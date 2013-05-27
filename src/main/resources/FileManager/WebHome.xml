@@ -12,8 +12,8 @@
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1355138962000</creationDate>
-  <date>1355395295000</date>
-  <contentUpdateDate>1355395295000</contentUpdateDate>
+  <date>1369652288000</date>
+  <contentUpdateDate>1369652288000</contentUpdateDate>
   <version>1.1</version>
   <title>$msg.get('platform.appwithinminutes.appHomePageTitle', $doc.space)</title>
   <template/>
@@ -233,7 +233,6 @@ icon=icon:folder_page</parameters>
 })
 #set($options = {
   'className': 'FileManager.FileManagerClass',
-  'resultPage' : 'AppWithinMinutes.LiveTableGenerator',
   'translationPrefix': 'filemanager.livetable.',
   'tagCloud': true,
   'rowCount': 15,

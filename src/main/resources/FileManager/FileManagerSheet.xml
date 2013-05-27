@@ -6,14 +6,14 @@
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
-  <parent>FileManagerClass</parent>
+  <parent>XWiki.FileManagerClass</parent>
   <creator>xwiki:XWiki.Admin</creator>
   <author>xwiki:XWiki.Admin</author>
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <creationDate>1355394189000</creationDate>
-  <date>1355404388000</date>
-  <contentUpdateDate>1355404388000</contentUpdateDate>
+  <date>1369651647000</date>
+  <contentUpdateDate>1369651647000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <template/>
@@ -24,7 +24,7 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity}}
-#set($url = "$xwiki.getURL($doc.getDocument(), 'view', 'change=true')#Attachments")
+#set($url = "$doc.getURL('view', 'change=true')#Attachments")
 #set($change = $request.change)
 #if($request.description)
   $doc.set('description', $request.description)
