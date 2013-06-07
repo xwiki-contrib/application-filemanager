@@ -87,6 +87,14 @@
 <property>
 <description>{{velocity}}
 $msg.get('contrib.FM.application.message')
+{{/velocity}}
+
+{{velocity}}
+{{html clean=false}}
+#foreach($ext in $services.uix.getExtensions('contrib.filemanager.actions'))
+$services.rendering.render($ext.execute(), "xhtml/1.0")
+#end
+{{/html}}
 {{/velocity}}</description>
 </property>
 </object>
