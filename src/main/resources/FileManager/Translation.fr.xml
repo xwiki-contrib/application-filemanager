@@ -22,7 +22,7 @@
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
-  <hidden>false</hidden>
+  <hidden>true</hidden>
   <content>contrib.FM.application.title=Gestionnaire de fichiers
 contrib.FM.application.message=Bienvenue sur le gestionnaire de fichiers XWiki.
 

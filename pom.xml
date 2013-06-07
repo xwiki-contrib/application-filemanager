@@ -25,21 +25,60 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.xwiki.platform</groupId>
-    <artifactId>xwiki-platform-core</artifactId>
-    <version>4.5.4</version>
+   <groupId>org.xwiki.commons</groupId>
+   <artifactId>xwiki-commons-pom</artifactId>
+   <version>4.5.4</version>
   </parent>
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>application-filemanager</artifactId>
   <packaging>xar</packaging>
-  <name>File manager</name>
+  <name>File Manager Application</name>
   <version>1.1-SNAPSHOT</version>
-  <description>Provides XWiki users with a File Manager Application</description>
+  <description>
+    Application to manage any files, including office or pdf files. It embeds the office file viewer and the pdf viewer.
+  </description>
+  <properties>
+    <!-- Don't run CLIRR here since there's no Java code. -->
+    <xwiki.clirr.skip>true</xwiki.clirr.skip>
+    <xwiki.extension.features>tdelafosse:file-manager-application</xwiki.extension.features>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.xwiki.contrib</groupId>
+      <artifactId>xwiki-macro-pdfviewer</artifactId>
+      <version>1.1</version>
+      <type>xar</type>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
   <developers>
     <developer>
+      <id>tdelafosse</id>
       <name>Thomas Delafosse</name>
     </developer>
+    <developer>
+      <id>ldubost</id>
+      <name>Ludovic Dubost</name>
+    </developer>
   </developers>
+    <build>
+   <!-- Needed to add support for the XAR packaging -->
+   <extensions>
+     <extension>
+       <groupId>org.xwiki.commons</groupId>
+       <artifactId>xwiki-commons-tool-xar-handlers</artifactId>
+       <version>${commons.version}</version>
+     </extension>
+   </extensions>
+   <plugins>
+     <!-- The XAR packaging uses the XAR plugin and thus we need to define what version to use -->
+     <plugin>
+       <groupId>org.xwiki.commons</groupId>
+       <artifactId>xwiki-commons-tool-xar-plugin</artifactId>
+       <version>${commons.version}</version>
+     </plugin>
+   </plugins>
+ </build>
   <scm>
    <connection>scm:git:git://github.com/xwiki-contrib/application-filemanager.git</connection>
    <developerConnection>scm:git:git@github.com:xwiki-contrib/application-filemanager.git</developerConnection>
