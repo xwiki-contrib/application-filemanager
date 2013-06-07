@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <xwikidoc>
-<web>FileManager</web>
-<name>Translation</name>
-<language>fr</language>
-<defaultLanguage>en</defaultLanguage>
-<translation>1</translation>
-<parent></parent>
-<creator>XWiki.Admin</creator>
-<author>XWiki.Admin</author>
-<customClass></customClass>
-<contentAuthor>XWiki.Admin</contentAuthor>
-<creationDate>1355094000000</creationDate>
-<date>1355094000000</date>
-<contentUpdateDate>1355094000000</contentUpdateDate>
-<version>1.1</version>
-<title></title>
-<template></template>
-<defaultTemplate></defaultTemplate>
-<validationScript></validationScript>
-<comment></comment>
-<minorEdit>false</minorEdit>
-<syntaxId>xwiki/2.1</syntaxId>
-<hidden>false</hidden>
-<content>contrib.FM.application.title=Gestionnaire de fichiers
+  <web>FileManager</web>
+  <name>Translation</name>
+  <language>fr</language>
+  <defaultLanguage/>
+  <translation>1</translation>
+  <parent>FileManager.WebHome</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1355094000000</creationDate>
+  <date>1355094000000</date>
+  <contentUpdateDate>1355094000000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <template/>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>false</hidden>
+  <content>contrib.FM.application.title=Gestionnaire de fichiers
 contrib.FM.application.message=Bienvenue sur le gestionnaire de fichiers XWiki.
 
 contrib.FM.description=Description du fichier
@@ -30,4 +31,5 @@ contrib.FM.noDescription=Aucune description de ce fichier n'est disponible.
 contrib.FM.noAttachment=Aucun fichier n'est actuellement attaché à ce document. Ajoutez en un en cliquant sur "éditer" ou en ajoutant directement le fichier en tant que pièce jointe. 
 contrib.FM.editDescription=Sauver et visualiser
 
-contrib.FM.change.explanations=Joignez votre fichier en utilisant la section "Pièces jointes" ci-dessous. Vous pouvez aussi ajouter des 'tags' à ce document (en utilisant l'application située en bas de cette section) pour qu'il soit plus facile de le retrouver.</content></xwikidoc>
+contrib.FM.change.explanations=Joignez votre fichier en utilisant la section "Pièces jointes" ci-dessous. Vous pouvez aussi ajouter des 'tags' à ce document (en utilisant l'application située en bas de cette section) pour qu'il soit plus facile de le retrouver.</content>
+</xwikidoc>

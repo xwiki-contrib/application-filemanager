@@ -1,143 +1,144 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <xwikidoc>
-<web>FileManager</web>
-<name>FileManagerMacro</name>
-<language></language>
-<defaultLanguage>en</defaultLanguage>
-<translation>0</translation>
-<parent></parent>
-<creator>XWiki.Admin</creator>
-<author>XWiki.Admin</author>
-<customClass></customClass>
-<contentAuthor>XWiki.Admin</contentAuthor>
-<creationDate>1355094000000</creationDate>
-<date>1355094000000</date>
-<contentUpdateDate>1355094000000</contentUpdateDate>
-<version>1.1</version>
-<title>File Manager Macro</title>
-<template></template>
-<defaultTemplate></defaultTemplate>
-<validationScript></validationScript>
-<comment></comment>
-<minorEdit>false</minorEdit>
-<syntaxId>xwiki/2.1</syntaxId>
-<hidden>false</hidden>
-<object>
-<class>
-<name>XWiki.WikiMacroClass</name>
-<customClass></customClass>
-<customMapping></customMapping>
-<defaultViewSheet></defaultViewSheet>
-<defaultEditSheet></defaultEditSheet>
-<defaultWeb></defaultWeb>
-<nameField></nameField>
-<validationScript></validationScript>
-<code>
-<disabled>0</disabled>
-<name>code</name>
-<number>9</number>
-<prettyName>Macro code</prettyName>
-<rows>20</rows>
-<size>40</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-</code>
-<contentDescription>
-<disabled>0</disabled>
-<name>contentDescription</name>
-<number>8</number>
-<prettyName>Content description (Not applicable for "No content" type)</prettyName>
-<rows>5</rows>
-<size>40</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-</contentDescription>
-<contentType>
-<cache>0</cache>
-<disabled>0</disabled>
-<displayType>select</displayType>
-<multiSelect>0</multiSelect>
-<name>contentType</name>
-<number>7</number>
-<prettyName>Macro content type</prettyName>
-<relationalStorage>0</relationalStorage>
-<separator>|</separator>
-<separators>|</separators>
-<size>1</size>
-<unmodifiable>0</unmodifiable>
-<values>Optional|Mandatory|No content</values>
-<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-</contentType>
-<defaultCategory>
-<disabled>0</disabled>
-<name>defaultCategory</name>
-<number>4</number>
-<prettyName>Default category</prettyName>
-<size>30</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-</defaultCategory>
-<description>
-<disabled>0</disabled>
-<name>description</name>
-<number>3</number>
-<prettyName>Macro description</prettyName>
-<rows>5</rows>
-<size>40</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-</description>
-<id>
-<disabled>0</disabled>
-<name>id</name>
-<number>1</number>
-<prettyName>Macro id</prettyName>
-<size>30</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-</id>
-<name>
-<disabled>0</disabled>
-<name>name</name>
-<number>2</number>
-<prettyName>Macro name</prettyName>
-<size>30</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-</name>
-<supportsInlineMode>
-<disabled>0</disabled>
-<displayFormType>select</displayFormType>
-<displayType>yesno</displayType>
-<name>supportsInlineMode</name>
-<number>5</number>
-<prettyName>Supports inline mode</prettyName>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-</supportsInlineMode>
-<visibility>
-<cache>0</cache>
-<disabled>0</disabled>
-<displayType>select</displayType>
-<multiSelect>0</multiSelect>
-<name>visibility</name>
-<number>6</number>
-<prettyName>Macro visibility</prettyName>
-<relationalStorage>0</relationalStorage>
-<separator>|</separator>
-<separators>|</separators>
-<size>1</size>
-<unmodifiable>0</unmodifiable>
-<values>Current User|Current Wiki|Global</values>
-<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-</visibility>
-</class>
-<name>FileManager.FileManagerMacro</name>
-<number>0</number>
-<className>XWiki.WikiMacroClass</className>
-<guid>3e97774f-225f-499d-a996-6ca0e4431331</guid>
-<property>
-<code>{{velocity filter=html}}
+  <web>FileManager</web>
+  <name>FileManagerMacro</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>FileManager.WebHome</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1355094000000</creationDate>
+  <date>1355094000000</date>
+  <contentUpdateDate>1355094000000</contentUpdateDate>
+  <version>1.1</version>
+  <title>File Manager Macro</title>
+  <template/>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>false</hidden>
+  <object>
+    <class>
+      <name>XWiki.WikiMacroClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>9</number>
+        <prettyName>Macro code</prettyName>
+        <rows>20</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <contentDescription>
+        <disabled>0</disabled>
+        <name>contentDescription</name>
+        <number>8</number>
+        <prettyName>Content description (Not applicable for "No content" type)</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </contentDescription>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>7</number>
+        <prettyName>Macro content type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator>|</separator>
+        <separators>|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>Optional|Mandatory|No content</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
+      <defaultCategory>
+        <disabled>0</disabled>
+        <name>defaultCategory</name>
+        <number>4</number>
+        <prettyName>Default category</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultCategory>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>3</number>
+        <prettyName>Macro description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <id>
+        <disabled>0</disabled>
+        <name>id</name>
+        <number>1</number>
+        <prettyName>Macro id</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </id>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>2</number>
+        <prettyName>Macro name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <supportsInlineMode>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>supportsInlineMode</name>
+        <number>5</number>
+        <prettyName>Supports inline mode</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </supportsInlineMode>
+      <visibility>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>visibility</name>
+        <number>6</number>
+        <prettyName>Macro visibility</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator>|</separator>
+        <separators>|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>Current User|Current Wiki|Global</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </visibility>
+    </class>
+    <name>FileManager.FileManagerMacro</name>
+    <number>0</number>
+    <className>XWiki.WikiMacroClass</className>
+    <guid>3e97774f-225f-499d-a996-6ca0e4431331</guid>
+    <property>
+      <code>{{velocity filter=html}}
 {{html clean=false}}&lt;div style="border: 1px solid grey; padding: 15px; width: 400px; margin: 5px;"&gt;
 #set($pagename = $xcontext.macro.params.page)
 #set($preview = $xcontext.macro.params.preview)
@@ -160,166 +161,167 @@
 &lt;/div&gt;
 {{/html}}
 {{/velocity}}</code>
-</property>
-<property>
-<contentDescription></contentDescription>
-</property>
-<property>
-<contentType>No content</contentType>
-</property>
-<property>
-<defaultCategory>content</defaultCategory>
-</property>
-<property>
-<description>Inserts a file manager document in a page, with or without preview</description>
-</property>
-<property>
-<id>filemanagerdoc</id>
-</property>
-<property>
-<name>File Manager Document</name>
-</property>
-<property>
-<supportsInlineMode>1</supportsInlineMode>
-</property>
-<property>
-<visibility>Global</visibility>
-</property>
-</object>
-<object>
-<class>
-<name>XWiki.WikiMacroParameterClass</name>
-<customClass></customClass>
-<customMapping></customMapping>
-<defaultViewSheet></defaultViewSheet>
-<defaultEditSheet></defaultEditSheet>
-<defaultWeb></defaultWeb>
-<nameField></nameField>
-<validationScript></validationScript>
-<defaultValue>
-<disabled>0</disabled>
-<name>defaultValue</name>
-<number>4</number>
-<prettyName>Parameter default value</prettyName>
-<size>30</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-</defaultValue>
-<description>
-<disabled>0</disabled>
-<name>description</name>
-<number>2</number>
-<prettyName>Parameter description</prettyName>
-<rows>5</rows>
-<size>40</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-</description>
-<mandatory>
-<disabled>0</disabled>
-<displayFormType>select</displayFormType>
-<displayType>yesno</displayType>
-<name>mandatory</name>
-<number>3</number>
-<prettyName>Parameter mandatory</prettyName>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-</mandatory>
-<name>
-<disabled>0</disabled>
-<name>name</name>
-<number>1</number>
-<prettyName>Parameter name</prettyName>
-<size>30</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-</name>
-</class>
-<name>FileManager.FileManagerMacro</name>
-<number>0</number>
-<className>XWiki.WikiMacroParameterClass</className>
-<guid>01df4269-cab6-4bde-bbb3-910078416859</guid>
-<property>
-<defaultValue></defaultValue>
-</property>
-<property>
-<description>Page name of the FileManager document</description>
-</property>
-<property>
-<mandatory>1</mandatory>
-</property>
-<property>
-<name>page</name>
-</property>
-</object>
-<object>
-<class>
-<name>XWiki.WikiMacroParameterClass</name>
-<customClass></customClass>
-<customMapping></customMapping>
-<defaultViewSheet></defaultViewSheet>
-<defaultEditSheet></defaultEditSheet>
-<defaultWeb></defaultWeb>
-<nameField></nameField>
-<validationScript></validationScript>
-<defaultValue>
-<disabled>0</disabled>
-<name>defaultValue</name>
-<number>4</number>
-<prettyName>Parameter default value</prettyName>
-<size>30</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-</defaultValue>
-<description>
-<disabled>0</disabled>
-<name>description</name>
-<number>2</number>
-<prettyName>Parameter description</prettyName>
-<rows>5</rows>
-<size>40</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-</description>
-<mandatory>
-<disabled>0</disabled>
-<displayFormType>select</displayFormType>
-<displayType>yesno</displayType>
-<name>mandatory</name>
-<number>3</number>
-<prettyName>Parameter mandatory</prettyName>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
-</mandatory>
-<name>
-<disabled>0</disabled>
-<name>name</name>
-<number>1</number>
-<prettyName>Parameter name</prettyName>
-<size>30</size>
-<unmodifiable>0</unmodifiable>
-<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-</name>
-</class>
-<name>FileManager.FileManagerMacro</name>
-<number>1</number>
-<className>XWiki.WikiMacroParameterClass</className>
-<guid>2f5ded1f-c779-4699-a540-23c4cce9d532</guid>
-<property>
-<defaultValue>false</defaultValue>
-</property>
-<property>
-<description>True if a preview should be included</description>
-</property>
-<property>
-<mandatory>0</mandatory>
-</property>
-<property>
-<name>preview</name>
-</property>
-</object>
-<content>This macro allows to show a file manager document in a nice box.
+    </property>
+    <property>
+      <contentDescription/>
+    </property>
+    <property>
+      <contentType>No content</contentType>
+    </property>
+    <property>
+      <defaultCategory>content</defaultCategory>
+    </property>
+    <property>
+      <description>Inserts a file manager document in a page, with or without preview</description>
+    </property>
+    <property>
+      <id>filemanagerdoc</id>
+    </property>
+    <property>
+      <name>File Manager Document</name>
+    </property>
+    <property>
+      <supportsInlineMode>1</supportsInlineMode>
+    </property>
+    <property>
+      <visibility>Global</visibility>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <name>FileManager.FileManagerMacro</name>
+    <number>0</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>01df4269-cab6-4bde-bbb3-910078416859</guid>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>Page name of the FileManager document</description>
+    </property>
+    <property>
+      <mandatory>1</mandatory>
+    </property>
+    <property>
+      <name>page</name>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <name>FileManager.FileManagerMacro</name>
+    <number>1</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>2f5ded1f-c779-4699-a540-23c4cce9d532</guid>
+    <property>
+      <defaultValue>false</defaultValue>
+    </property>
+    <property>
+      <description>True if a preview should be included</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>preview</name>
+    </property>
+  </object>
+  <content>This macro allows to show a file manager document in a nice box.
 
 {{filemanagerdoc page="FileManager.Ampoule-ledsfr03042012" /}}
 {{filemanagerdoc page="FileManager.Ampoule-ledsfr03042012" /}}
-{{filemanagerdoc page="FileManager.Ampoule-ledsfr03042012" /}}</content></xwikidoc>
+{{filemanagerdoc page="FileManager.Ampoule-ledsfr03042012" /}}</content>
+</xwikidoc>
