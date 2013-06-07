@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xwikidoc>
 <web>FileManager</web>
-<name>Translation</name>
+<name>FileManagerTranslations</name>
 <language></language>
 <defaultLanguage>en</defaultLanguage>
 <translation>0</translation>
-<parent>FileManager.WebHome</parent>
+<parent>FileManagerClass</parent>
 <creator>XWiki.Admin</creator>
 <author>XWiki.Admin</author>
 <customClass></customClass>
@@ -14,14 +14,14 @@
 <date>1355094000000</date>
 <contentUpdateDate>1355094000000</contentUpdateDate>
 <version>1.1</version>
-<title>Translations</title>
+<title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
 <validationScript></validationScript>
 <comment></comment>
 <minorEdit>false</minorEdit>
 <syntaxId>xwiki/2.1</syntaxId>
-<hidden>false</hidden>
+<hidden>true</hidden>
 <object>
 <class>
 <name>XWiki.TranslationDocumentClass</name>
@@ -49,20 +49,33 @@
 <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
 </scope>
 </class>
-<name>FileManager.Translation</name>
+<name>FileManager.FileManagerTranslations</name>
 <number>0</number>
 <className>XWiki.TranslationDocumentClass</className>
-<guid>a94d308d-8a2a-49c0-bd2e-3c54903ab3ae</guid>
+<guid>bfb8b84a-33d7-4ce8-bc37-2721329b7182</guid>
 <property>
-<scope>WIKI</scope>
+<scope>ON_DEMAND</scope>
 </property>
 </object>
-<content>contrib.FM.application.title=File Manager
-contrib.FM.application.message=Welcome to XWiki File Manager application.
+<content># Class fields
+FileManager.FileManagerClass_description=Description
 
-contrib.FM.description=Description of the file
-contrib.FM.noDescription=No description of this file is available.
-contrib.FM.noAttachment=No file is attached to this document. Add one by clicking on "edit" or by directly adding it as an attachement. 
-contrib.FM.editDescription=Save and view
+# Live table generic keys
+filemanager.livetable.doc.title=Page title
+filemanager.livetable.doc.name=Page name
+filemanager.livetable.doc.space=Space
+filemanager.livetable.doc.fullname=Page full name
+filemanager.livetable.doc.author=Last Author
+filemanager.livetable.doc.creator=Creator
+filemanager.livetable.doc.date=Update date
+filemanager.livetable.doc.creationDate=Creation date
+filemanager.livetable._avatar=Avatar
+filemanager.livetable._images=Images
+filemanager.livetable._attachments=Attachments
+filemanager.livetable._actions=Actions
+filemanager.livetable._actions.edit=Edit
+filemanager.livetable._actions.delete=Delete
+filemanager.livetable.emptyvalue=-
 
-contrib.FM.change.explanations=You can manage the file(s) to attach to this document using the "Attachments" section below. You can also tag this document with the application at the bottom of this section, so it would be easier to find it.  </content></xwikidoc>
+# Live table specific keys
+filemanager.livetable.description=Description</content></xwikidoc>

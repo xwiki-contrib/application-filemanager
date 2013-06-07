@@ -1,238 +1,192 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <xwikidoc>
-  <web>FileManager</web>
-  <name>WebHome</name>
-  <language/>
-  <defaultLanguage/>
-  <translation>0</translation>
-  <parent>AppWithinMinutes.WebHome</parent>
-  <creator>xwiki:XWiki.Admin</creator>
-  <author>xwiki:XWiki.Admin</author>
-  <customClass/>
-  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <creationDate>1355138962000</creationDate>
-  <date>1369652288000</date>
-  <contentUpdateDate>1369652288000</contentUpdateDate>
-  <version>1.1</version>
-  <title>$msg.get('platform.appwithinminutes.appHomePageTitle', $doc.space)</title>
-  <template/>
-  <defaultTemplate/>
-  <validationScript/>
-  <comment/>
-  <minorEdit>false</minorEdit>
-  <syntaxId>xwiki/2.0</syntaxId>
-  <hidden>false</hidden>
-  <object>
-    <class>
-      <name>AppWithinMinutes.LiveTableClass</name>
-      <customClass/>
-      <customMapping/>
-      <defaultViewSheet/>
-      <defaultEditSheet/>
-      <defaultWeb/>
-      <nameField/>
-      <validationScript/>
-      <class>
-        <customDisplay/>
-        <disabled>0</disabled>
-        <name>class</name>
-        <number>1</number>
-        <picker>0</picker>
-        <prettyName>Class</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <validationMessage/>
-        <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </class>
-      <columns>
-        <customDisplay/>
-        <disabled>0</disabled>
-        <name>columns</name>
-        <number>3</number>
-        <picker>0</picker>
-        <prettyName>Columns</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <validationMessage/>
-        <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </columns>
-      <description>
-        <customDisplay/>
-        <disabled>0</disabled>
-        <editor>---</editor>
-        <name>description</name>
-        <number>2</number>
-        <picker>0</picker>
-        <prettyName>Description</prettyName>
-        <rows>5</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <validationMessage/>
-        <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </description>
-    </class>
-    <name>FileManager.WebHome</name>
-    <number>0</number>
-    <className>AppWithinMinutes.LiveTableClass</className>
-    <guid>9070a9b8-91d6-4486-9c41-58809eeaff16</guid>
-    <property>
-      <class>FileManager.FileManagerClass</class>
-    </property>
-    <property>
-      <columns>doc.name _actions _attachments</columns>
-    </property>
-    <property>
-      <description>{{velocity}}
+<web>FileManager</web>
+<name>WebHome</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent>AppWithinMinutes.WebHome</parent>
+<creator>XWiki.Admin</creator>
+<author>XWiki.Admin</author>
+<customClass></customClass>
+<contentAuthor>XWiki.Admin</contentAuthor>
+<creationDate>1355094000000</creationDate>
+<date>1355094000000</date>
+<contentUpdateDate>1355094000000</contentUpdateDate>
+<version>1.1</version>
+<title>$msg.get('platform.appwithinminutes.appHomePageTitle', $doc.space)</title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>AppWithinMinutes.LiveTableClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<class>
+<customDisplay></customDisplay>
+<disabled>0</disabled>
+<name>class</name>
+<number>1</number>
+<picker>0</picker>
+<prettyName>Class</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</class>
+<columns>
+<customDisplay></customDisplay>
+<disabled>0</disabled>
+<name>columns</name>
+<number>3</number>
+<picker>0</picker>
+<prettyName>Columns</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</columns>
+<description>
+<customDisplay></customDisplay>
+<disabled>0</disabled>
+<editor>---</editor>
+<name>description</name>
+<number>2</number>
+<picker>0</picker>
+<prettyName>Description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<validationMessage></validationMessage>
+<validationRegExp></validationRegExp>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+</class>
+<name>FileManager.WebHome</name>
+<number>0</number>
+<className>AppWithinMinutes.LiveTableClass</className>
+<guid>9070a9b8-91d6-4486-9c41-58809eeaff16</guid>
+<property>
+<class>FileManager.FileManagerClass</class>
+</property>
+<property>
+<columns>doc.name _actions _attachments</columns>
+</property>
+<property>
+<description>{{velocity}}
 $msg.get('contrib.FM.application.message')
 {{/velocity}}</description>
-    </property>
-  </object>
-  <object>
-    <class>
-      <name>XWiki.TagClass</name>
-      <customClass/>
-      <customMapping/>
-      <defaultViewSheet/>
-      <defaultEditSheet/>
-      <defaultWeb/>
-      <nameField/>
-      <validationScript/>
-      <tags>
-        <cache>0</cache>
-        <disabled>0</disabled>
-        <displayType>input</displayType>
-        <multiSelect>1</multiSelect>
-        <name>tags</name>
-        <number>1</number>
-        <prettyName>Tags</prettyName>
-        <relationalStorage>1</relationalStorage>
-        <separator>|</separator>
-        <separators>|,</separators>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <values/>
-        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-      </tags>
-    </class>
-    <name>FileManager.WebHome</name>
-    <number>0</number>
-    <className>XWiki.TagClass</className>
-    <guid>33cb445a-6a65-4c1d-a709-3191d89c73ab</guid>
-    <property>
-      <tags>
-        <value>test</value>
-      </tags>
-    </property>
-  </object>
-  <object>
-    <class>
-      <name>XWiki.UIExtensionClass</name>
-      <customClass/>
-      <customMapping/>
-      <defaultViewSheet/>
-      <defaultEditSheet/>
-      <defaultWeb/>
-      <nameField/>
-      <validationScript/>
-      <content>
-        <disabled>0</disabled>
-        <name>content</name>
-        <number>3</number>
-        <prettyName>Extension Content</prettyName>
-        <rows>10</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </content>
-      <extensionPointId>
-        <disabled>0</disabled>
-        <name>extensionPointId</name>
-        <number>1</number>
-        <prettyName>Extension Point ID</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </extensionPointId>
-      <name>
-        <disabled>0</disabled>
-        <name>name</name>
-        <number>2</number>
-        <prettyName>Extension ID</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </name>
-      <parameters>
-        <disabled>0</disabled>
-        <name>parameters</name>
-        <number>4</number>
-        <prettyName>Extension Parameters</prettyName>
-        <rows>10</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </parameters>
-      <scope>
-        <cache>0</cache>
-        <disabled>0</disabled>
-        <displayType>select</displayType>
-        <multiSelect>0</multiSelect>
-        <name>scope</name>
-        <number>5</number>
-        <prettyName>Extension Scope</prettyName>
-        <relationalStorage>0</relationalStorage>
-        <separator> </separator>
-        <separators> ,|</separators>
-        <size>1</size>
-        <unmodifiable>0</unmodifiable>
-        <values>wiki=Current Wiki|user=Current User|global=Global</values>
-        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-      </scope>
-    </class>
-    <name>FileManager.WebHome</name>
-    <number>0</number>
-    <className>XWiki.UIExtensionClass</className>
-    <guid>1658b90f-3ae5-49d1-9172-5fccfdf006f1</guid>
-    <property>
-      <content/>
-    </property>
-    <property>
-      <extensionPointId>org.xwiki.platform.panels.Applications</extensionPointId>
-    </property>
-    <property>
-      <name>platform.panels.FileManagerApplication</name>
-    </property>
-    <property>
-      <parameters>label=FileManager
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.UIExtensionClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<content>
+<disabled>0</disabled>
+<name>content</name>
+<number>3</number>
+<prettyName>Extension Content</prettyName>
+<rows>10</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</content>
+<extensionPointId>
+<disabled>0</disabled>
+<name>extensionPointId</name>
+<number>1</number>
+<prettyName>Extension Point ID</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</extensionPointId>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>2</number>
+<prettyName>Extension ID</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parameters>
+<disabled>0</disabled>
+<name>parameters</name>
+<number>4</number>
+<prettyName>Extension Parameters</prettyName>
+<rows>10</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</parameters>
+<scope>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>scope</name>
+<number>5</number>
+<prettyName>Extension Scope</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>wiki=Current Wiki|user=Current User|global=Global</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</scope>
+</class>
+<name>FileManager.WebHome</name>
+<number>0</number>
+<className>XWiki.UIExtensionClass</className>
+<guid>1658b90f-3ae5-49d1-9172-5fccfdf006f1</guid>
+<property>
+<content></content>
+</property>
+<property>
+<extensionPointId>org.xwiki.platform.panels.Applications</extensionPointId>
+</property>
+<property>
+<name>platform.panels.FileManagerApplication</name>
+</property>
+<property>
+<parameters>label=FileManager
 target=FileManager.WebHome
 icon=icon:folder_page</parameters>
-    </property>
-    <property>
-      <scope>wiki</scope>
-    </property>
-  </object>
-  <content>{{include document="AppWithinMinutes.DynamicMessageTool" context="new" /}}
-
-{{velocity}}
-#set($originalMsg = $msg)
-#set($msg = $services.dynamicMessageToolFactory.createDynamicMessageTool($msg, {
-  'filemanager.livetable.doc.name': $msg.get('platform.appwithinminutes.liveTableEditorDocNameColumnName'),
-  'filemanager.livetable._actions.edit': $msg.get('platform.appwithinminutes.appLiveTableEditEntryActionName'),
-  'filemanager.livetable._actions.delete': $msg.get('platform.appwithinminutes.appLiveTableDeleteEntryActionName'),
-  'filemanager.livetable._actions': $msg.get('platform.appwithinminutes.liveTableEditorActionsColumnName'),
-  'filemanager.livetable._attachments': $msg.get('platform.appwithinminutes.liveTableEditorAttachmentsColumnName')
-}))
-#set($columnsProperties = {
-  'doc.name': {'type': 'text', 'link': 'view', 'size': 10, 'filterable': true, 'sortable': true},
-  '_actions': {'html': true, 'sortable': false, 'actions': ['edit', 'delete']},
-  '_attachments': {'html': true, 'sortable': false}
+</property>
+<property>
+<scope>wiki</scope>
+</property>
+</object>
+<content>{{velocity}}
+#set ($discard = $services.localization.use('document', 'FileManager.FileManagerTranslations'))
+#set ($columnsProperties = {
+  'doc.name': {"type":"text","size":10,"link":"view"},
+  '_actions': {"sortable":false,"filterable":false,"html":true,"actions":["edit","delete"]},
+  '_attachments': {"sortable":false,"filterable":false,"html":true}
 })
-#set($options = {
+#set ($options = {
   'className': 'FileManager.FileManagerClass',
+  'resultPage': 'FileManager.FileManagerLiveTableResults',
   'translationPrefix': 'filemanager.livetable.',
   'tagCloud': true,
   'rowCount': 15,
@@ -240,8 +194,6 @@ icon=icon:folder_page</parameters>
   'selectedColumn': 'doc.name',
   'defaultOrder': 'asc'
 })
-#set($columns = ['doc.name', '_actions', '_attachments'])
+#set ($columns = ['doc.name', '_actions', '_attachments'])
 #livetable('filemanager' $columns $columnsProperties $options)
-#set($msg = $originalMsg)
-{{/velocity}}</content>
-</xwikidoc>
+{{/velocity}}</content></xwikidoc>
