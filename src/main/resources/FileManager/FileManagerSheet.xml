@@ -63,7 +63,7 @@ $xwiki.ssx.use('FileManager.SkinExtension')
 
     {{pdfviewer file="$pdf" /}}
 
-  #else
+  #elseif($doc.getAttachmentList().size() == 0)
     &lt;p&gt;//$msg.get('contrib.FM.noAttachment')//&lt;/p&gt;
   #end
 #elseif($change)
