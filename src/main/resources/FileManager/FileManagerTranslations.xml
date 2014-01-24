@@ -79,5 +79,6 @@ filemanager.livetable._actions.delete=Delete
 filemanager.livetable.emptyvalue=-
 
 # Live table specific keys
-filemanager.livetable.description=Description</content>
+filemanager.livetable.description=Description
+filemanager.appname=FileManager</content>
 </xwikidoc>
