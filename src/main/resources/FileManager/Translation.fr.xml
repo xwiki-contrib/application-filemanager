@@ -33,5 +33,5 @@ contrib.FM.editDescription=Sauver et visualiser
 contrib.FM.change.explanations=Joignez votre fichier en utilisant la section "Pièces jointes" ci-dessous. Vous pouvez aussi ajouter des 'tags' à ce document (en utilisant l'application située en bas de cette section) pour qu'il soit plus facile de le retrouver.
 
 rendering.macro.filetagcloud.name=Gestionnaire des documents
-rendering.macro.filetagcloud.description=Affiche les mot clés des fichiers dans ce wiki ou dans l'espace spécifié.</content>
+rendering.macro.filetagcloud.description=Affiche les mots clés des documents du gestionnaire des fichiers.</content>
 </xwikidoc>

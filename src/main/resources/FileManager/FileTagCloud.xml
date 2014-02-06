@@ -237,7 +237,7 @@
     <guid>19610d60-5918-4dd8-b220-f57dddd4c5b2</guid>
     <property>
       <code>{{velocity}}
-## we'll trick the hell out of this macro: use the default tags macro in a container, with the space parameter, and then twist the display with some CSS
+## Twist the default tag cloud display with some CSS and a container
 #set($discard = $xwiki.ssx.use("$xcontext.macro.doc.prefixedFullName"))
 ##
 ## tagCloudSpace - the space to display the tag cloud for. If blank, display cloud for the whole wiki. Default is blank.
@@ -337,7 +337,7 @@ $xwiki.ssx.use('XWiki.TagCloud')##
       <id>filetagcloud</id>
     </property>
     <property>
-      <name>File tag cloud</name>
+      <name>FileManager tag cloud</name>
     </property>
     <property>
       <supportsInlineMode>0</supportsInlineMode>
