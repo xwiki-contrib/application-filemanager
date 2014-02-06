@@ -11,12 +11,11 @@
   <author>xwiki:XWiki.Admin</author>
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <creationDate>1355094000000</creationDate>
-  <date>1355094000000</date>
-  <contentUpdateDate>1355094000000</contentUpdateDate>
+  <creationDate>1389884929000</creationDate>
+  <date>1391683250000</date>
+  <contentUpdateDate>1391683250000</contentUpdateDate>
   <version>1.1</version>
   <title/>
-  <template/>
   <defaultTemplate/>
   <validationScript/>
   <comment/>
@@ -31,5 +30,8 @@ contrib.FM.noDescription=Aucune description de ce fichier n'est disponible.
 contrib.FM.noAttachment=Aucun fichier n'est actuellement attaché à ce document. Ajoutez en un en cliquant sur "éditer" ou en ajoutant directement le fichier en tant que pièce jointe. 
 contrib.FM.editDescription=Sauver et visualiser
 
-contrib.FM.change.explanations=Joignez votre fichier en utilisant la section "Pièces jointes" ci-dessous. Vous pouvez aussi ajouter des 'tags' à ce document (en utilisant l'application située en bas de cette section) pour qu'il soit plus facile de le retrouver.</content>
+contrib.FM.change.explanations=Joignez votre fichier en utilisant la section "Pièces jointes" ci-dessous. Vous pouvez aussi ajouter des 'tags' à ce document (en utilisant l'application située en bas de cette section) pour qu'il soit plus facile de le retrouver.
+
+rendering.macro.filetagcloud.name=Gestionnaire des documents
+rendering.macro.filetagcloud.description=Affiche les mot clés des fichiers dans ce wiki ou dans l'espace spécifié.</content>
 </xwikidoc>
