@@ -240,8 +240,8 @@
 ## Twist the default tag cloud display with some CSS and a container
 #set($discard = $xwiki.ssx.use("$xcontext.macro.doc.prefixedFullName"))
 ##
-## tagCloudSpace - the space to display the tag cloud for. If blank, display cloud for the whole wiki. Default is blank.
-#set ($tagCloudSpace = $xcontext.macro.params.get('space'))
+## Display the tag cloud only for the FileManager space
+#set ($tagCloudSpace = "FileManager")
 ##
 ## Configurable popularity levels. You must enter an even number of levels. Default: 6.
 #set ($popularityLevels = ["notPopular", "notVeryPopular", "somewhatPopular", "popular", "veryPopular", "ultraPopular"])
