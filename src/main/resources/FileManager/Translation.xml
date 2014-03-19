@@ -63,7 +63,7 @@ contrib.FM.application.message=Welcome to XWiki File Manager application.
 
 contrib.FM.description=Description of the file
 contrib.FM.noDescription=No description of this file is available.
-contrib.FM.noAttachment=No file is attached to this document. Add one by clicking on "edit" or by directly adding it as an attachement. 
+contrib.FM.noAttachment=No file is attached to this document. Add one by clicking on "edit" or by directly adding it as an attachment. 
 contrib.FM.editDescription=Save and view
 
 contrib.FM.change.explanations=You can manage the file(s) to attach to this document using the "Attachments" section below. You can also tag this document with the application at the bottom of this section, so it would be easier to find it.  </content>
