@@ -55,7 +55,7 @@
     <className>XWiki.TranslationDocumentClass</className>
     <guid>bfb8b84a-33d7-4ce8-bc37-2721329b7182</guid>
     <property>
-      <scope>ON_DEMAND</scope>
+      <scope>WIKI</scope>
     </property>
   </object>
   <content># Class fields
@@ -80,5 +80,5 @@ filemanager.livetable.emptyvalue=-
 
 # Live table specific keys
 filemanager.livetable.description=Description
-filemanager.appname=FileManager</content>
+filemanager.appname=File Manager</content>
 </xwikidoc>
