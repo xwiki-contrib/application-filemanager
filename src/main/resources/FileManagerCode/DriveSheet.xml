@@ -11,15 +11,17 @@
   <parent>DriveClass</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <date>1401197958000</date>
-  <contentUpdateDate>1401197785000</contentUpdateDate>
+  <date>1401280484000</date>
+  <contentUpdateDate>1401204779000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content>{{velocity output="false"}}
+  <content>{{include reference="FileManagerCode.Macros" /}}
+
+{{velocity output="false"}}
 ## We need to use HQL because XWQL doesn't support nested queries.
 #set ($selectAllFoldersFromDriveHQL = "select folderDoc.name from XWikiDocument folderDoc, BaseObject folderObj where folderDoc.space = :space and folderObj.name = folderDoc.fullName and folderObj.className = 'FileManagerCode.FolderClass'")
 
@@ -36,8 +38,8 @@
     #end
   #else
     #set ($discard = $response.setContentType('application/json'))
-    #if ($request.data == 'childFolders')
-      #getRootFolders
+    #if ($request.data == 'folders')
+      #getChildFolders($doc $data)
     #elseif ($request.data == 'allFiles')
       #getAllFiles
     #elseif ($request.data == 'orphanFolders')
@@ -67,73 +69,14 @@
   })))
 #end
 
-#macro (getUniquePageName $name $return)
-  #set ($documentReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $name))
-  #if (!$xwiki.exists($documentReference))
-    #set ($uniqueName = $name)
-  #else
-    #set ($found = false)
-    #foreach ($counter in [1..99])
-      #set ($uniqueName = "$name$counter")
-      #set ($documentReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $uniqueName))
-      #if (!$xwiki.exists($documentReference))
-        #set ($found = true)
-        #break
-      #end
-    #end
-    #if (!$found)
-      #set ($uniqueName = "$name$mathtool.random(100, 1000)")
-    #end
-  #end
-  #set ($return = $NULL)
-  #setVariable("$return" $uniqueName)
-#end
-
-#macro (getRootFolders)
-  #set ($statement = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and doc.parent = :parent')
-  #getFolders($statement {'space': $doc.space, 'parent': $doc.name})
-#end
-
 #macro (getOrphanFolders)
   #set ($statement = "from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and (doc.parent = '' or (doc.parent &lt;&gt; :parent and doc.parent not in ($selectAllFoldersFromDriveHQL)))")
-  #getFolders($statement {'space': $doc.space, 'parent': $doc.name})
-#end
-
-#macro (getFolders $statement $parameters)
-  #set ($query = $services.query.xwql("$statement order by doc.name"))
-  #set ($countQuery = $services.query.xwql($statement).addFilter('count'))
-  #foreach ($entry in $parameters.entrySet())
-    #set ($discard = $query.bindValue($entry.key, $entry.value))
-    #set ($discard = $countQuery.bindValue($entry.key, $entry.value))
-  #end
-  #set ($folderCount = $countQuery.execute().get(0))
-  #set ($folders = [])
-  #set ($offset = $mathtool.toInteger($request.offset))
-  #if ($offset)
-    #set ($discard = $query.setOffset($offset))
-  #end
-  #set ($limit = $mathtool.toInteger($request.limit))
-  #if ($limit)
-    #set ($discard = $query.setLimit($limit))
-  #end
-  #foreach ($folder in $query.execute())
-    #set ($folderDoc = $xwiki.getDocument($folder))
-    #set ($discard = $folders.add({
-      'id': $folderDoc.name,
-      'name': $folderDoc.plainTitle,
-      'url': $folderDoc.getURL('get')
-    }))
-  #end
-  #set ($data = {
-    'folderCount': $folderCount,
-    'offset': $offset,
-    'folders': $folders
-  })
+  #getFolders($statement {'space': $doc.space, 'parent': $doc.name} $data)
 #end
 
 #macro (getAllFiles)
   #set ($statement = 'from doc.object(FileManagerCode.FileClass) as file where doc.space = :space')
-  #getFiles($statement {'space': $doc.space})
+  #getFiles($statement {'space': $doc.space} $data)
 #end
 
 #macro (getOrphanFiles)
@@ -141,46 +84,7 @@
   ## the first, is set as wiki page parent so that a tree widget (such as the XWiki explorer tree) can still display the
   ## hierarchy nicely.
   #set ($statement = "from doc.object(FileManagerCode.FileClass) as file where doc.space = :space and (doc.parent = '' or doc.parent not in ($selectAllFoldersFromDriveHQL))")
-  #getFiles($statement {'space': $doc.space})
-#end
-
-#macro (getFiles $statement $parameters)
-  #set ($query = $services.query.xwql("$statement order by doc.name"))
-  #set ($countQuery = $services.query.xwql($statement).addFilter('count'))
-  #foreach ($entry in $parameters.entrySet())
-    #set ($discard = $query.bindValue($entry.key, $entry.value))
-    #set ($discard = $countQuery.bindValue($entry.key, $entry.value))
-  #end
-  #set ($fileCount = $countQuery.execute().get(0))
-  #set ($files = [])
-  #set ($offset = $mathtool.toInteger($request.offset))
-  #if ($offset)
-    #set ($discard = $query.setOffset($offset))
-  #end
-  #set ($limit = $mathtool.toInteger($request.limit))
-  #if ($limit)
-    #set ($discard = $query.setLimit($limit))
-  #end
-  #foreach ($file in $query.execute())
-    #set ($fileDoc = $xwiki.getDocument($file))
-    #set ($attach = $fileDoc.attachmentList.get(0))
-    #set ($discard = $files.add({
-      'id': $fileDoc.name,
-      'name': $attach.filename,
-      'date': $fileDoc.date,
-      'author': $fileDoc.author,
-      'size': $attach.filesize,
-      'mediaType': $attach.mimeType,
-      'version': $fileDoc.version,
-      'description': $fileDoc.display('description'),
-      'url': $fileDoc.getURL('get')
-    }))
-  #end
-  #set ($data = {
-    'fileCount': $fileCount,
-    'offset': $offset,
-    'files': $files
-  })
+  #getFiles($statement {'space': $doc.space} $data)
 #end
 
 #macro (getDrive)

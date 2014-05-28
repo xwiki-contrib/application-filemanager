@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc version="1.1">
+  <web>FileManagerCode</web>
+  <name>Macros</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1401201952000</creationDate>
+  <parent>FileManagerCode.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1401280487000</date>
+  <contentUpdateDate>1401280300000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity output=false}}
+#macro (getChildFolders $parentDoc $return)
+  #set ($statement = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and doc.parent = :parent')
+  #getFolders($statement {'space': $parentDoc.space, 'parent': $parentDoc.name} $_return)
+  #set ($return = $NULL)
+  #setVariable("$return" $_return)
+#end
+
+#macro (getFolders $statement $parameters $return)
+  #set ($query = $services.query.xwql("$statement order by doc.name"))
+  #set ($countQuery = $services.query.xwql($statement).addFilter('count'))
+  #foreach ($entry in $parameters.entrySet())
+    #set ($discard = $query.bindValue($entry.key, $entry.value))
+    #set ($discard = $countQuery.bindValue($entry.key, $entry.value))
+  #end
+  #set ($folderCount = $countQuery.execute().get(0))
+  #set ($folders = [])
+  #set ($offset = $mathtool.toInteger($request.offset))
+  #if ($offset)
+    #set ($discard = $query.setOffset($offset))
+  #end
+  #set ($limit = $mathtool.toInteger($request.limit))
+  #if ($limit)
+    #set ($discard = $query.setLimit($limit))
+  #end
+  #foreach ($folderId in $query.execute())
+    #set ($folderDoc = $xwiki.getDocument($folderId))
+    #getFolder($folderDoc $folder)
+    #set ($discard = $folders.add($folder))
+  #end
+  #set ($return = $NULL)
+  #setVariable("$return" {
+    'folderCount': $folderCount,
+    'offset': $offset,
+    'folders': $folders
+  })
+#end
+
+#macro (getFolder $folderDoc $return)
+  #set ($parent = $NULL)
+  #if ("$!folderDoc.parent" != '')
+    #set ($parentReference = $services.model.resolveDocument($folderDoc.parent, 'explicit', $folderDoc.documentReference))
+    ## The parent must be on the same drive (space).
+    #if ($folderDoc.documentReference.parent.equals($parentReference.parent))
+      #set ($parentDoc = $xwiki.getDocument($parentReference))
+      ## The parent must be either a folder or a drive.
+      #if ($parentDoc.getObject('FileManagerCode.FolderClass') || $parentDoc.getObject('FileManagerCode.DriveClass'))
+        #set ($parent = {
+          'id': $parentReference.name,
+          'url': $xwiki.getURL($parentReference, 'get', $NULL)
+        })
+      #end
+    #end
+  #end
+  #set ($return = $NULL)
+  #setVariable("$return" {
+    'id': $folderDoc.name,
+    'name': $folderDoc.plainTitle,
+    'parent': $parent,
+    'url': $folderDoc.getURL('get')
+  })
+#end
+
+#macro (getFiles $statement $parameters $return)
+  #set ($query = $services.query.xwql("$statement order by doc.name"))
+  #set ($countQuery = $services.query.xwql($statement).addFilter('count'))
+  #foreach ($entry in $parameters.entrySet())
+    #set ($discard = $query.bindValue($entry.key, $entry.value))
+    #set ($discard = $countQuery.bindValue($entry.key, $entry.value))
+  #end
+  #set ($fileCount = $countQuery.execute().get(0))
+  #set ($files = [])
+  #set ($offset = $mathtool.toInteger($request.offset))
+  #if ($offset)
+    #set ($discard = $query.setOffset($offset))
+  #end
+  #set ($limit = $mathtool.toInteger($request.limit))
+  #if ($limit)
+    #set ($discard = $query.setLimit($limit))
+  #end
+  #foreach ($fileId in $query.execute())
+    #set ($fileDoc = $xwiki.getDocument($fileId))
+    #getFile($fileDoc $file)
+    #set ($discard = $files.add($file))
+  #end
+  #set ($return = $NULL)
+  #setVariable("$return" {
+    'fileCount': $fileCount,
+    'offset': $offset,
+    'files': $files
+  })
+#end
+
+#macro (getFile $fileDoc $return)
+  #getFileParents($fileDoc $parents)
+  #set ($attach = $fileDoc.attachmentList.get(0))
+  #set ($return = $NULL)
+  #setVariable("$return" {
+    'id': $fileDoc.name,
+    'name': $attach.filename,
+    'date': $fileDoc.date,
+    'author': $fileDoc.author,
+    'size': $attach.filesize,
+    'mediaType': $attach.mimeType,
+    'version': $fileDoc.version,
+    'description': $fileDoc.display('description'),
+    'parents': $parents,
+    'url': $fileDoc.getURL('get')
+  })
+#end
+
+#macro (getFileParents $fileDoc $return)
+  #set ($tags = $fileDoc.getObject('XWiki.TagClass').getProperty('tags').value)
+  #set ($_parents = [])
+  #if ($tags &amp;&amp; $tags.size() &gt; 0)
+    #set ($statement = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.name in (:tags)')
+    #foreach ($folderId in $services.query.xwql($statement).bindValue('tags', $tags).execute())
+      #set ($folderReference = $services.model.resolveDocument($folderId, 'explicit', $fileDoc.documentReference))
+      #set ($discard = $_parents.add({
+        'id': $folderReference.name,
+        'url': $xwiki.getURL($folderReference, 'get', $NULL)
+      }))
+    #end
+  #end
+  #set ($return = $NULL)
+  #setVariable("$return" $_parents)
+#end
+
+#macro (getUniquePageName $name $return)
+  #set ($documentReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $name))
+  #if (!$xwiki.exists($documentReference))
+    #set ($uniqueName = $name)
+  #else
+    #set ($found = false)
+    #foreach ($counter in [1..99])
+      #set ($uniqueName = "$name$counter")
+      #set ($documentReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $uniqueName))
+      #if (!$xwiki.exists($documentReference))
+        #set ($found = true)
+        #break
+      #end
+    #end
+    #if (!$found)
+      #set ($uniqueName = "$name$mathtool.random(100, 1000)")
+    #end
+  #end
+  #set ($return = $NULL)
+  #setVariable("$return" $uniqueName)
+#end
+{{/velocity}}</content>
+</xwikidoc>
