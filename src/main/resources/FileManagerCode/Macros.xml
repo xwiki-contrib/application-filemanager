@@ -22,7 +22,7 @@
   <content>{{velocity output=false}}
 #macro (getChildFolders $parentDoc $return)
   #set ($statement = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and doc.parent = :parent')
-  #getFolders($statement {'space': $parentDoc.space, 'parent': $parentDoc.name} $_return)
+  #getFolders($statement {'space': $parentDoc.space, 'parent': $parentDoc.fullName} $_return)
   #set ($return = $NULL)
   #setVariable("$return" $_return)
 #end

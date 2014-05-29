@@ -23,7 +23,7 @@
 
 {{velocity output="false"}}
 ## We need to use HQL because XWQL doesn't support nested queries.
-#set ($selectAllFoldersFromDriveHQL = "select folderDoc.name from XWikiDocument folderDoc, BaseObject folderObj where folderDoc.space = :space and folderObj.name = folderDoc.fullName and folderObj.className = 'FileManagerCode.FolderClass'")
+#set ($selectAllFoldersFromDriveHQL = "select folderDoc.fullName from XWikiDocument folderDoc, BaseObject folderObj where folderDoc.space = :space and folderObj.name = folderDoc.fullName and folderObj.className = 'FileManagerCode.FolderClass'")
 
 #macro (handleDriveWebServiceRequest)
   #if ($request.action)
@@ -55,7 +55,7 @@
 
 #macro (getOrphanFolders)
   #set ($statement = "from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and (doc.parent = '' or (doc.parent &lt;&gt; :parent and doc.parent not in ($selectAllFoldersFromDriveHQL)))")
-  #getFolders($statement {'space': $doc.space, 'parent': $doc.name} $data)
+  #getFolders($statement {'space': $doc.space, 'parent': $doc.fullName} $data)
 #end
 
 #macro (getAllFiles)
