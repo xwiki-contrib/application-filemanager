@@ -29,7 +29,7 @@
   #if ($request.action)
     #if ($services.csrf.isTokenValid($request.form_token))
       #if ($request.action == 'newFolder')
-        #createRootFolder
+        #createFolder($request.name $doc)
       #end
     #elseif ($isAjaxRequest)
       $response.sendError(403, 'The CSRF token is missing.')
@@ -51,22 +51,6 @@
     #end
     $jsontool.serialize($data)
   #end
-#end
-
-#macro (createRootFolder)
-  #set ($name = $request.name)
-  #if ("$!name" == '')
-    #set ($name = 'Untitled Folder')
-  #end
-  #getUniquePageName($name $id)
-  #set ($folderReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $id))
-  $response.sendRedirect($xwiki.getURL($folderReference, 'save', $escapetool.url({
-    'title': $name,
-    'parent': $doc.name,
-    'template': 'FileManagerCode.FolderTemplate',
-    'form_token': $request.form_token,
-    'xredirect': $xwiki.getURL($folderReference, 'get', 'outputSyntax=plain')
-  })))
 #end
 
 #macro (getOrphanFolders)

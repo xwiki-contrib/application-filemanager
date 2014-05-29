@@ -82,6 +82,21 @@
   })
 #end
 
+#macro (createFolder $name $parentDoc)
+  #if ("$!name" == '')
+    #set ($name = 'Untitled Folder')
+  #end
+  #getUniquePageName($name $id)
+  #set ($folderReference = $services.model.createDocumentReference($parentDoc.wiki, $parentDoc.space, $id))
+  $response.sendRedirect($xwiki.getURL($folderReference, 'save', $escapetool.url({
+    'title': $name,
+    'parent': $parentDoc.fullName,
+    'template': 'FileManagerCode.FolderTemplate',
+    'form_token': $request.form_token,
+    'xredirect': $xwiki.getURL($folderReference, 'get', 'outputSyntax=plain')
+  })))
+#end
+
 #macro (getFiles $statement $parameters $return)
   #set ($query = $services.query.xwql("$statement order by doc.name"))
   #set ($countQuery = $services.query.xwql($statement).addFilter('count'))
