@@ -20,9 +20,12 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>{{velocity output=false}}
+#set ($selectChildFolders = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and doc.parent in (:parent)')
+#set ($selectChildFiles = 'from doc.object(FileManagerCode.FileClass) as file where doc.space = :space and :tag member of doc.object(XWiki.TagClass).tags')
+
 #macro (getChildFolders $parentDoc $return)
-  #set ($statement = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and doc.parent = :parent')
-  #getFolders($statement {'space': $parentDoc.space, 'parent': $parentDoc.fullName} $_return)
+  #set ($parentNameAsReference = $services.model.serialize($parentDoc.documentReference, 'compact', $parentDoc.documentReference))
+  #getFolders($selectChildFolders {'space': $parentDoc.space, 'parent': [$parentDoc.fullName, $parentNameAsReference]} $_return)
   #set ($return = $NULL)
   #setVariable("$return" $_return)
 #end
@@ -51,9 +54,9 @@
   #end
   #set ($return = $NULL)
   #setVariable("$return" {
-    'folderCount': $folderCount,
+    'count': $folderCount,
     'offset': $offset,
-    'folders': $folders
+    'list': $folders
   })
 #end
 
@@ -92,6 +95,7 @@
     'title': $name,
     'parent': $parentDoc.fullName,
     'template': 'FileManagerCode.FolderTemplate',
+    'comment': 'Folder created',
     'form_token': $request.form_token,
     'xredirect': $xwiki.getURL($folderReference, 'get', 'outputSyntax=plain')
   })))
@@ -121,9 +125,9 @@
   #end
   #set ($return = $NULL)
   #setVariable("$return" {
-    'fileCount': $fileCount,
+    'count': $fileCount,
     'offset': $offset,
-    'files': $files
+    'list': $files
   })
 #end
 
