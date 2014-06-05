@@ -34,7 +34,7 @@
   <packaging>jar</packaging>
   <description>APIs to manage files and folders.</description>
   <properties>
-    <xwiki.jacoco.instructionRatio>35.43</xwiki.jacoco.instructionRatio>
+    <xwiki.jacoco.instructionRatio>49.07</xwiki.jacoco.instructionRatio>
   </properties>
   <dependencies>
     <dependency>

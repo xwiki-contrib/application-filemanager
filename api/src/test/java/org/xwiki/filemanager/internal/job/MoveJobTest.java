@@ -40,7 +40,10 @@ import org.xwiki.filemanager.FileSystem;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
 import org.xwiki.filemanager.job.MoveRequest;
+import org.xwiki.filemanager.job.OverwriteQuestion;
 import org.xwiki.job.Job;
+import org.xwiki.job.event.status.JobStatus;
+import org.xwiki.job.event.status.JobStatus.State;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
 
@@ -93,6 +96,77 @@ public class MoveJobTest
     }
 
     @Test
+    public void moveFolderInItself() throws Exception
+    {
+        Folder child = mockFolder("Specs", "Resilience");
+        mockFolder("Resilience", "Projects");
+        Folder grandParent = mockFolder("Projects");
+
+        MoveRequest request = new MoveRequest();
+        request.setPaths(Collections.singleton(new Path(grandParent.getReference())));
+        request.setDestination(new Path(child.getReference()));
+
+        mocker.getComponentUnderTest().start(request);
+
+        verify(mocker.getMockedLogger()).error("Cannot move [{}] to a sub-folder of itself.",
+            grandParent.getReference());
+    }
+
+    @Test
+    public void mergeFolder() throws Exception
+    {
+        mockFolder("Tests", "Concerto");
+        mockFolder("Specs", "Concerto");
+        Folder concerto =
+            mockFolder("Concerto", "Projects", Arrays.asList("Specs", "Tests"), Collections.<String> emptyList());
+        Folder projects = mockFolder("Projects", null, Arrays.asList("Concerto"), Collections.<String> emptyList());
+
+        final File testFile = mockFile("test.in", "TestsNew");
+        final Folder testsNew =
+            mockFolder("TestsNew", "Tests", "ConcertoNew", Collections.<String> emptyList(), Arrays.asList("test.in"));
+        final Folder src = mockFolder("src", "ConcertoNew");
+        final Folder concertoNew =
+            mockFolder("ConcertoNew", "Concerto", null, Arrays.asList("src", "TestsNew"),
+                Collections.<String> emptyList());
+
+        // Assume that testFile is saved after the parent is updated (we verify this at the end).
+        doAnswer(new Answer<Void>()
+        {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable
+            {
+                when(testsNew.getChildFileReferences()).thenReturn(Collections.<DocumentReference> emptyList());
+                return null;
+            }
+        }).when(fileSystem).save(testFile);
+
+        // ConcertoNew should remain empty after its only child is deleted.
+        DocumentReference testsNewReference = testsNew.getReference();
+        doAnswer(new Answer<Void>()
+        {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable
+            {
+                when(concertoNew.getChildFolderReferences()).thenReturn(Collections.<DocumentReference> emptyList());
+                return null;
+            }
+        }).when(fileSystem).delete(testsNewReference);
+
+        MoveRequest request = new MoveRequest();
+        request.setPaths(Collections.singleton(new Path(concertoNew.getReference())));
+        request.setDestination(new Path(projects.getReference()));
+
+        mocker.getComponentUnderTest().start(request);
+
+        assertEquals(Collections.singletonList("Tests"), getParents(testFile));
+
+        verify(src).setParentReference(concerto.getReference());
+        verify(fileSystem).save(src);
+
+        verify(fileSystem).delete(concertoNew.getReference());
+    }
+
+    @Test
     public void moveFile() throws Exception
     {
         File file = mockFile("readme.txt", "Concerto", "Resilience");
@@ -108,6 +182,28 @@ public class MoveJobTest
         assertEquals(Arrays.asList("Resilience", "Projects"), getParents(file));
 
         verify(fileSystem).save(file);
+    }
+
+    @Test
+    public void overwriteFile() throws Exception
+    {
+        File pom = mockFile("pom.xml", "api");
+        Folder api = mockFolder("api", null, Collections.<String> emptyList(), Arrays.asList("pom.xml"));
+
+        File otherPom = mockFile("pom.xml1", "pom.xml", Arrays.asList("root"));
+        Folder root = mockFolder("root", null, Collections.<String> emptyList(), Arrays.asList("pom.xml1"));
+
+        MoveRequest request = new MoveRequest();
+        request.setPaths(Collections.singleton(new Path(root.getReference(), otherPom.getReference())));
+        request.setDestination(new Path(api.getReference()));
+
+        request.setInteractive(true);
+        Job job = mocker.getComponentUnderTest();
+        answerOverwriteQuestion(job, true, false);
+
+        job.start(request);
+
+        verify(fileSystem).delete(pom.getReference());
     }
 
     @Test
@@ -159,7 +255,7 @@ public class MoveJobTest
 
     private Folder mockFolder(String name)
     {
-        return mockFolder(new DocumentReference("wiki", "Drive", name), null);
+        return mockFolder(name, null);
     }
 
     private Folder mockFolder(String name, String parentName)
@@ -167,22 +263,16 @@ public class MoveJobTest
         return mockFolder(name, parentName, Collections.<String> emptyList(), Collections.<String> emptyList());
     }
 
-    private Folder mockFolder(String name, String parentName, List<String> childFolders, List<String> childFiles)
+    private Folder mockFolder(String name, String parentId, List<String> childFolders, List<String> childFiles)
     {
-        return mockFolder(new DocumentReference("wiki", "Drive", name), new DocumentReference("wiki", "Drive",
-            parentName), asReference(childFolders), asReference(childFiles));
+        return mockFolder(name, name, parentId, childFolders, childFiles);
     }
 
-    private Folder mockFolder(DocumentReference reference, DocumentReference parentReference)
+    private Folder mockFolder(String id, String name, String parentId, List<String> childFolders,
+        List<String> childFiles)
     {
-        return mockFolder(reference, parentReference, Collections.<DocumentReference> emptyList(),
-            Collections.<DocumentReference> emptyList());
-    }
-
-    private Folder mockFolder(DocumentReference reference, DocumentReference parentReference,
-        List<DocumentReference> childFolderReferences, List<DocumentReference> childFileReferences)
-    {
-        return mockFolder(reference, reference.getName(), parentReference, childFolderReferences, childFileReferences);
+        DocumentReference parentReference = parentId != null ? ref(parentId) : null;
+        return mockFolder(ref(id), name, parentReference, ref(childFolders), ref(childFiles));
     }
 
     private Folder mockFolder(DocumentReference reference, String name, DocumentReference parentReference,
@@ -204,13 +294,12 @@ public class MoveJobTest
 
     private File mockFile(String name, String... parents)
     {
-        DocumentReference reference = new DocumentReference("wiki", "Drive", name);
-        return mockFile(reference, asReference(Arrays.asList(parents)));
+        return mockFile(name, name, Arrays.asList(parents));
     }
 
-    private File mockFile(DocumentReference reference, Collection<DocumentReference> parentReferences)
+    private File mockFile(String id, String name, Collection<String> parentIds)
     {
-        return mockFile(reference, reference.getName(), parentReferences);
+        return mockFile(ref(id), name, ref(parentIds));
     }
 
     private File mockFile(DocumentReference reference, String name, Collection<DocumentReference> parentReferences)
@@ -236,12 +325,43 @@ public class MoveJobTest
         return parents;
     }
 
-    private List<DocumentReference> asReference(List<String> names)
+    private List<DocumentReference> ref(Collection<String> names)
     {
         List<DocumentReference> references = new ArrayList<DocumentReference>();
         for (String name : names) {
-            references.add(new DocumentReference("wiki", "Drive", name));
+            references.add(ref(name));
         }
         return references;
+    }
+
+    private DocumentReference ref(String id)
+    {
+        return new DocumentReference("wiki", "Drive", id);
+    }
+
+    private void answerOverwriteQuestion(final Job job, final boolean overwrite, final boolean askAgain)
+        throws Exception
+    {
+        new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                for (int i = 0; i < 5; i++) {
+                    try {
+                        Thread.sleep(20);
+                        JobStatus status = job.getStatus();
+                        if (status != null && status.getState() == State.WAITING) {
+                            OverwriteQuestion question = (OverwriteQuestion) status.getQuestion();
+                            question.setOverwrite(overwrite);
+                            question.setAskAgain(askAgain);
+                            status.answered();
+                            return;
+                        }
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        }, "Answer Overwrite Question").start();
     }
 }
