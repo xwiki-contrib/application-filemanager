@@ -283,8 +283,8 @@ public class MoveJob extends AbstractJob<MoveRequest>
         // Check if a file with the same name already exits under the new parent folder.
         File child = getChildFileByName(newParent, file.getName());
         if (child != null) {
-            if (shouldOverwrite(file.getReference(), child.getReference())
-                && fileSystem.canEdit(child.getReference())) {
+            if (fileSystem.canEdit(child.getReference())
+                && shouldOverwrite(file.getReference(), child.getReference())) {
                 deleteFile(child, newParent.getReference());
             } else {
                 return;
@@ -391,39 +391,53 @@ public class MoveJob extends AbstractJob<MoveRequest>
     private void renameFolder(DocumentReference oldReference, Path newPath)
     {
         Folder folder = fileSystem.getFolder(oldReference);
-        if (folder == null) {
-            return;
-        }
-
-        DocumentReference newParentReference = newPath.getFolderReference();
-        if (newParentReference == null) {
-            // If the new parent is not specified we assume the parent doesn't change.
-            newParentReference = folder.getParentReference();
-        }
-        if (ObjectUtils.equals(newParentReference, folder.getParentReference())
-            && newPath.getFileReference().equals(oldReference)) {
-            // No move (same parent) and no rename (same reference).
-            return;
-        }
-        if (newParentReference != null) {
-            Folder newParent = fileSystem.getFolder(newParentReference);
-            Folder child = getChildFolderByName(newParent, newPath.getFileReference().getName());
-            if (child == null) {
-                folder.setParentReference(newParentReference);
-                if (newPath.getFileReference().equals(oldReference)) {
-                    fileSystem.save(folder);
+        if (folder != null) {
+            if (fileSystem.canEdit(oldReference)) {
+                DocumentReference newParentReference = newPath.getFolderReference();
+                if (newParentReference == null) {
+                    // If the new parent is not specified we assume the parent doesn't change.
+                    newParentReference = folder.getParentReference();
+                }
+                if (ObjectUtils.equals(newParentReference, folder.getParentReference())
+                    && newPath.getFileReference().equals(oldReference)) {
+                    // No move (same parent) and no rename (same reference).
+                    return;
+                }
+                if (newParentReference != null) {
+                    renameFolder(folder, new Path(newParentReference, newPath.getFileReference()));
                 } else {
+                    // Rename an orphan folder.
                     // The file reference from the new path is actually used as the new folder reference.
                     renameFolder(folder, newPath.getFileReference());
                 }
             } else {
-                this.logger.error("A folder with the same name [{}] already exists under [{}]", newPath
-                    .getFileReference().getName(), newParentReference);
+                this.logger.error("You are not allowed to rename the folder [{}].", oldReference);
+            }
+        }
+    }
+
+    /**
+     * Renames a folder.
+     * 
+     * @param folder the folder to rename
+     * @param newPath the new path
+     */
+    private void renameFolder(Folder folder, Path newPath)
+    {
+        Folder newParent = fileSystem.getFolder(newPath.getFolderReference());
+        Folder child = getChildFolderByName(newParent, newPath.getFileReference().getName());
+        if (child == null) {
+            folder.setParentReference(newParent.getReference());
+            if (newPath.getFileReference().equals(folder.getReference())) {
+                // No rename, just move.
+                fileSystem.save(folder);
+            } else {
+                // The file reference from the new path is actually used as the new folder reference.
+                renameFolder(folder, newPath.getFileReference());
             }
         } else {
-            // Rename an orphan folder.
-            // The file reference from the new path is actually used as the new folder reference.
-            renameFolder(folder, newPath.getFileReference());
+            this.logger.error("A folder with the same name [{}] already exists under [{}]", newPath.getFileReference()
+                .getName(), newParent.getReference());
         }
     }
 
@@ -467,34 +481,47 @@ public class MoveJob extends AbstractJob<MoveRequest>
     private void renameFile(Path oldPath, Path newPath)
     {
         File file = fileSystem.getFile(oldPath.getFileReference());
-        if (file == null) {
-            return;
-        }
-
-        boolean save = false;
-        Collection<DocumentReference> parentReferences = file.getParentReferences();
-        if (newPath.getFolderReference() != null && oldPath.getFolderReference() != null
-            && !newPath.getFolderReference().equals(oldPath.getFolderReference())) {
-            save |= parentReferences.remove(oldPath.getFolderReference());
-            save |= parentReferences.add(newPath.getFolderReference());
-        }
-
-        if (!file.getReference().equals(newPath.getFileReference())) {
-            if (!file.getReference().getName().equals(newPath.getFileReference().getName())) {
-                for (DocumentReference parentReference : parentReferences) {
-                    Folder folder = fileSystem.getFolder(parentReference);
-                    if (getChildFolderByName(folder, newPath.getFileReference().getName()) != null) {
-                        this.logger.error("A file with the same name [{}] already exists under [{}]", newPath
-                            .getFileReference().getName(), parentReference);
-                        return;
-                    }
+        if (file != null) {
+            if (fileSystem.canEdit(file.getReference())) {
+                boolean save = false;
+                Collection<DocumentReference> parentReferences = file.getParentReferences();
+                if (newPath.getFolderReference() != null && oldPath.getFolderReference() != null
+                    && !newPath.getFolderReference().equals(oldPath.getFolderReference())) {
+                    save |= parentReferences.remove(oldPath.getFolderReference());
+                    save |= parentReferences.add(newPath.getFolderReference());
                 }
-                file.setName(newPath.getFileReference().getName());
+
+                if (!file.getReference().equals(newPath.getFileReference())) {
+                    renameFile(file, newPath.getFileReference());
+                } else if (save) {
+                    fileSystem.save(file);
+                }
+            } else {
+                this.logger.error("You are not allowed to rename the file [{}].", file.getReference());
             }
-            fileSystem.rename(file, getUniqueReference(newPath.getFileReference()));
-        } else if (save) {
-            fileSystem.save(file);
         }
+    }
+
+    /**
+     * Renames the given file.
+     * 
+     * @param file the file to rename
+     * @param newReference the new file reference
+     */
+    private void renameFile(File file, DocumentReference newReference)
+    {
+        if (!file.getReference().getName().equals(newReference.getName())) {
+            for (DocumentReference parentReference : file.getParentReferences()) {
+                Folder folder = fileSystem.getFolder(parentReference);
+                if (folder != null && getChildFileByName(folder, newReference.getName()) != null) {
+                    this.logger.error("A file with the same name [{}] already exists under [{}]",
+                        newReference.getName(), parentReference);
+                    return;
+                }
+            }
+            file.setName(newReference.getName());
+        }
+        fileSystem.rename(file, getUniqueReference(newReference));
     }
 
     /**
