@@ -109,6 +109,26 @@ public abstract class AbstractJobTest
             }
 
         }).when(fileSystem).rename(any(Document.class), any(DocumentReference.class));
+
+        doAnswer(new Answer<Void>()
+        {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable
+            {
+                DocumentReference source = (DocumentReference) invocation.getArguments()[0];
+                DocumentReference destination = (DocumentReference) invocation.getArguments()[1];
+                File file = fileSystem.getFile(source);
+                Folder folder = fileSystem.getFolder(source);
+                if (file != null) {
+                    mockFile(destination, file.getName(), new ArrayList<DocumentReference>(file.getParentReferences()));
+                } else if (folder != null) {
+                    mockFolder(destination, folder.getName(), folder.getParentReference(),
+                        Collections.<DocumentReference> emptyList(), Collections.<DocumentReference> emptyList());
+                }
+                return null;
+            }
+
+        }).when(fileSystem).copy(any(DocumentReference.class), any(DocumentReference.class));
     }
 
     protected abstract MockitoComponentMockingRule<Job> getMocker();
@@ -147,6 +167,7 @@ public abstract class AbstractJobTest
 
         when(fileSystem.exists(reference)).thenReturn(true);
         when(fileSystem.getFolder(reference)).thenReturn(folder);
+        when(fileSystem.canView(reference)).thenReturn(true);
         when(fileSystem.canEdit(reference)).thenReturn(true);
         when(fileSystem.canDelete(reference)).thenReturn(true);
 
@@ -172,6 +193,7 @@ public abstract class AbstractJobTest
 
         when(fileSystem.exists(reference)).thenReturn(true);
         when(fileSystem.getFile(reference)).thenReturn(file);
+        when(fileSystem.canView(reference)).thenReturn(true);
         when(fileSystem.canEdit(reference)).thenReturn(true);
         when(fileSystem.canDelete(reference)).thenReturn(true);
 

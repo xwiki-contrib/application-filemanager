@@ -51,6 +51,12 @@ public interface FileSystem
 
     /**
      * @param reference a reference to a file or folder
+     * @return {@code true} if the referenced entity can be viewed by the current user
+     */
+    boolean canView(DocumentReference reference);
+
+    /**
+     * @param reference a reference to a file or folder
      * @return {@code true} if the referenced entity can be edited by the current user
      */
     boolean canEdit(DocumentReference reference);
@@ -82,4 +88,12 @@ public interface FileSystem
      * @param newReference the new reference
      */
     void rename(Document document, DocumentReference newReference);
+
+    /**
+     * Copy a file or a folder.
+     * 
+     * @param source the reference to the file or folder to copy
+     * @param target the reference to the file or folder to create
+     */
+    void copy(DocumentReference source, DocumentReference target);
 }

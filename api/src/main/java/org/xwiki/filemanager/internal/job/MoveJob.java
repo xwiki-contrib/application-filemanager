@@ -62,7 +62,7 @@ public class MoveJob extends AbstractJob<MoveRequest>
      * The pseudo file system.
      */
     @Inject
-    private FileSystem fileSystem;
+    protected FileSystem fileSystem;
 
     /**
      * Specifies whether all files with the same name are to be overwritten on not. When {@code true} all files with the
@@ -160,7 +160,7 @@ public class MoveJob extends AbstractJob<MoveRequest>
      * @param bobReference a folder reference
      * @return {@code true} if the first folder is a descendant of the second, {@code false} otherwise
      */
-    private boolean isDescendantOrSelf(DocumentReference aliceReference, DocumentReference bobReference)
+    protected boolean isDescendantOrSelf(DocumentReference aliceReference, DocumentReference bobReference)
     {
         DocumentReference parentReference = aliceReference;
         while (parentReference != null && !parentReference.equals(bobReference)) {
@@ -200,7 +200,7 @@ public class MoveJob extends AbstractJob<MoveRequest>
      * @return a child folder with the given name, {@code null} if the parent doesn't have a child folder with the
      *         specified name
      */
-    private Folder getChildFolderByName(Folder parent, String name)
+    protected Folder getChildFolderByName(Folder parent, String name)
     {
         for (DocumentReference childReference : parent.getChildFolderReferences()) {
             Folder child = fileSystem.getFolder(childReference);
@@ -283,7 +283,7 @@ public class MoveJob extends AbstractJob<MoveRequest>
         // Check if a file with the same name already exits under the new parent folder.
         File child = getChildFileByName(newParent, file.getName());
         if (child != null) {
-            if (fileSystem.canEdit(child.getReference())
+            if (fileSystem.canDelete(child.getReference())
                 && shouldOverwrite(file.getReference(), child.getReference())) {
                 deleteFile(child, newParent.getReference());
             } else {
@@ -307,7 +307,7 @@ public class MoveJob extends AbstractJob<MoveRequest>
      * @return a child file with the given name, {@code null} if the parent doesn't have a child file with the specified
      *         name
      */
-    private File getChildFileByName(Folder parent, String name)
+    protected File getChildFileByName(Folder parent, String name)
     {
         for (DocumentReference childReference : parent.getChildFileReferences()) {
             File child = fileSystem.getFile(childReference);
@@ -325,7 +325,7 @@ public class MoveJob extends AbstractJob<MoveRequest>
      * @param destination a file with the same name that exists in the destination folder
      * @return {@code true} to overwrite the file, {@code false} otherwise
      */
-    private boolean shouldOverwrite(DocumentReference source, DocumentReference destination)
+    protected boolean shouldOverwrite(DocumentReference source, DocumentReference destination)
     {
         if (getRequest().isInteractive() && getStatus() != null) {
             if (overwriteAll == null) {
@@ -354,7 +354,7 @@ public class MoveJob extends AbstractJob<MoveRequest>
      * @param file the file to be deleted
      * @param parentReference the folder from where to delete the file
      */
-    private void deleteFile(File file, DocumentReference parentReference)
+    protected void deleteFile(File file, DocumentReference parentReference)
     {
         Collection<DocumentReference> parentReferences = file.getParentReferences();
         parentReferences.remove(parentReference);
@@ -528,7 +528,7 @@ public class MoveJob extends AbstractJob<MoveRequest>
      * @param documentReference a document reference
      * @return a unique document references based on the given reference (adds a counter if needed)
      */
-    private DocumentReference getUniqueReference(DocumentReference documentReference)
+    protected DocumentReference getUniqueReference(DocumentReference documentReference)
     {
         if (!fileSystem.exists(documentReference)) {
             return documentReference;

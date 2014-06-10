@@ -122,6 +122,12 @@ public class DefaultFileSystem implements FileSystem
     }
 
     @Override
+    public boolean canView(DocumentReference reference)
+    {
+        return hasRight(reference, "view");
+    }
+
+    @Override
     public boolean canEdit(DocumentReference reference)
     {
         return hasRight(reference, "edit");
@@ -203,6 +209,17 @@ public class DefaultFileSystem implements FileSystem
             } catch (XWikiException e) {
                 logger.error("Failed to rename document [{}] to [{}]", document.getReference(), newReference, e);
             }
+        }
+    }
+
+    @Override
+    public void copy(DocumentReference source, DocumentReference target)
+    {
+        XWikiContext context = xcontextProvider.get();
+        try {
+            context.getWiki().copyDocument(source, target, null, false, true, true, context);
+        } catch (XWikiException e) {
+            logger.error("Failed to copy [{}] as [{}].", source, target, e);
         }
     }
 }

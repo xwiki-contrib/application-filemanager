@@ -205,7 +205,7 @@ public class MoveJobTest extends AbstractJobTest
     public void overwriteProtectedFile() throws Exception
     {
         File pom = mockFile("pom.xml", "api");
-        when(fileSystem.canEdit(pom.getReference())).thenReturn(false);
+        when(fileSystem.canDelete(pom.getReference())).thenReturn(false);
         Folder api = mockFolder("api", null, Collections.<String> emptyList(), Arrays.asList("pom.xml"));
 
         File otherPom = mockFile("pom.xml1", "pom.xml", Arrays.asList("root"));
@@ -214,8 +214,13 @@ public class MoveJobTest extends AbstractJobTest
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(root.getReference(), otherPom.getReference())));
         request.setDestination(new Path(api.getReference()));
+
         request.setInteractive(true);
-        mocker.getComponentUnderTest().start(request);
+        Job job = mocker.getComponentUnderTest();
+        // Make sure the test doesn't hang waiting for the answer.
+        answerOverwriteQuestion(job, true, false);
+
+        job.start(request);
 
         verify(fileSystem, never()).delete(pom.getReference());
         verify(fileSystem, never()).save(otherPom);
