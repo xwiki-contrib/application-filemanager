@@ -1,1 +1,35 @@
-te
+<xwikidoc>
+  <web>FileManager</web>
+  <name>Translation</name>
+  <language>fr</language>
+  <defaultLanguage/>
+  <translation>1</translation>
+  <parent>FileManager.WebHome</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1389884929000</creationDate>
+  <date>1391683250000</date>
+  <contentUpdateDate>1391683250000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>ccontrib.FM.application.title=Gerenciador de Arquivos
+contrib.FM.application.message=Bem Vindo ao Gerenciador de Arquivos da Wiki! Utilize este espaço para armazenar, organizar e compartilhar arquivos da sua área!
+
+contrib.FM.description=Descrição do Arquivo
+contrib.FM.noDescription=Nenhuma descrição disponível.
+contrib.FM.noAttachment=Nenhum arquivo anexado. Adicione um arquivo clicando em "editar" ou utilizando a aba anexos. 
+contrib.FM.editDescription=Salvar e Visualizar
+
+contrib.FM.change.explanations=Você pode anexar arquivos utilizando a aba "Anexo". Você pode também pode classificar o documento através de palavras-chaves (Tags ou Marcadores), assim ficará mais fácil encontra-lo!
+
+rendering.macro.filetagcloud.name=Gerenciador de Arquivos
+rendering.macro.filetagcloud.description=Palavras-chave dos arquivos inseridos no Gerenciador de arquivos.</content>
+</xwikidoc>
