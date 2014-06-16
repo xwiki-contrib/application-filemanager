@@ -555,6 +555,6 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
         }
 
         String uniqueName = documentReference.getName() + UUID.randomUUID().toString();
-        return new DocumentReference(uniqueName, documentReference.getSpaceReferences().get(0));
+        return new DocumentReference(uniqueName, documentReference.getLastSpaceReference());
     }
 }
