@@ -62,15 +62,22 @@
       $response.sendRedirect($services.csrf.getResubmissionURL())
     #end
   #else
-    #set ($discard = $response.setContentType('application/json'))
+    #set ($data = $NULL)
     #if ($request.data == 'files')
       #getChildFiles($doc $data)
     #elseif ($request.data == 'folders')
       #getChildFolders($doc $data)
+    #elseif ($request.data == 'jobStatus')
+      #getJobStatus($request.jobId $data)
     #else
       #getFolder($doc $data)
     #end
-    $jsontool.serialize($data)
+    #if ($data)
+      #set ($discard = $response.setContentType('application/json'))
+      $jsontool.serialize($data)
+    #else
+      $response.sendError(404);
+    #end
   #end
 #end
 
@@ -79,64 +86,18 @@
 #end
 
 #macro (moveFolder)
-  #set ($parentId = $request.parent)
-  #if ("$!parentId" != '')
-    ## Move this folder to a different (parent) folder.
-    #set ($newParentReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $parentId))
-    #set ($newParent = $services.model.serialize($newParentReference, 'local'))
-    #if ($doc.parent != $newParent)
-      #set ($discard = $doc.setParent($newParent))
-      #set ($discard = $doc.save('Folder moved'))
-    #end
-  #end
-  #set ($name = $request.name)
-  #if ("$!name" != '' &amp;&amp; $doc.plainTitle != $name)
-    ## Rename this folder.
-    #set ($oldId = $doc.name)
-    #set ($childFilesQuery = $services.query.xwql($selectChildFiles))
-    #set ($discard = $childFilesQuery.bindValue('space', $doc.space).bindValue('tag', $oldId))
-    #set ($files = $childFilesQuery.execute())
-    #set ($childFoldersQuery = $services.query.xwql($selectChildFolders))
-    #set ($docNameAsReference = $services.model.serialize($doc.documentReference, 'compact', $doc.documentReference))
-    #set ($discard = $childFoldersQuery.bindValue('space', $doc.space).bindValue('parent',
-      [$doc.fullName, $docNameAsReference]))
-    #set ($folders = $childFoldersQuery.execute())
-    #getUniquePageName($name $newId)
-    #set ($newFolderReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $newId))
-    #set ($discard = $doc.rename($services.model.serialize($newFolderReference, 'local')))
-    ## Fix the parent field for all the child folders.
-    #foreach ($folder in $folders)
-      #set ($folderDoc = $xwiki.getDocument($folder))
-      #fixParent($folderDoc)
-      #set ($discard = $folderDoc.save('Fixed parent field after the parent folder has been renamed.', true))
-    #end
-    ## Update the child files to point to the new parent id (this isn't done automatically because we're using tags).
-    #foreach ($file in $files)
-      #set ($fileDoc = $xwiki.getDocument($file))
-      #set ($tags = $fileDoc.getObject('XWiki.TagClass').getProperty('tags').value)
-      #set ($discard = $tags.remove($oldId))
-      #set ($discard = $tags.add($newId))
-      #fixParent($fileDoc)
-      #set ($discard = $fileDoc.save('Updated file after parent folder has been renamed.', true))
-    #end
-  #end
-  #set ($discard = $response.sendRedirect($doc.getURL('get', 'outputSyntax=plain')))
-#end
-
-#macro (fixParent $document)
-  ## Make sure the space is included in the value of the parent field. This is needed in order to be able to compute the
-  ## list of orphan files and folders.
-  #set ($parentReference = $services.model.resolveDocument($document.parent, 'explicit', $document.documentReference))
-  #set ($discard = $document.setParent($services.model.serialize($parentReference, 'compactwiki',
-    $document.documentReference)))
+  #set ($jobId = $services.drive.move([[$doc.name]], [$request.parent, $request.name]))
+  #handleJobStartFailure($jobId)
 #end
 
 #macro (copyFolder)
-  ## TODO
+  #set ($jobId = $services.drive.copy([[$doc.name]], [$request.parent, $request.name]))
+  #handleJobStartFailure($jobId)
 #end
 
 #macro (deleteFolder)
-  ## TODO
+  #set ($jobId = $services.drive.delete([[$doc.name]]))
+  #handleJobStartFailure($jobId)
 #end
 
 #macro (getChildFiles $parentDoc $return)
