@@ -50,6 +50,12 @@
     #if ($services.csrf.isTokenValid($request.form_token))
       #if ($request.action == 'newFolder')
         #createFolder($request.name $doc)
+      #elseif ($request.action == 'move')
+        #batchMove
+      #elseif ($request.action == 'copy')
+        #batchCopy
+      #elseif ($request.action == 'delete')
+        #batchDelete
       #end
     #elseif ($isAjaxRequest)
       $response.sendError(403, 'The CSRF token is missing.')
@@ -57,7 +63,7 @@
       $response.sendRedirect($services.csrf.getResubmissionURL())
     #end
   #else
-    #set ($discard = $response.setContentType('application/json'))
+    #set ($data = $NULL)
     #if ($request.data == 'folders')
       #getChildFolders($doc $data)
     #elseif ($request.data == 'allFiles')
@@ -66,11 +72,41 @@
       #getOrphanFolders
     #elseif ($request.data == 'orphanFiles')
       #getOrphanFiles
+    #elseif ($request.data == 'jobStatus')
+      #getJobStatus($request.jobId $data)
     #else
       #getDrive
     #end
-    $jsontool.serialize($data)
+    #if ($data)
+      #set ($discard = $response.setContentType('application/json'))
+      $jsontool.serialize($data)
+    #else
+      $response.sendError(404);
+    #end
   #end
+#end
+
+#macro (batchMove)
+  ## TODO: Read the collection of paths and the destination from the request.
+  #set ($paths = [])
+  #set ($destination = [])
+  #set ($jobId = $services.drive.move($paths, $destination))
+  #handleJobStartFailure($jobId)
+#end
+
+#macro (batchCopy)
+  ## TODO: Read the collection of paths and the destination from the request.
+  #set ($paths = [])
+  #set ($destination = [])
+  #set ($jobId = $services.drive.copy($paths, $destination))
+  #handleJobStartFailure($jobId)
+#end
+
+#macro (batchDelete)
+  ## TODO: Read the collection of paths from the request.
+  #set ($paths = [])
+  #set ($jobId = $services.drive.delete($paths))
+  #handleJobStartFailure($jobId)
 #end
 
 #macro (getOrphanFolders)

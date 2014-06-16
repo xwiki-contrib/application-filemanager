@@ -186,6 +186,7 @@
   #setVariable("$return" $_parents)
 #end
 
+## TODO: Use the script service to avoid duplicated code!
 #macro (getUniquePageName $name $return)
   #set ($documentReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $name))
   #if (!$xwiki.exists($documentReference))
@@ -206,6 +207,60 @@
   #end
   #set ($return = $NULL)
   #setVariable("$return" $uniqueName)
+#end
+
+#macro (handleJobStartFailure $jobId)
+  #if ($jobId)
+    #set ($discard = $response.sendRedirect($doc.getURL('get', $escapetool.url({
+      'outputSyntax': 'plain',
+      'data': 'jobStatus',
+      'jobId': $jobId
+    }))))
+  #else
+    $response.sendError(500, $services.drive.lastError.message);
+  #end
+#end
+
+#macro (getJobStatus $jobId $return)
+  #set ($jobStatus = $services.drive.getJobStatus($jobId))
+  #if ($jobStatus)
+    #set ($pathsAsJSON = [])
+    #foreach ($path in $jobStatus.request.paths)
+      #set ($discard = $pathsAsJSON.add({
+        'parent': $path.folderReference.name,
+        'child': $path.fileReference.name
+      }))
+    #end
+    #set ($jobStatusAsJSON = {
+      'state': $jobStatus.state,
+      'request': {
+        'type': $jobStatus.request.getProperty('job.type'),
+        'user': "$jobStatus.request.getProperty('user.reference')",
+        'paths': $pathsAsJSON
+      },
+      'log': {},
+      'progress': {
+        'offset': $jobStatus.progress.offset,
+        'currentLevelOffset': $jobStatus.progress.currentLevelOffset
+      },
+      'startDate': $jobStatus.startDate,
+      'endDate': $jobStatus.endDate
+    })
+    #if ($jobStatus.question)
+      #set ($jobStatusAsJSON.question = {
+        'source': $jobStatus.question.source.name,
+        'destination': $jobStatus.question.destination.name
+      })
+    #end
+    #if ($jobStatus.request.destination)
+      #set ($jobStatusAsJSON.request.destination = {
+        'parent': $jobStatus.request.destination.folderReference.name,
+        'child': $jobStatus.request.destination.fileReference.name
+      })
+    #end
+    #set ($return = $NULL)
+    #setVariable("$return" $jobStatusAsJSON)
+  #end
 #end
 {{/velocity}}</content>
 </xwikidoc>
