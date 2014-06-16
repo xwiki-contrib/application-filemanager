@@ -72,7 +72,7 @@ public class DeleteJobTest extends AbstractJobTest
         BatchPathRequest request = new BatchPathRequest();
         request.setPaths(Collections.singleton(new Path(projects.getReference())));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem).delete(specs.getReference());
         verify(fileSystem).delete(readme.getReference());
@@ -92,7 +92,7 @@ public class DeleteJobTest extends AbstractJobTest
         BatchPathRequest request = new BatchPathRequest();
         request.setPaths(Collections.singleton(new Path(folder.getReference())));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem, never()).delete(childFile.getReference());
         verify(fileSystem, never()).delete(childFolder.getReference());
@@ -108,7 +108,7 @@ public class DeleteJobTest extends AbstractJobTest
         BatchPathRequest request = new BatchPathRequest();
         request.setPaths(Collections.singleton(new Path(ref("Resilience"), file.getReference())));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         assertEquals(Arrays.asList("Concerto"), getParents(file));
         verify(fileSystem).save(file);
@@ -122,7 +122,7 @@ public class DeleteJobTest extends AbstractJobTest
         BatchPathRequest request = new BatchPathRequest();
         request.setPaths(Collections.singleton(new Path(null, file.getReference())));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem).delete(file.getReference());
     }
@@ -142,7 +142,7 @@ public class DeleteJobTest extends AbstractJobTest
         request.setPaths(Arrays.asList(new Path(ref("Resilience"), readme.getReference()), new Path(ref("Concerto"),
             pom.getReference()), new Path(ref("Resilience"), index.getReference())));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem, never()).save(readme);
         verify(mocker.getMockedLogger()).error("You are not allowed to edit the file [{}].", readme.getReference());

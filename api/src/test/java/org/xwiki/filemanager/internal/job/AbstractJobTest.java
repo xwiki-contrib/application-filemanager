@@ -37,6 +37,7 @@ import org.xwiki.filemanager.FileSystem;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.job.OverwriteQuestion;
 import org.xwiki.job.Job;
+import org.xwiki.job.Request;
 import org.xwiki.job.event.status.JobStatus;
 import org.xwiki.job.event.status.JobStatus.State;
 import org.xwiki.model.reference.DocumentReference;
@@ -257,5 +258,12 @@ public abstract class AbstractJobTest
     protected UpdateChildFolders updateChildFolders(Folder folder, String... folderIds)
     {
         return new UpdateChildFolders(folder, ref(Arrays.asList(folderIds)));
+    }
+
+    protected void execute(Request request) throws Exception
+    {
+        Job job = getMocker().getComponentUnderTest();
+        job.initialize(request);
+        job.run();
     }
 }

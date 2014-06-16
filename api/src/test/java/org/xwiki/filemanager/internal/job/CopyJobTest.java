@@ -65,7 +65,7 @@ public class CopyJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(concerto.getReference())));
         request.setDestination(new Path(projects.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         DocumentReference concertoCopyRef = ref("Concerto1");
         verify(fileSystem).copy(concerto.getReference(), concertoCopyRef);
@@ -103,7 +103,7 @@ public class CopyJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(concerto.getReference())));
         request.setDestination(new Path(projects.getReference(), concertoCopyRef));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem).copy(concerto.getReference(), concertoCopyRef);
 
@@ -124,7 +124,7 @@ public class CopyJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(projects.getReference())));
         request.setDestination(new Path(specs.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem, never()).copy(eq(projects.getReference()), any(DocumentReference.class));
         verify(mocker.getMockedLogger()).error("Cannot copy [{}] to a sub-folder of itself.", projects.getReference());
@@ -142,7 +142,7 @@ public class CopyJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(resilience.getReference())));
         request.setDestination(new Path(projects.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem, never()).copy(eq(resilience.getReference()), any(DocumentReference.class));
         verify(mocker.getMockedLogger()).error("You are not allowed to copy the folder [{}].",
@@ -166,7 +166,7 @@ public class CopyJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(concerto.getReference())));
         request.setDestination(new Path(projects.getReference(), resilience.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem, never()).copy(eq(concerto.getReference()), any(DocumentReference.class));
         verify(fileSystem, never()).copy(eq(specs.getReference()), any(DocumentReference.class));
@@ -191,7 +191,7 @@ public class CopyJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(null, readme.getReference())));
         request.setDestination(new Path(concerto.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         DocumentReference readmeCopyRef = ref("README1");
         verify(fileSystem).copy(readme.getReference(), readmeCopyRef);
@@ -214,7 +214,7 @@ public class CopyJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(null, readme.getReference())));
         request.setDestination(new Path(projects.getReference(), readmeCopyRef));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem).copy(readme.getReference(), readmeCopyRef);
 
@@ -236,7 +236,7 @@ public class CopyJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(null, readme.getReference())));
         request.setDestination(new Path(concerto.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem, never()).copy(eq(readme.getReference()), any(DocumentReference.class));
         verify(mocker.getMockedLogger()).error("You are not allowed to copy the file [{}].", readme.getReference());
@@ -257,7 +257,8 @@ public class CopyJobTest extends AbstractJobTest
         Job job = mocker.getComponentUnderTest();
         answerOverwriteQuestion(job, true, false);
 
-        job.start(request);
+        job.initialize(request);
+        job.run();
 
         verify(fileSystem).delete(pom.getReference());
 
@@ -287,7 +288,8 @@ public class CopyJobTest extends AbstractJobTest
         Job job = mocker.getComponentUnderTest();
         answerOverwriteQuestion(job, true, false);
 
-        job.start(request);
+        job.initialize(request);
+        job.run();
 
         verify(fileSystem, never()).delete(pom.getReference());
         verify(fileSystem, never()).copy(eq(otherPom.getReference()), any(DocumentReference.class));

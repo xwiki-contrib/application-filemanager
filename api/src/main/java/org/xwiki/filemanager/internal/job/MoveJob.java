@@ -34,7 +34,8 @@ import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
 import org.xwiki.filemanager.job.MoveRequest;
 import org.xwiki.filemanager.job.OverwriteQuestion;
-import org.xwiki.job.AbstractJob;
+import org.xwiki.job.internal.AbstractJob;
+import org.xwiki.job.internal.DefaultJobStatus;
 import org.xwiki.model.reference.DocumentReference;
 
 /**
@@ -46,7 +47,7 @@ import org.xwiki.model.reference.DocumentReference;
  */
 @Component
 @Named(MoveJob.JOB_TYPE)
-public class MoveJob extends AbstractJob<MoveRequest>
+public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveRequest>>
 {
     /**
      * The id of the job.
@@ -78,7 +79,7 @@ public class MoveJob extends AbstractJob<MoveRequest>
     }
 
     @Override
-    protected void start() throws Exception
+    protected void runInternal() throws Exception
     {
         Collection<Path> paths = getRequest().getPaths();
         Path destination = getRequest().getDestination();

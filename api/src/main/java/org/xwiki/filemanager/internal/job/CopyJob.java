@@ -52,7 +52,7 @@ public class CopyJob extends MoveJob
     }
 
     @Override
-    protected void start() throws Exception
+    protected void runInternal() throws Exception
     {
         Collection<Path> paths = getRequest().getPaths();
         Path destination = getRequest().getDestination();

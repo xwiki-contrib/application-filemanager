@@ -19,6 +19,7 @@
  */
 package org.xwiki.filemanager;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.xwiki.model.reference.DocumentReference;
 
 /**
@@ -78,5 +79,32 @@ public class Path
     public DocumentReference getFileReference()
     {
         return fileReference;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((fileReference == null) ? 0 : fileReference.hashCode());
+        result = prime * result + ((folderReference == null) ? 0 : folderReference.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == null) {
+            return false;
+        }
+        if (obj == this) {
+            return true;
+        }
+        if (obj.getClass() != getClass()) {
+            return false;
+        }
+        Path other = (Path) obj;
+        return new EqualsBuilder().append(folderReference, other.folderReference)
+            .append(fileReference, other.fileReference).isEquals();
     }
 }

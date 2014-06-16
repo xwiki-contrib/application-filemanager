@@ -34,7 +34,7 @@
   <packaging>jar</packaging>
   <description>APIs to manage files and folders.</description>
   <properties>
-    <xwiki.jacoco.instructionRatio>64.47</xwiki.jacoco.instructionRatio>
+    <xwiki.jacoco.instructionRatio>0.64</xwiki.jacoco.instructionRatio>
   </properties>
   <dependencies>
     <dependency>
@@ -48,6 +48,11 @@
       <version>${commons.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.xwiki.commons</groupId>
+      <artifactId>xwiki-commons-observation-api</artifactId>
+      <version>${commons.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-model</artifactId>
       <version>${commons.version}</version>
@@ -57,10 +62,17 @@
       <artifactId>xwiki-platform-oldcore</artifactId>
       <version>${commons.version}</version>
     </dependency>
+    <!-- Test dependencies -->
     <dependency>
       <groupId>org.xwiki.commons</groupId>
       <artifactId>xwiki-commons-test-component</artifactId>
       <version>${commons.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <!-- Required in order to mock XWikiContext -->
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

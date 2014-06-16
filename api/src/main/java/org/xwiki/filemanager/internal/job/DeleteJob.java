@@ -31,7 +31,8 @@ import org.xwiki.filemanager.FileSystem;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
 import org.xwiki.filemanager.job.BatchPathRequest;
-import org.xwiki.job.AbstractJob;
+import org.xwiki.job.internal.AbstractJob;
+import org.xwiki.job.internal.DefaultJobStatus;
 import org.xwiki.model.reference.DocumentReference;
 
 /**
@@ -42,7 +43,7 @@ import org.xwiki.model.reference.DocumentReference;
  */
 @Component
 @Named(DeleteJob.JOB_TYPE)
-public class DeleteJob extends AbstractJob<BatchPathRequest>
+public class DeleteJob extends AbstractJob<BatchPathRequest, DefaultJobStatus<BatchPathRequest>>
 {
     /**
      * The id of the job.
@@ -62,7 +63,7 @@ public class DeleteJob extends AbstractJob<BatchPathRequest>
     }
 
     @Override
-    protected void start() throws Exception
+    protected void runInternal() throws Exception
     {
         Collection<Path> paths = getRequest().getPaths();
         if (paths == null) {

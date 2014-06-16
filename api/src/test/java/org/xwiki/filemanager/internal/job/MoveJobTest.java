@@ -62,7 +62,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(folder.getReference())));
         request.setDestination(new Path(newParent.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(folder).setParentReference(newParent.getReference());
         verify(fileSystem).save(folder);
@@ -79,7 +79,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(grandParent.getReference())));
         request.setDestination(new Path(child.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem, never()).save(grandParent);
         verify(mocker.getMockedLogger()).error("Cannot move [{}] to a sub-folder of itself.",
@@ -98,7 +98,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(source.getReference())));
         request.setDestination(new Path(destination.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem, never()).save(source);
         verify(mocker.getMockedLogger()).error("You are not allowed to move the folder [{}].", source.getReference());
@@ -132,7 +132,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(concertoNew.getReference())));
         request.setDestination(new Path(projects.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         assertEquals(Collections.singletonList("Tests"), getParents(testFile));
 
@@ -153,7 +153,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(oldParentReference, file.getReference())));
         request.setDestination(new Path(newParent.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         assertEquals(Arrays.asList("Resilience", "Projects"), getParents(file));
 
@@ -173,7 +173,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(oldParentReference, file.getReference())));
         request.setDestination(new Path(newParent.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem, never()).save(file);
         verify(mocker.getMockedLogger()).error("You are not allowed to move the file [{}].", file.getReference());
@@ -196,7 +196,8 @@ public class MoveJobTest extends AbstractJobTest
         Job job = mocker.getComponentUnderTest();
         answerOverwriteQuestion(job, true, false);
 
-        job.start(request);
+        job.initialize(request);
+        job.run();
 
         verify(fileSystem).delete(pom.getReference());
     }
@@ -220,7 +221,8 @@ public class MoveJobTest extends AbstractJobTest
         // Make sure the test doesn't hang waiting for the answer.
         answerOverwriteQuestion(job, true, false);
 
-        job.start(request);
+        job.initialize(request);
+        job.run();
 
         verify(fileSystem, never()).delete(pom.getReference());
         verify(fileSystem, never()).save(otherPom);
@@ -242,7 +244,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(folder.getReference())));
         request.setDestination(new Path(null, otherFolder.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(folder).setName(otherFolder.getName());
         verify(fileSystem).rename(folder, newReference);
@@ -270,7 +272,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(folder.getReference())));
         request.setDestination(new Path(null, newReference));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(mocker.getMockedLogger()).error("You are not allowed to rename the folder [{}].", folder.getReference());
         verify(fileSystem, never()).rename(folder, newReference);
@@ -290,7 +292,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(concerto.getReference())));
         request.setDestination(new Path(projects.getReference(), resilience.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(mocker.getMockedLogger()).error("A folder with the same name [{}] already exists under [{}]",
             resilience.getName(), projects.getReference());
@@ -310,7 +312,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(null, file.getReference())));
         request.setDestination(new Path(null, newReference));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(file).setName(newReference.getName());
         verify(fileSystem).rename(file, newReference);
@@ -328,7 +330,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(null, file.getReference())));
         request.setDestination(new Path(null, newReference));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem, never()).rename(file, newReference);
         verify(mocker.getMockedLogger()).error("You are not allowed to rename the file [{}].", file.getReference());
@@ -346,7 +348,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(null, file.getReference())));
         request.setDestination(new Path(null, readme.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         verify(fileSystem, never()).rename(file, readme.getReference());
         verify(mocker.getMockedLogger()).error("A file with the same name [{}] already exists under [{}]",
@@ -368,7 +370,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setPaths(Collections.singleton(new Path(concerto.getReference(), file.getReference())));
         request.setDestination(new Path(projects.getReference(), readme.getReference()));
 
-        mocker.getComponentUnderTest().start(request);
+        execute(request);
 
         assertEquals(Arrays.asList("Resilience", "Projects"), getParents(file));
 

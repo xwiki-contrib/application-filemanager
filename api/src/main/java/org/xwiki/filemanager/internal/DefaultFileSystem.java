@@ -98,7 +98,7 @@ public class DefaultFileSystem implements FileSystem
             if (document.isNew()) {
                 return null;
             } else {
-                File file = componentManagerProvider.get().getInstance(Folder.class);
+                File file = componentManagerProvider.get().getInstance(File.class);
                 if (file instanceof AbstractDocument) {
                     ((AbstractDocument) file).setDocument(document);
                     return file;
