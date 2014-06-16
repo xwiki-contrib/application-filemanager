@@ -20,6 +20,7 @@
 package org.xwiki.filemanager;
 
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.stability.Unstable;
 
 /**
  * A document in the file system.
@@ -27,6 +28,7 @@ import org.xwiki.model.reference.DocumentReference;
  * @version $Id$
  * @since 2.0M1
  */
+@Unstable
 public interface Document
 {
     /**

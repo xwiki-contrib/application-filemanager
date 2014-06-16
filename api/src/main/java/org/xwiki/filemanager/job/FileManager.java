@@ -26,6 +26,7 @@ import org.xwiki.component.annotation.Role;
 import org.xwiki.filemanager.Path;
 import org.xwiki.job.JobException;
 import org.xwiki.job.event.status.JobStatus;
+import org.xwiki.stability.Unstable;
 
 /**
  * Exposes APIs to run file system jobs.
@@ -34,6 +35,7 @@ import org.xwiki.job.event.status.JobStatus;
  * @since 2.0M1
  */
 @Role
+@Unstable
 public interface FileManager
 {
     /**

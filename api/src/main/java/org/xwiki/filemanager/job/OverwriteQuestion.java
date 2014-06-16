@@ -20,6 +20,7 @@
 package org.xwiki.filemanager.job;
 
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.stability.Unstable;
 
 /**
  * Question asked when a file with the same name is found during a copy or move operation and we don't know whether to
@@ -28,6 +29,7 @@ import org.xwiki.model.reference.DocumentReference;
  * @version $Id$
  * @since 2.0M1
  */
+@Unstable
 public class OverwriteQuestion
 {
     /**

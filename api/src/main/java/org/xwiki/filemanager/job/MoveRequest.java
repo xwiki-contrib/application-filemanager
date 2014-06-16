@@ -20,6 +20,7 @@
 package org.xwiki.filemanager.job;
 
 import org.xwiki.filemanager.Path;
+import org.xwiki.stability.Unstable;
 
 /**
  * Request used by {@link org.xwiki.filemanager.internal.job.MoveJob} to move files and folders to a different path,
@@ -28,6 +29,7 @@ import org.xwiki.filemanager.Path;
  * @version $Id$
  * @since 2.0M1
  */
+@Unstable
 public class MoveRequest extends BatchPathRequest
 {
     /**

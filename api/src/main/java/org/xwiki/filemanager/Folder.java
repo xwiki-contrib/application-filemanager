@@ -23,6 +23,7 @@ import java.util.List;
 
 import org.xwiki.component.annotation.Role;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.stability.Unstable;
 
 /**
  * Represents a folder.
@@ -31,6 +32,7 @@ import org.xwiki.model.reference.DocumentReference;
  * @since 2.0M1
  */
 @Role
+@Unstable
 public interface Folder extends Document
 {
     /**

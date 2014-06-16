@@ -23,6 +23,7 @@ import java.util.Collection;
 
 import org.xwiki.component.annotation.Role;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.stability.Unstable;
 
 /**
  * Represents a file.
@@ -31,6 +32,7 @@ import org.xwiki.model.reference.DocumentReference;
  * @since 2.0M1
  */
 @Role
+@Unstable
 public interface File extends Document
 {
     /**

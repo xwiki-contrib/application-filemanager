@@ -21,6 +21,7 @@ package org.xwiki.filemanager;
 
 import org.xwiki.component.annotation.Role;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.stability.Unstable;
 
 /**
  * Represents the file system.
@@ -29,6 +30,7 @@ import org.xwiki.model.reference.DocumentReference;
  * @since 2.0M1
  */
 @Role
+@Unstable
 public interface FileSystem
 {
     /**

@@ -21,6 +21,7 @@ package org.xwiki.filemanager;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.stability.Unstable;
 
 /**
  * Represents a path in the file system. A path is uniquely determined either by a folder or by a (folder, file) pair. A
@@ -30,6 +31,7 @@ import org.xwiki.model.reference.DocumentReference;
  * @version $Id$
  * @since 2.0M1
  */
+@Unstable
 public class Path
 {
     /**

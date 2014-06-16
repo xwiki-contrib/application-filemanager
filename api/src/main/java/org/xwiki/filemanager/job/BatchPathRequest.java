@@ -23,6 +23,7 @@ import java.util.Collection;
 
 import org.xwiki.filemanager.Path;
 import org.xwiki.job.AbstractRequest;
+import org.xwiki.stability.Unstable;
 
 /**
  * A generic request that targets multiple paths in the file system.
@@ -30,6 +31,7 @@ import org.xwiki.job.AbstractRequest;
  * @version $Id$
  * @since 2.0M1
  */
+@Unstable
 public class BatchPathRequest extends AbstractRequest
 {
     /**
