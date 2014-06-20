@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.1">
+  <web>FileManagerCode</web>
+  <name>Pagination</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1403097243000</creationDate>
+  <parent>FileManagerCode.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1403253245000</date>
+  <contentUpdateDate>1403195676000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity output="false"}}
+#macro (paginationTemplate)
+  &lt;div class="paginationFilter"&gt;
+    &lt;span ng-if="showResultsRange" class="resultsNo"&gt;
+      &lt;span ng-if="totalCount == 0" class="currentResultsNo"&gt;
+        $services.localization.render('platform.livetable.paginationResultsNone')
+      &lt;/span&gt;
+      &lt;span ng-if="totalCount == 1" class="currentResultsNo"&gt;
+        $services.localization.render('platform.livetable.paginationResultsOne')
+      &lt;/span&gt;
+      &lt;span ng-if="totalCount &gt; 1 &amp;&amp; from == totalCount"&gt;
+        $services.localization.render('platform.livetable.paginationResultsSingle',
+          ['{{from}}', '{{totalCount}}'])
+      &lt;/span&gt;
+      &lt;span ng-if="totalCount &gt; 1 &amp;&amp; from != totalCount"&gt;
+        $services.localization.render('platform.livetable.paginationResultsMany',
+          ['{{from}}', '{{to}}', '{{totalCount}}'])
+      &lt;/span&gt;
+    &lt;/span&gt;
+
+    &lt;span ng-if="totalCount &gt; 0" class="controlPagination"&gt;
+      &lt;span ng-if="pageNumber == 0" class="noPrevPagination"&gt; &lt;/span&gt;
+      &lt;a ng-if="pageNumber &gt; 0" href="#previousPage" ng-click="loadPage(pageNumber - 1)"
+          title="$services.localization.render('platform.livetable.paginationPagePrevTitle')" class="prevPagination"&gt;
+        $services.localization.render('platform.livetable.paginationPagePrevious')
+      &lt;/a&gt;
+
+      &lt;span ng-if="pageNumber &gt;= pageCount - 1" class="noNextPagination"&gt; &lt;/span&gt;
+      &lt;a ng-if="pageNumber &lt; pageCount - 1" href="#nextPage" ng-click="loadPage(pageNumber + 1)"
+          title="$services.localization.render('platform.livetable.paginationPageNextTitle')" class="nextPagination"&gt;
+        $services.localization.render('platform.livetable.paginationPageNext')
+      &lt;/a&gt;
+    &lt;/span&gt;
+
+    &lt;span ng-if="totalCount &gt; 0" class="pagination"&gt;
+      $services.localization.render('platform.livetable.paginationPage')
+      ## Always show first page number.
+      &lt;page-link number="0" ng-if="contextFirstPage != 0"&gt;&lt;/page-link&gt;
+      &lt;span ng-if="contextFirstPage &gt; 1"&gt; ... &lt;/span&gt;
+      &lt;page-link number="{{i}}" ng-repeat="i in pageNumbers"&gt;&lt;/page-link&gt;
+      &lt;span ng-if="contextLastPage &lt; pageCount - 2"&gt; ... &lt;/span&gt;
+      ## Always show last page number.
+      &lt;page-link number="{{pageCount - 1}}" ng-if="contextLastPage != pageCount - 1"&gt;&lt;/page-link&gt;
+    &lt;/span&gt;
+  &lt;/div&gt;
+#end
+
+#macro (pageLinkTemplate)
+  &lt;a href="#page" title="$services.localization.render('platform.livetable.paginationPageTitle',
+    ['{{number + 1}}'])" ng-if="number != pageNumber" ng-click="loadPage(number)"&gt;{{number + 1}}&lt;/a&gt;
+  &lt;span ng-if="number == pageNumber" class="currentPage"&gt;
+    {{number + 1}}
+  &lt;/span&gt;
+#end
+{{/velocity}}
+
+{{velocity}}
+{{html clean="false"}}
+#if ($request.template == 'pageLink')
+  #pageLinkTemplate
+#else
+  #paginationTemplate
+#end
+{{/html}}
+{{/velocity}}</content>
+</xwikidoc>

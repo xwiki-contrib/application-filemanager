@@ -45,9 +45,9 @@
 #macro (handleFolderWebServiceRequest)
   #if ($request.action)
     #if ($services.csrf.isTokenValid($request.form_token))
-      #if ($request.action == 'newFolder')
+      #if ($request.action == 'createFolder')
         #createFolder($request.name $doc)
-      #elseif ($request.action == 'newFile')
+      #elseif ($request.action == 'createFile')
         #createFile
       #elseif ($request.action == 'move')
         #moveFolder

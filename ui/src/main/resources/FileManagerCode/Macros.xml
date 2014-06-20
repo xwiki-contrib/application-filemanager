@@ -74,8 +74,9 @@
   #end
   #set ($return = $NULL)
   #setVariable("$return" {
-    'count': $folderCount,
+    'totalCount': $folderCount,
     'offset': $offset,
+    'limit': $limit,
     'list': $folders
   })
 #end
@@ -145,8 +146,9 @@
   #end
   #set ($return = $NULL)
   #setVariable("$return" {
-    'count': $fileCount,
+    'totalCount': $fileCount,
     'offset': $offset,
+    'limit': $limit,
     'list': $files
   })
 #end
@@ -219,6 +221,16 @@
   #else
     $response.sendError(500, $services.drive.lastError.message);
   #end
+#end
+
+#macro (getActiveJobs $return)
+  #set ($activeJobs = [])
+  #foreach ($jobId in $services.drive.activeJobs)
+    #getJobStatus($jobId $jobStatus)
+    #set ($discard = $activeJobs.add($jobStatus))
+  #end
+  #set ($return = $NULL)
+  #setVariable("$return" $activeJobs)
 #end
 
 #macro (getJobStatus $jobId $return)

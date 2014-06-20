@@ -48,7 +48,7 @@
 #macro (handleDriveWebServiceRequest)
   #if ($request.action)
     #if ($services.csrf.isTokenValid($request.form_token))
-      #if ($request.action == 'newFolder')
+      #if ($request.action == 'createFolder')
         #createFolder($request.name $doc)
       #elseif ($request.action == 'move')
         #batchMove
@@ -72,6 +72,8 @@
       #getOrphanFolders
     #elseif ($request.data == 'orphanFiles')
       #getOrphanFiles
+    #elseif ($request.data == 'activeJobs')
+      #getActiveJobs($data)
     #elseif ($request.data == 'jobStatus')
       #getJobStatus($request.jobId $data)
     #else
@@ -141,7 +143,33 @@
 #end
 
 #macro (displayDrive)
-  This is a drive.
+  {{html clean="false"}}
+  $xwiki.jsx.use('FileManagerCode.DriveSheet', {'minify': false})
+  &lt;div ng-app="drive" ng-controller="DriveCtrl"&gt;
+    &lt;pagination for="files" show-results-range="true"&gt;&lt;/pagination&gt;
+    &lt;table&gt;
+      &lt;thead&gt;
+        &lt;th/&gt;
+        &lt;th&gt;Name&lt;/th&gt;
+        &lt;th&gt;Size&lt;/th&gt;
+        &lt;th&gt;Type&lt;/th&gt;
+        &lt;th&gt;Modified&lt;/th&gt;
+        &lt;th&gt;Author&lt;/th&gt;
+      &lt;/thead&gt;
+      &lt;tbody&gt;
+        &lt;tr ng-repeat="file in files.list"&gt;
+          &lt;td&gt;&lt;input type="checkbox" ng-model="file.selected" /&gt;&lt;/td&gt;
+          &lt;td&gt;{{file.name}}&lt;/td&gt;
+          &lt;td&gt;{{file.size}}&lt;/td&gt;
+          &lt;td&gt;{{file.mediaType}}&lt;/td&gt;
+          &lt;td&gt;{{file.date}}&lt;/td&gt;
+          &lt;td&gt;{{file.author}}&lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/tbody&gt;
+    &lt;/table&gt;
+    &lt;pagination for="files"&gt;&lt;/pagination&gt;
+  &lt;/div&gt;
+  {{/html}}
 #end
 {{/velocity}}
 
@@ -152,4 +180,441 @@
   #displayDrive
 #end
 {{/velocity}}</content>
+  <object>
+    <name>FileManagerCode.DriveSheet</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>d9f9fdc1-3059-4d56-bfe4-0d8ef78cbab2</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>require.config({
+  paths: {
+    angular: '//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.min',
+    'angular-resource': '//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-resource.min'
+  },
+  shim: {
+    angular: {
+      exports: 'angular'
+    },
+    'angular-resource': {
+      deps: ['angular'],
+      exports: 'angular'
+    }
+  }
+});
+
+require(['jquery', 'angular', 'angular-resource'], function($, angular) {
+  var drive = angular.module('drive', ['driveServices', 'driveDirectives']);
+
+  drive.controller('DriveCtrl', ['$scope', 'Drive', function ($scope, Drive) {
+    var loadPage = function(offset, limit) {
+      return Drive.getAllFiles({offset: offset, limit: limit}, function(files) {
+        $scope.$broadcast('pagination:pageLoaded', 'files', files);
+      });
+    }
+    $scope.$on('pagination:pageLoading', function(event, sourceId, page) {
+      if (sourceId == 'files') {
+        $scope.files = loadPage(page.offset, page.limit);
+      }
+    });
+    $scope.files = loadPage(0, 3);
+  }]);
+});</code>
+    </property>
+    <property>
+      <name>App</name>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <name>FileManagerCode.DriveSheet</name>
+    <number>1</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>39e1dccf-38d0-4709-90b1-f466d7728ab6</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>require(['jquery', 'angular'], function($, angular) {
+  var driveServices = angular.module('driveServices', ['ngResource']);
+
+  var defaultParams = {
+    outputSyntax: 'plain',
+    space: XWiki.currentSpace,
+    page: XWiki.currentPage
+  };
+
+  // The colon ':' is URL-encoded so we must decode it otherwise Angular won't find the parameter.
+  var url = new XWiki.Document(':page', ':space').getURL('get').replace('/%3A', '/:', 'g');
+
+  var addGET = function(api, data) {
+    api['get' + data.substr(0, 1).toUpperCase() + data.substr(1)] = {
+      params: {data: data}
+    }
+  };
+
+  var formToken = $('meta[name=form_token]').attr('content');
+
+  var addPOST = function(api, action) {
+    // TODO: Maybe we should submit the data as JSON (Angular's default behaviour) but for this we need to enhance the
+    // JSON Velocity tool to read the request payload on the server side. We can use Jackson's raw/untyped/simple data
+    // binding (see http://wiki.fasterxml.com/JacksonInFiveMinutes#A.22Raw.22_Data_Binding_Example ).
+    api[action] = {
+      method: 'POST',
+      params: {
+        action: action,
+        form_token: formToken
+      },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      }
+    }
+  }
+
+  var createAPI = function(data, actions) {
+    var api = {};
+
+    $.each(data, function(index, value) {
+      addGET(api, value);
+    });
+
+    $.each(actions, function(index, value) {
+      addPOST(api, value);
+    });
+
+    return api;
+  }
+
+  driveServices.factory('Drive', ['$resource', function($resource) {
+    var data = ['folders', 'allFiles', 'orphanFolders', 'orphanFiles', 'activeJobs', 'jobStatus'];
+    var actions = ['createFolder', 'createFile', 'move', 'copy', 'delete'];
+    var api = createAPI(data, actions);
+    api.getActiveJobs.isArray = true;
+    return $resource(url, defaultParams, api);
+  }]);
+
+  driveServices.factory('Folder', ['$resource', function($resource) {
+    var data = ['files', 'folders'];
+    var actions = ['createFolder', 'createFile', 'move', 'copy', 'delete'];
+    var api = createAPI(data, actions);
+    return $resource(url, defaultParams, api);
+  }]);
+
+  driveServices.factory('Folder', ['$resource', function($resource) {
+    var data = [];
+    var actions = ['label', 'move', 'copy', 'delete'];
+    var api = createAPI(data, actions);
+    return $resource(url, defaultParams, api);
+  }]);
+});</code>
+    </property>
+    <property>
+      <name>Services</name>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <name>FileManagerCode.DriveSheet</name>
+    <number>2</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>4af06c3a-4fbf-4c6f-8d87-01c56417dfbb</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>require(['angular'], function(angular) {
+  var driveDirectives = angular.module('driveDirectives', []);
+
+  driveDirectives.directive('pagination', function() {
+    return {
+      restrict: 'E',
+      scope: {
+        sourceId: '@for',
+        showResultsRange: '@'
+      },
+      templateUrl: new XWiki.Document('Pagination', 'FileManagerCode').getURL('get'),
+      controller: function($scope) {
+        $scope.loadPage = function(pageNumber) {
+          $scope.$emit('pagination:pageLoading', $scope.sourceId, {
+            offset: pageNumber * $scope.limit,
+            limit: $scope.limit
+          });
+        };
+
+        $scope.$on('pagination:pageLoaded', function(event, sourceId, page) {
+          if ($scope.sourceId == sourceId) {
+            $scope.totalCount = page.totalCount;
+            $scope.limit = page.limit;
+            $scope.from = page.offset + 1;
+            $scope.to = Math.min(page.offset + page.limit, page.totalCount);
+            $scope.pageNumber = Math.floor(page.offset / page.limit);
+            $scope.pageCount = Math.floor((page.totalCount + page.limit - 1) / page.limit);
+
+            var contextRadius = 4;
+            var contextSize = 2 * contextRadius + 1;
+            if ($scope.pageCount &lt;= contextSize) {
+              $scope.contextFirstPage = 0;
+              $scope.contextLastPage = $scope.pageCount - 1;
+            } else {
+              $scope.contextFirstPage = Math.min(Math.max($scope.pageNumber - contextRadius, 0), $scope.pageCount - contextSize);
+              $scope.contextLastPage = Math.max(Math.min($scope.pageNumber + contextRadius, $scope.pageCount - 1), contextSize - 1);
+            }
+            $scope.pageNumbers = [];
+            for (var i = $scope.contextFirstPage; i &lt;= $scope.contextLastPage; i++) {
+              $scope.pageNumbers.push(i);
+            }
+          }
+        });
+      }
+    };
+  });
+
+  driveDirectives.directive('pageLink', function() {
+    return {
+      require: '^pagination',
+      restrict: 'E',
+      scope: true,
+      templateUrl: new XWiki.Document('Pagination', 'FileManagerCode').getURL('get', 'template=pageLink'),
+      link: function(scope, element, attrs, paginationCtrl) {
+        scope.number = parseInt(attrs.number);
+      }
+    };
+  });
+});</code>
+    </property>
+    <property>
+      <name>Directives</name>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
 </xwikidoc>
