@@ -142,47 +142,37 @@
   })
 #end
 
+#macro (xmlJsL10n $key)
+$!escapetool.xml($escapetool.javascript($services.localization.render($key)))##
+#end
+
 #macro (displayDrive)
   {{html clean="false"}}
   #set ($discard = $xwiki.jsx.use('FileManagerCode.DriveSheet', {'minify': false}))
   #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
   &lt;div ng-app="drive" ng-controller="DriveCtrl"&gt;
-    &lt;div class="xwiki-livetable-container"&gt;
-      &lt;table id="files" class="xwiki-livetable"&gt;
-        &lt;tr&gt;
-          &lt;td class="xwiki-livetable-pagination"&gt;
-            &lt;pagination for="files" show-results-range="true"&gt;&lt;/pagination&gt;
-          &lt;/td&gt;
-        &lt;/tr&gt;
-        &lt;tr&gt;
-          &lt;td class="xwiki-livetable-display-container"&gt;
-            &lt;table class="xwiki-livetable-display"&gt;
-              &lt;thead class="xwiki-livetable-display-header"&gt;
-                &lt;tr&gt;
-                  &lt;th ng-repeat="header in ['', 'Name', 'Size', 'Type', 'Modified', 'Author']"
-                    class="xwiki-livetable-display-header-text sortable asc"&gt;{{header}}&lt;/th&gt;
-                &lt;/tr&gt;
-              &lt;/thead&gt;
-              &lt;tbody class="xwiki-livetable-display-body"&gt;
-                &lt;tr ng-repeat="file in files.list"&gt;
-                  &lt;td&gt;&lt;input type="checkbox" ng-model="file.selected" /&gt;&lt;/td&gt;
-                  &lt;td&gt;{{file.name}}&lt;/td&gt;
-                  &lt;td&gt;{{file.size}}&lt;/td&gt;
-                  &lt;td&gt;{{file.mediaType}}&lt;/td&gt;
-                  &lt;td&gt;{{file.date}}&lt;/td&gt;
-                  &lt;td&gt;{{file.author}}&lt;/td&gt;
-                &lt;/tr&gt;
-              &lt;/tbody&gt;
-            &lt;/table&gt;
-          &lt;/td&gt;
-        &lt;/tr&gt;
-        &lt;tr&gt;
-          &lt;td class="xwiki-livetable-pagination"&gt;
-            &lt;pagination for="files"&gt;&lt;/pagination&gt;
-          &lt;/td&gt;
-        &lt;/tr&gt;
-      &lt;/table&gt;
-    &lt;/div&gt;
+    &lt;livetable id="files" service="service" columns="[
+      {
+        id: 'name',
+        title: '#xmlJsL10n('Name')',
+        type: 'document'
+      }, {
+        id: 'size',
+        title: '#xmlJsL10n('Size')',
+        type: 'fileSize'
+      }, {
+        id: 'mediaType',
+        title: '#xmlJsL10n('Type')'
+      }, {
+        id: 'date',
+        title: '#xmlJsL10n('Modified')',
+        type: 'date'
+      }, {
+        id: 'author',
+        title: '#xmlJsL10n('Author')',
+        type: 'user'
+      }
+    ]"&gt;&lt;/livetable&gt;
   &lt;/div&gt;
   {{/html}}
 #end
@@ -295,17 +285,7 @@ require(['jquery', 'angular', 'angular-resource'], function($, angular) {
   var drive = angular.module('drive', ['driveServices', 'driveDirectives']);
 
   drive.controller('DriveCtrl', ['$scope', 'Drive', function ($scope, Drive) {
-    var loadPage = function(offset, limit) {
-      return Drive.getAllFiles({offset: offset, limit: limit}, function(files) {
-        $scope.$broadcast('pagination:pageLoaded', 'files', files);
-      });
-    }
-    $scope.$on('pagination:pageLoading', function(event, sourceId, page) {
-      if (sourceId == 'files') {
-        $scope.files = loadPage(page.offset, page.limit);
-      }
-    });
-    $scope.files = loadPage(0, 3);
+    $scope.service = Drive.getAllFiles;
   }]);
 });</code>
     </property>
@@ -617,6 +597,31 @@ require(['jquery', 'angular', 'angular-resource'], function($, angular) {
       templateUrl: new XWiki.Document('Pagination', 'FileManagerCode').getURL('get', 'template=pageLink'),
       link: function(scope, element, attrs, paginationCtrl) {
         scope.number = parseInt(attrs.number);
+      }
+    };
+  });
+
+  driveDirectives.directive('livetable', function() {
+    return {
+      restrict: 'E',
+      scope: {
+        'id': '@',
+        'service': '=',
+        'columns': '='
+      },
+      templateUrl: new XWiki.Document('LiveTable', 'FileManagerCode').getURL('get'),
+      link: function(scope, element, attrs) {
+        var loadPage = function(offset, limit) {
+          return scope.service({offset: offset, limit: limit}, function(rows) {
+            scope.$broadcast('pagination:pageLoaded', scope.id, rows);
+          });
+        }
+        scope.$on('pagination:pageLoading', function(event, sourceId, page) {
+          if (sourceId == scope.id) {
+            scope.rows = loadPage(page.offset, page.limit);
+          }
+        });
+        scope.rows = loadPage(0, 3);
       }
     };
   });
