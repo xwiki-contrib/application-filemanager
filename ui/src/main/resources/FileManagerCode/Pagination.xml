@@ -41,8 +41,8 @@
   <hidden>true</hidden>
   <content>{{velocity output="false"}}
 #macro (paginationTemplate)
-  &lt;div class="paginationFilter"&gt;
-    &lt;span ng-if="showResultsRange" class="resultsNo"&gt;
+  &lt;div ng-class="{paginationFilter: isSeparate}"&gt;
+    &lt;span ng-if="showResultsRange" class="resultsNo xwiki-livetable-limits"&gt;
       &lt;span ng-if="totalCount == 0" class="currentResultsNo"&gt;
         $services.localization.render('platform.livetable.paginationResultsNone')
       &lt;/span&gt;

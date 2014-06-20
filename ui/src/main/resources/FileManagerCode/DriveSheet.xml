@@ -144,30 +144,45 @@
 
 #macro (displayDrive)
   {{html clean="false"}}
-  $xwiki.jsx.use('FileManagerCode.DriveSheet', {'minify': false})
+  #set ($discard = $xwiki.jsx.use('FileManagerCode.DriveSheet', {'minify': false}))
+  #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
   &lt;div ng-app="drive" ng-controller="DriveCtrl"&gt;
-    &lt;pagination for="files" show-results-range="true"&gt;&lt;/pagination&gt;
-    &lt;table&gt;
-      &lt;thead&gt;
-        &lt;th/&gt;
-        &lt;th&gt;Name&lt;/th&gt;
-        &lt;th&gt;Size&lt;/th&gt;
-        &lt;th&gt;Type&lt;/th&gt;
-        &lt;th&gt;Modified&lt;/th&gt;
-        &lt;th&gt;Author&lt;/th&gt;
-      &lt;/thead&gt;
-      &lt;tbody&gt;
-        &lt;tr ng-repeat="file in files.list"&gt;
-          &lt;td&gt;&lt;input type="checkbox" ng-model="file.selected" /&gt;&lt;/td&gt;
-          &lt;td&gt;{{file.name}}&lt;/td&gt;
-          &lt;td&gt;{{file.size}}&lt;/td&gt;
-          &lt;td&gt;{{file.mediaType}}&lt;/td&gt;
-          &lt;td&gt;{{file.date}}&lt;/td&gt;
-          &lt;td&gt;{{file.author}}&lt;/td&gt;
+    &lt;div class="xwiki-livetable-container"&gt;
+      &lt;table id="files" class="xwiki-livetable"&gt;
+        &lt;tr&gt;
+          &lt;td class="xwiki-livetable-pagination"&gt;
+            &lt;pagination for="files" show-results-range="true"&gt;&lt;/pagination&gt;
+          &lt;/td&gt;
         &lt;/tr&gt;
-      &lt;/tbody&gt;
-    &lt;/table&gt;
-    &lt;pagination for="files"&gt;&lt;/pagination&gt;
+        &lt;tr&gt;
+          &lt;td class="xwiki-livetable-display-container"&gt;
+            &lt;table class="xwiki-livetable-display"&gt;
+              &lt;thead class="xwiki-livetable-display-header"&gt;
+                &lt;tr&gt;
+                  &lt;th ng-repeat="header in ['', 'Name', 'Size', 'Type', 'Modified', 'Author']"
+                    class="xwiki-livetable-display-header-text sortable asc"&gt;{{header}}&lt;/th&gt;
+                &lt;/tr&gt;
+              &lt;/thead&gt;
+              &lt;tbody class="xwiki-livetable-display-body"&gt;
+                &lt;tr ng-repeat="file in files.list"&gt;
+                  &lt;td&gt;&lt;input type="checkbox" ng-model="file.selected" /&gt;&lt;/td&gt;
+                  &lt;td&gt;{{file.name}}&lt;/td&gt;
+                  &lt;td&gt;{{file.size}}&lt;/td&gt;
+                  &lt;td&gt;{{file.mediaType}}&lt;/td&gt;
+                  &lt;td&gt;{{file.date}}&lt;/td&gt;
+                  &lt;td&gt;{{file.author}}&lt;/td&gt;
+                &lt;/tr&gt;
+              &lt;/tbody&gt;
+            &lt;/table&gt;
+          &lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+          &lt;td class="xwiki-livetable-pagination"&gt;
+            &lt;pagination for="files"&gt;&lt;/pagination&gt;
+          &lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/table&gt;
+    &lt;/div&gt;
   &lt;/div&gt;
   {{/html}}
 #end
