@@ -61,13 +61,13 @@
 
     &lt;span ng-if="totalCount &gt; 0" class="controlPagination"&gt;
       &lt;span ng-if="pageNumber == 0" class="noPrevPagination"&gt; &lt;/span&gt;
-      &lt;a ng-if="pageNumber &gt; 0" href="#previousPage" ng-click="loadPage(pageNumber - 1)"
+      &lt;a ng-if="pageNumber &gt; 0" href="#previousPage" ng-click="loadPage(pageNumber - 1); $event.preventDefault()"
           title="$services.localization.render('platform.livetable.paginationPagePrevTitle')" class="prevPagination"&gt;
         $services.localization.render('platform.livetable.paginationPagePrevious')
       &lt;/a&gt;
 
       &lt;span ng-if="pageNumber &gt;= pageCount - 1" class="noNextPagination"&gt; &lt;/span&gt;
-      &lt;a ng-if="pageNumber &lt; pageCount - 1" href="#nextPage" ng-click="loadPage(pageNumber + 1)"
+      &lt;a ng-if="pageNumber &lt; pageCount - 1" href="#nextPage" ng-click="loadPage(pageNumber + 1); $event.preventDefault()"
           title="$services.localization.render('platform.livetable.paginationPageNextTitle')" class="nextPagination"&gt;
         $services.localization.render('platform.livetable.paginationPageNext')
       &lt;/a&gt;
@@ -87,8 +87,9 @@
 #end
 
 #macro (pageLinkTemplate)
-  &lt;a href="#page" title="$services.localization.render('platform.livetable.paginationPageTitle',
-    ['{{number + 1}}'])" ng-if="number != pageNumber" ng-click="loadPage(number)"&gt;{{number + 1}}&lt;/a&gt;
+  &lt;a href="#page" ng-if="number != pageNumber" ng-click="loadPage(number); $event.preventDefault()"
+    title="$services.localization.render('platform.livetable.paginationPageTitle',
+    ['{{number + 1}}'])"&gt;{{number + 1}}&lt;/a&gt;
   &lt;span ng-if="number == pageNumber" class="currentPage"&gt;
     {{number + 1}}
   &lt;/span&gt;

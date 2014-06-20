@@ -601,7 +601,7 @@ require(['jquery', 'angular', 'angular-resource'], function($, angular) {
     };
   });
 
-  driveDirectives.directive('livetable', function() {
+  driveDirectives.directive('livetable',  ["$location", function($location) {
     return {
       restrict: 'E',
       scope: {
@@ -611,8 +611,11 @@ require(['jquery', 'angular', 'angular-resource'], function($, angular) {
       },
       templateUrl: new XWiki.Document('LiveTable', 'FileManagerCode').getURL('get'),
       link: function(scope, element, attrs) {
+        var offsetKey = scope.id + 'Offset';
         var loadPage = function(offset, limit) {
           return scope.service({offset: offset, limit: limit}, function(rows) {
+            // Save the offset in the URL in order to have a bookmarkable pagination.
+            $location.search(offsetKey, rows.offset);
             scope.$broadcast('pagination:pageLoaded', scope.id, rows);
           });
         }
@@ -621,10 +624,11 @@ require(['jquery', 'angular', 'angular-resource'], function($, angular) {
             scope.rows = loadPage(page.offset, page.limit);
           }
         });
-        scope.rows = loadPage(0, 3);
+        // Load the page specified in the URL.
+        scope.rows = loadPage($location.search()[offsetKey] || 0, 5);
       }
     };
-  });
+  }]);
 });</code>
     </property>
     <property>
