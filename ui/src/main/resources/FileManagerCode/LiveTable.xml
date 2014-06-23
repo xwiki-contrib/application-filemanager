@@ -53,8 +53,14 @@
           &lt;thead class="xwiki-livetable-display-header"&gt;
             &lt;tr&gt;
               &lt;th class="xwiki-livetable-display-header-text"&gt;&lt;/th&gt;
-              &lt;th ng-repeat="column in columns" class="xwiki-livetable-display-header-text sortable asc"&gt;
-                {{column.title}}
+              &lt;th ng-repeat="column in columns" class="xwiki-livetable-display-header-text"
+                  ng-class="{
+                    sortable: column.sortable,
+                    selected: params.sort == column.id,
+                    asc: column.sortable &amp;&amp; (params.sort != column.id || params.order != 'desc'),
+                    desc: params.sort == column.id &amp;&amp; params.order == 'desc'
+                  }" ng-click="sort(column)"&gt;
+                &lt;a wrap-if="column.sortable" rel="{{column.id}}"&gt;{{column.title}}&lt;/a&gt;
               &lt;/th&gt;
             &lt;/tr&gt;
           &lt;/thead&gt;

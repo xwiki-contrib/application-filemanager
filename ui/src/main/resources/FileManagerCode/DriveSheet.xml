@@ -117,7 +117,7 @@
 #end
 
 #macro (getAllFiles)
-  #set ($statement = 'from doc.object(FileManagerCode.FileClass) as file where doc.space = :space')
+  #getFilesStatement('doc.space = :space' $statement)
   #getFiles($statement {'space': $doc.space} $data)
 #end
 
@@ -125,7 +125,7 @@
   ## A file can have multiple parent folders, which are declared using tags, and one of these parent folders, usually
   ## the first, is set as wiki page parent so that a tree widget (such as the XWiki explorer tree) can still display the
   ## hierarchy nicely.
-  #set ($statement = "from doc.object(FileManagerCode.FileClass) as file where doc.space = :space and (doc.parent = '' or doc.parent not in ($selectAllFoldersFromDriveHQL))")
+  #getFilesStatement("doc.space = :space and (doc.parent = '' or doc.parent not in ($selectAllFoldersFromDriveHQL))" $statement)
   #getFiles($statement {'space': $doc.space} $data)
 #end
 
@@ -155,22 +155,26 @@ $!escapetool.xml($escapetool.javascript($services.localization.render($key)))##
       {
         id: 'name',
         title: '#xmlJsL10n('Name')',
-        type: 'document'
+        type: 'document',
+        sortable: true
       }, {
         id: 'size',
         title: '#xmlJsL10n('Size')',
-        type: 'fileSize'
+        type: 'fileSize',
+        sortable: true
       }, {
         id: 'mediaType',
         title: '#xmlJsL10n('Type')'
       }, {
         id: 'date',
         title: '#xmlJsL10n('Modified')',
-        type: 'date'
+        type: 'date',
+        sortable: true
       }, {
         id: 'author',
         title: '#xmlJsL10n('Author')',
-        type: 'user'
+        type: 'user',
+        sortable: true
       }
     ]"&gt;&lt;/livetable&gt;
   &lt;/div&gt;
@@ -611,24 +615,91 @@ require(['jquery', 'angular', 'angular-resource'], function($, angular) {
       },
       templateUrl: new XWiki.Document('LiveTable', 'FileManagerCode').getURL('get'),
       link: function(scope, element, attrs) {
-        var offsetKey = scope.id + 'Offset';
-        var loadPage = function(offset, limit) {
-          return scope.service({offset: offset, limit: limit}, function(rows) {
-            // Save the offset in the URL in order to have a bookmarkable pagination.
-            $location.search(offsetKey, rows.offset);
+        var key = function(name) {
+          return scope.id + name.substr(0, 1).toUpperCase() + name.substr(1);
+        };
+
+        // Initialize the parameters with the values specified in the URL.
+        scope.params = {
+          offset: $location.search()[key('offset')],
+          limit: 5,
+          sort: $location.search()[key('sort')],
+          order: $location.search()[key('order')]
+        };
+
+        if (!scope.params.sort) {
+          var getSelectedColumn = function(columns) {
+            var firstSortableColumn = null;
+            for (var i = 0; i &lt; columns.length; i++) {
+              if (columns[i].selected) {
+                return columns[i];
+              } else if (!firstSortableColumn &amp;&amp; columns[i].sortable) {
+                firstSortableColumn = columns[i];
+              }
+            }
+            // If no column is explicitly selected then select the first sortable column.
+            return firstSortableColumn;
+          };
+
+          var selectedColumn = getSelectedColumn(scope.columns);
+          if (selectedColumn) {
+            scope.params.sort = selectedColumn.id;
+            scope.params.order = selectedColumn.order;
+          }
+        }
+
+        // Save the parameters in the URL in order to have a bookmarkable state.
+        var saveParams = function(newParamValues) {
+          newParamValues &amp;&amp; angular.extend(scope.params, newParamValues);
+          for (var param in scope.params) {
+            $location.search(key(param), scope.params[param]);
+          }
+        };
+
+        var fetchRows = function(newParamValues) {
+          newParamValues &amp;&amp; angular.extend(scope.params, newParamValues);
+          scope.rows = scope.service(scope.params, function(rows) {
+            saveParams();
             scope.$broadcast('pagination:pageLoaded', scope.id, rows);
           });
         }
+
         scope.$on('pagination:pageLoading', function(event, sourceId, page) {
           if (sourceId == scope.id) {
-            scope.rows = loadPage(page.offset, page.limit);
+            fetchRows({offset: page.offset, limit: page.limit});
           }
         });
-        // Load the page specified in the URL.
-        scope.rows = loadPage($location.search()[offsetKey] || 0, 5);
+
+        scope.sort = function(column) {
+          if (column.sortable) {
+            var order = (column.id == scope.params.sort &amp;&amp; scope.params.order != 'desc') ? 'desc' : null;
+            fetchRows({sort: column.id, order: order});
+          }
+        };
+
+        fetchRows();
       }
     };
   }]);
+
+  driveDirectives.directive('wrapIf',  function() {
+    return {
+      restrict: 'A',
+      scope: {
+        wrapIf: '='
+      },
+      link: function(scope, element, attrs) {
+        if (!scope.wrapIf) {
+          // Replace the element with its contents.
+          var domElement = element[0];
+          while (domElement.firstChild) {
+            domElement.parentNode.insertBefore(domElement.firstChild, domElement);
+          }
+          element.remove();
+        }
+      }
+    }
+  });
 });</code>
     </property>
     <property>

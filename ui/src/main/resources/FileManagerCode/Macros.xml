@@ -41,7 +41,6 @@
   <hidden>true</hidden>
   <content>{{velocity output=false}}
 #set ($selectChildFolders = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and doc.parent in (:parent)')
-#set ($selectChildFiles = 'from doc.object(FileManagerCode.FileClass) as file where doc.space = :space and :tag member of doc.object(XWiki.TagClass).tags')
 
 #macro (getChildFolders $parentDoc $return)
   #set ($parentNameAsReference = $services.model.serialize($parentDoc.documentReference, 'compact', $parentDoc.documentReference))
@@ -122,8 +121,37 @@
   })))
 #end
 
+#macro (getFilesStatement $where $return)
+  #set ($from = 'from doc.object(FileManagerCode.FileClass) as file')
+  #set ($orderBy = '')
+  #set ($sortMap = {
+    'name': 'attach.filename',
+    'size': 'attach.filesize',
+    'date': 'doc.date',
+    'author': 'doc.author'
+  })
+  #set ($sort = $sortMap.get($request.sort))
+  #if ($sort)
+    #if ($sort.startsWith('attach.'))
+      ## We need to join with the Attachments table.
+      #set ($from = "$from, XWikiAttachment attach")
+      #set ($where = "$!where and attach.docId = doc.id")
+    #end
+    #set ($order = $request.order)
+    #if ($order != 'desc')
+      #set ($order = '')
+    #end
+    #set ($orderBy = "order by $sort $order")
+  #end
+  #if ("$!where" != '')
+    #set ($where = "where $stringtool.removeStart($where.trim(), 'and')")
+  #end
+  #set ($return = $NULL)
+  #setVariable("$return" "$from $!where $orderBy")
+#end
+
 #macro (getFiles $statement $parameters $return)
-  #set ($query = $services.query.xwql("$statement order by doc.name"))
+  #set ($query = $services.query.xwql($statement))
   #set ($countQuery = $services.query.xwql($statement).addFilter('count'))
   #foreach ($entry in $parameters.entrySet())
     #set ($discard = $query.bindValue($entry.key, $entry.value))

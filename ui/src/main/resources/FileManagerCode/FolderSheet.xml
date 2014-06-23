@@ -101,7 +101,8 @@
 #end
 
 #macro (getChildFiles $parentDoc $return)
-  #getFiles($selectChildFiles {'space': $parentDoc.space, 'tag': $parentDoc.name} $_return)
+  #getFilesStatement('doc.space = :space and :tag member of doc.object(XWiki.TagClass).tags' $statement)
+  #getFiles($statement {'space': $parentDoc.space, 'tag': $parentDoc.name} $_return)
   #set ($return = $NULL)
   #setVariable("$return" $_return)
 #end
