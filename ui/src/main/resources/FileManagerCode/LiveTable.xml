@@ -67,7 +67,7 @@
           &lt;tbody class="xwiki-livetable-display-body"&gt;
             &lt;tr ng-repeat="row in rows.list"&gt;
               &lt;td&gt;&lt;input type="checkbox" ng-model="row.selected" /&gt;&lt;/td&gt;
-              &lt;td ng-repeat="column in columns"&gt;{{row[column.id]}}&lt;/td&gt;
+              &lt;td ng-repeat="column in columns" ng-include="liveTableCellTemplate"&gt;&lt;/td&gt;
             &lt;/tr&gt;
           &lt;/tbody&gt;
         &lt;/table&gt;
@@ -81,4 +81,197 @@
   &lt;/table&gt;
 &lt;/div&gt;
 {{/html}}</content>
+  <object>
+    <name>FileManagerCode.LiveTable</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>ce27e865-86f0-415f-a330-b3554a3ee38e</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>define(['angular', 'pagination'], function(angular) {
+  var liveTable = angular.module('liveTable', ['pagination']);
+
+  liveTable.directive('livetable',  ["$location", function($location) {
+    return {
+      restrict: 'E',
+      scope: {
+        'id': '@',
+        'service': '=',
+        'columns': '='
+      },
+      templateUrl: new XWiki.Document('LiveTable', 'FileManagerCode').getURL('get'),
+      link: function(scope, element, attrs) {
+        var key = function(name) {
+          return scope.id + name.substr(0, 1).toUpperCase() + name.substr(1);
+        };
+
+        // Initialize the parameters with the values specified in the URL.
+        scope.params = {
+          offset: $location.search()[key('offset')],
+          limit: 5,
+          sort: $location.search()[key('sort')],
+          order: $location.search()[key('order')]
+        };
+
+        if (!scope.params.sort) {
+          var getSelectedColumn = function(columns) {
+            var firstSortableColumn = null;
+            for (var i = 0; i &lt; columns.length; i++) {
+              if (columns[i].selected) {
+                return columns[i];
+              } else if (!firstSortableColumn &amp;&amp; columns[i].sortable) {
+                firstSortableColumn = columns[i];
+              }
+            }
+            // If no column is explicitly selected then select the first sortable column.
+            return firstSortableColumn;
+          };
+
+          var selectedColumn = getSelectedColumn(scope.columns);
+          if (selectedColumn) {
+            scope.params.sort = selectedColumn.id;
+            scope.params.order = selectedColumn.order;
+          }
+        }
+
+        // Save the parameters in the URL in order to have a bookmarkable state.
+        var saveParams = function(newParamValues) {
+          newParamValues &amp;&amp; angular.extend(scope.params, newParamValues);
+          for (var param in scope.params) {
+            $location.search(key(param), scope.params[param]);
+          }
+        };
+
+        var fetchRows = function(newParamValues) {
+          newParamValues &amp;&amp; angular.extend(scope.params, newParamValues);
+          scope.rows = scope.service(scope.params, function(rows) {
+            saveParams();
+            scope.$broadcast('pagination:pageLoaded', scope.id, rows);
+          });
+        }
+
+        scope.$on('pagination:pageLoading', function(event, sourceId, page) {
+          if (sourceId == scope.id) {
+            fetchRows({offset: page.offset, limit: page.limit});
+          }
+        });
+
+        scope.sort = function(column) {
+          if (column.sortable) {
+            var order = (column.id == scope.params.sort &amp;&amp; scope.params.order != 'desc') ? 'desc' : null;
+            fetchRows({sort: column.id, order: order});
+          }
+        };
+
+        // This can be made configurable.
+        scope.liveTableCellTemplate = new XWiki.Document('LiveTableCell', 'FileManagerCode').getURL('get');
+
+        fetchRows();
+      }
+    };
+  }]);
+
+  liveTable.directive('wrapIf',  function() {
+    return {
+      restrict: 'A',
+      scope: {
+        wrapIf: '='
+      },
+      link: function(scope, element, attrs) {
+        if (!scope.wrapIf) {
+          // Replace the element with its contents.
+          var domElement = element[0];
+          while (domElement.firstChild) {
+            domElement.parentNode.insertBefore(domElement.firstChild, domElement);
+          }
+          element.remove();
+        }
+      }
+    }
+  });
+});</code>
+    </property>
+    <property>
+      <name>Directives</name>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
 </xwikidoc>

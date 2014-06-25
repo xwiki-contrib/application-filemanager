@@ -105,4 +105,154 @@
 #end
 {{/html}}
 {{/velocity}}</content>
+  <object>
+    <name>FileManagerCode.Pagination</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>8a9adccf-da0b-4cde-9830-96be55074a12</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>define(['angular'], function(angular) {
+  var pagination = angular.module('pagination', []);
+
+  pagination.directive('pagination', function() {
+    return {
+      restrict: 'E',
+      scope: {
+        sourceId: '@for',
+        showResultsRange: '@'
+      },
+      templateUrl: new XWiki.Document('Pagination', 'FileManagerCode').getURL('get'),
+      controller: function($scope) {
+        $scope.loadPage = function(pageNumber) {
+          $scope.$emit('pagination:pageLoading', $scope.sourceId, {
+            offset: pageNumber * $scope.limit,
+            limit: $scope.limit
+          });
+        };
+
+        $scope.$on('pagination:pageLoaded', function(event, sourceId, page) {
+          if ($scope.sourceId == sourceId) {
+            $scope.totalCount = page.totalCount;
+            $scope.limit = page.limit;
+            $scope.from = page.offset + 1;
+            $scope.to = Math.min(page.offset + page.limit, page.totalCount);
+            $scope.pageNumber = Math.floor(page.offset / page.limit);
+            $scope.pageCount = Math.floor((page.totalCount + page.limit - 1) / page.limit);
+
+            var contextRadius = 4;
+            var contextSize = 2 * contextRadius + 1;
+            if ($scope.pageCount &lt;= contextSize) {
+              $scope.contextFirstPage = 0;
+              $scope.contextLastPage = $scope.pageCount - 1;
+            } else {
+              $scope.contextFirstPage = Math.min(Math.max($scope.pageNumber - contextRadius, 0), $scope.pageCount - contextSize);
+              $scope.contextLastPage = Math.max(Math.min($scope.pageNumber + contextRadius, $scope.pageCount - 1), contextSize - 1);
+            }
+            $scope.pageNumbers = [];
+            for (var i = $scope.contextFirstPage; i &lt;= $scope.contextLastPage; i++) {
+              $scope.pageNumbers.push(i);
+            }
+          }
+        });
+      }
+    };
+  });
+
+  pagination.directive('pageLink', function() {
+    return {
+      require: '^pagination',
+      restrict: 'E',
+      scope: true,
+      templateUrl: new XWiki.Document('Pagination', 'FileManagerCode').getURL('get', 'template=pageLink'),
+      link: function(scope, element, attrs, paginationCtrl) {
+        scope.number = parseInt(attrs.number);
+      }
+    };
+  });
+});</code>
+    </property>
+    <property>
+      <name>Directives</name>
+    </property>
+    <property>
+      <parse>0</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
 </xwikidoc>
