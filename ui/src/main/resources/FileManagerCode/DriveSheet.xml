@@ -396,7 +396,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
   };
 
   // The colon ':' is URL-encoded so we must decode it otherwise Angular won't find the parameter.
-  var url = new XWiki.Document(':page', ':space').getURL('get').replace('/%3A', '/:', 'g');
+  var url = new XWiki.Document(':page', ':space').getURL('get').replace(/\/%3A/g, '/:');
 
   var addGET = function(api, data) {
     api['get' + data.substr(0, 1).toUpperCase() + data.substr(1)] = {
@@ -628,7 +628,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
     return {
       restrict: 'A',
       scope: {},
-      template: '&lt;img src="{{icon}}" alt="{{type}}" title="{{type}}" /&gt;&lt;a href="{{url}}"&gt;{{name}}&lt;/a&gt;',
+      template: '&lt;img ng-src="{{icon}}" alt="{{type}}" title="{{type}}" /&gt;&lt;a href="{{url}}"&gt;{{name}}&lt;/a&gt;',
       link: function(scope, element, attrs) {
         scope.name = attrs.file;
         scope.url = new XWiki.Document(attrs.file).getURL();
