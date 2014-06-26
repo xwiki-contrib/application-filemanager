@@ -39,14 +39,17 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content>{{html clean="false"}}
+  <content>{{velocity}}
+{{html clean="false"}}
 &lt;div ng-switch="column.type"&gt;
   &lt;div ng-switch-when="file" file="{{row[column.id]}}"&gt;&lt;/div&gt;
   &lt;div ng-switch-when="bytes"&gt;{{ row[column.id] | bytes }}&lt;/div&gt;
   &lt;div ng-switch-when="mediaType"&gt;{{ row[column.id] | mediaType }}&lt;/div&gt;
-  &lt;div ng-switch-when="date"&gt;{{ row[column.id] | date }}&lt;/div&gt;
+  #set ($dateFormat = $xwiki.getXWikiPreference('dateformat', 'yyyy/MM/dd HH:mm'))
+  &lt;div ng-switch-when="date" title="{{ row[column.id] | date : '$dateFormat' }}"&gt;{{ row[column.id] | timeAgo : '$dateFormat' }}&lt;/div&gt;
   &lt;div ng-switch-when="user" user="{{row[column.id]}}"&gt;&lt;/div&gt;
   &lt;div ng-switch-default&gt;{{row[column.id]}}&lt;/div&gt;
 &lt;/div&gt;
-{{/html}}</content>
+{{/html}}
+{{/velocity}}</content>
 </xwikidoc>

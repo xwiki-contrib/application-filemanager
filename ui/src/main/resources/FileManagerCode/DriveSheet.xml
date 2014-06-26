@@ -897,6 +897,92 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
       }
     }
   });
+
+  driveFilters.filter('timeAgo', ['$filter', function($filter) {
+    var referenceTime = (new Date()).getTime();
+    // Inspired by http://momentjs.com/docs/#/displaying/fromnow/ .
+    var milestones = [
+      {
+        range: '0 to 45 seconds',
+        limit: 45,
+        text: 'Seconds ago'
+      }, {
+        range: '45 to 90 seconds',
+        limit: 90,
+        text: 'A minute ago'
+      }, {
+        range: '90 seconds to 45 minutes',
+        limit: 2700,
+        text: '__x__ minutes ago',
+        unit: 60
+      }, {
+        range: '45 to 90 minutes',
+        limit: 5400,
+        text: 'An hour ago'
+      }, {
+        range: '90 minutes to 22 hours',
+        limit: 22 * 3600,
+        text: '__x__ hours ago',
+        unit: 3600
+      }, {
+        range: '22 to 36 hours',
+        limit: 36 * 3600,
+        text: 'A day ago'
+      }, {
+        range: '36 hours to 25 days',
+        limit: 25 * 86400,
+        text: '__x__ days ago',
+        unit: 86400
+      }, {
+        range: '25 to 45 days',
+        value: 45 * 86400,
+        text: 'A month ago'
+      }, {
+        range: '45 to 345 days',
+        limit: 345 * 86400,
+        text: '__x__ months ago',
+        unit: 31 * 86400
+      }, {
+        range: '345 to 547 days (1.5 years)',
+        limit: 547 * 86400,
+        text: 'A year ago'
+      }, {
+        range: '548 days+',
+        text: '__x__ years ago',
+        unit: 365 * 86400
+      }
+    ];
+
+    return function(timestamp, dateFormat) {
+      var now = (new Date()).getTime();
+      if (now - referenceTime &gt; 1000) {
+        // The reference time is older than a second. Update it.
+        // Note that we need this in order to avoid and infinite $digest loop.
+        // See https://docs.angularjs.org/error/$rootScope/infdig .
+        referenceTime = now;
+      }
+
+      var diff = referenceTime - timestamp;
+      if (diff &gt;= 0) {
+        diff /= 1000;
+        for (var i = 0; i &lt; milestones.length; i++) {
+          var milestone = milestones[i];
+          if (diff &lt;= milestone.limit) {
+            var text = milestone.text;
+            if (milestone.unit) {
+              text = text.replace('__x__', Math.max(Math.floor(diff / milestone.unit), 2));
+            }
+            return text;
+          } else if (!milestone.limit &amp;&amp; milestone.unit) {
+            return milestone.text.replace('__x__', Math.max(Math.floor(diff / milestone.unit), 2));
+          }
+        }
+      }
+
+      // Fall-back on the absolute date display.
+      return $filter('date')(timestamp, dateFormat);
+    }
+  }]);
 });</code>
     </property>
     <property>
