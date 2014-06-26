@@ -148,6 +148,7 @@ $!escapetool.xml($escapetool.javascript($services.localization.render($key)))##
 
 #macro (displayDrive)
   {{html clean="false"}}
+  #set ($discard = $xwiki.ssx.use('FileManagerCode.DriveSheet'))
   #set ($discard = $xwiki.jsx.use('FileManagerCode.DriveSheet', {'minify': false}))
   #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
   &lt;div ng-app="drive" ng-controller="DriveCtrl"&gt;
@@ -457,6 +458,13 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
     var api = createAPI(data, actions);
     return $resource(url, defaultParams, api);
   }]);
+
+  driveServices.factory('User', ['$resource', function($resource) {
+    var url = new XWiki.Document(':page', ':space', ':wiki').getRestURL('objects/XWiki.XWikiUsers/0');
+    return $resource(url, {}, {
+      get: {cache: true}
+    });
+  }]);
 });</code>
     </property>
     <property>
@@ -550,7 +558,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
     </property>
     <property>
       <code>require(['angular'], function(angular) {
-  var driveDirectives = angular.module('driveDirectives', []);
+  var driveDirectives = angular.module('driveDirectives', ['driveServices']);
 
   driveDirectives.directive('file',  function() {
     var categories = {
@@ -628,7 +636,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
     return {
       restrict: 'A',
       scope: {},
-      template: '&lt;img ng-src="{{icon}}" alt="{{type}}" title="{{type}}" /&gt;&lt;a href="{{url}}"&gt;{{name}}&lt;/a&gt;',
+      template: '&lt;img ng-src="{{icon}}" alt="{{type}}" title="{{type}}" class="icon" /&gt; &lt;a href="{{url}}"&gt;{{name}}&lt;/a&gt;',
       link: function(scope, element, attrs) {
         scope.name = attrs.file;
         scope.url = new XWiki.Document(attrs.file).getURL();
@@ -643,16 +651,80 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
     }
   });
 
-  driveDirectives.directive('user',  function() {
+  driveDirectives.directive('user',  ['User', function(User) {
+    var documentURLTemplate = '$xwiki.getURL($services.model.createDocumentReference("__wiki__", "__space__", "__page__"))';
+    var getDocumentURL = function(wiki, space, page) {
+      var url = documentURLTemplate.replace('__wiki__', encodeURIComponent(wiki));
+      url = url.replace('__space__', encodeURIComponent(space));
+      return url.replace('__page__', encodeURIComponent(page));
+    };
+
+    var attachmentURLTemplate = '$xwiki.getAttachmentURL("__wiki__:__space__.__page__", "__file__")';
+    var getAttachmentURL = function(wiki, space, page, file) {
+      var url = attachmentURLTemplate.replace('__wiki__', encodeURIComponent(wiki));
+      url = url.replace('__space__', encodeURIComponent(space));
+      url = url.replace('__page__', encodeURIComponent(page));
+      return url.replace('__file__', encodeURIComponent(file));
+    };
+
+    var getPropertyValue = function(user, name) {
+      for (var i = 0; i &lt; user.properties.length; i++) {
+        var property = user.properties[i];
+        if (property.name == name) {
+          return property.value;
+        }
+      }
+      return null;
+    };
+
+    var noAvatar = '$xwiki.getSkinFile("/icons/xwiki/noavatar.png", true)';
+    var getAvatar = function(user) {
+      var avatar = getPropertyValue(user, 'avatar') || '';
+      if (avatar != '') {
+        var avatarURL = getAttachmentURL(user.wiki, user.space, user.pageName, avatar);
+        // Resize the avatar image on the server (use the medium avatar size as it may have been already cached on the
+        // server since it is used for comments).
+        return avatarURL + '?width=50';
+      } else {
+        return noAvatar;
+      }
+    };
+
+    var getName = function(user) {
+      var firstName = getPropertyValue(user, 'first_name') || '';
+      var lastName = getPropertyValue(user, 'last_name') || '';
+      var name = (firstName + ' ' + lastName).trim();
+      if (name == '') {
+        name = user.pageName;
+        if (user.wiki != XWiki.currentWiki) {
+          name += ' (' + user.wiki + ')';
+        }
+      }
+      return name;
+    };
+
     return {
       restrict: 'A',
       scope: {},
-      template: '{{reference.name}}',
+      template: '&lt;img ng-src="{{avatar}}" alt="Avatar" class="avatar" /&gt; &lt;a href="{{url}}"&gt;{{name}}&lt;/a&gt;',
       link: function(scope, element, attrs) {
-        scope.reference = XWiki.Model.resolve(attrs.user, XWiki.EntityType.DOCUMENT);
+        var reference = XWiki.Model.resolve(attrs.user, XWiki.EntityType.DOCUMENT);
+        var params = {
+          wiki: reference.extractReferenceValue(XWiki.EntityType.WIKI) || XWiki.currentWiki,
+          space: reference.extractReferenceValue(XWiki.EntityType.SPACE) || XWiki.currentSpace,
+          page: reference.name
+        };
+        scope.url = getDocumentURL(params.wiki, params.space, params.page);
+        // Default value for avatar and name, in case the user doesn't exist.
+        scope.name = reference.name;
+        scope.avatar = noAvatar;
+        User.get(params, function(user) {
+          scope.avatar = getAvatar(user);
+          scope.name = getName(user);
+        });
       }
     }
-  });
+  }]);
 });</code>
     </property>
     <property>
@@ -832,6 +904,101 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
     </property>
     <property>
       <parse>1</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <name>FileManagerCode.DriveSheet</name>
+    <number>0</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>907048f6-cec7-4a6b-b40a-d5b3dbf60125</guid>
+    <class>
+      <name>XWiki.StyleSheetExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>#files img.avatar, #files img.icon {
+  height: 16px;
+  vertical-align: bottom;
+}</code>
+    </property>
+    <property>
+      <name>Style</name>
+    </property>
+    <property>
+      <parse>0</parse>
     </property>
     <property>
       <use>onDemand</use>
