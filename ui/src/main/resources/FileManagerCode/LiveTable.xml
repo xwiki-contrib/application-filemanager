@@ -66,7 +66,7 @@
           &lt;/thead&gt;
           &lt;tbody class="xwiki-livetable-display-body"&gt;
             &lt;tr ng-repeat="row in rows.list"&gt;
-              &lt;td&gt;&lt;input type="checkbox" ng-model="row.selected" /&gt;&lt;/td&gt;
+              &lt;td&gt;&lt;input type="checkbox" ng-model="selectedRows[row.id]" /&gt;&lt;/td&gt;
               &lt;td ng-repeat="column in columns" ng-include="liveTableCellTemplate"&gt;&lt;/td&gt;
             &lt;/tr&gt;
           &lt;/tbody&gt;
@@ -165,6 +165,19 @@
   var liveTable = angular.module('liveTable', ['pagination']);
 
   liveTable.directive('livetable',  ["$location", function($location) {
+    var getSelectedColumn = function(columns) {
+      var firstSortableColumn = null;
+      for (var i = 0; i &lt; columns.length; i++) {
+        if (columns[i].selected) {
+          return columns[i];
+        } else if (!firstSortableColumn &amp;&amp; columns[i].sortable) {
+          firstSortableColumn = columns[i];
+        }
+      }
+      // If no column is explicitly selected then select the first sortable column.
+      return firstSortableColumn;
+    };
+
     return {
       restrict: 'E',
       scope: {
@@ -187,19 +200,6 @@
         };
 
         if (!scope.params.sort) {
-          var getSelectedColumn = function(columns) {
-            var firstSortableColumn = null;
-            for (var i = 0; i &lt; columns.length; i++) {
-              if (columns[i].selected) {
-                return columns[i];
-              } else if (!firstSortableColumn &amp;&amp; columns[i].sortable) {
-                firstSortableColumn = columns[i];
-              }
-            }
-            // If no column is explicitly selected then select the first sortable column.
-            return firstSortableColumn;
-          };
-
           var selectedColumn = getSelectedColumn(scope.columns);
           if (selectedColumn) {
             scope.params.sort = selectedColumn.id;
@@ -238,6 +238,9 @@
 
         // This can be made configurable.
         scope.liveTableCellTemplate = new XWiki.Document('LiveTableCell', 'FileManagerCode').getURL('get');
+
+        // Collect the selected rows.
+        scope.selectedRows = {};
 
         fetchRows();
       }
