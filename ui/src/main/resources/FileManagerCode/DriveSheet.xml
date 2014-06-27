@@ -152,6 +152,7 @@ $!escapetool.xml($escapetool.javascript($services.localization.render($key)))##
   #set ($discard = $xwiki.jsx.use('FileManagerCode.DriveSheet', {'minify': false}))
   #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
   &lt;div ng-app="drive" ng-controller="DriveCtrl"&gt;
+    &lt;drive-tree&gt;&lt;/drive-tree&gt;
     &lt;livetable id="files" service="service" columns="[
       {
         id: 'name',
@@ -277,6 +278,7 @@ $!escapetool.xml($escapetool.javascript($services.localization.render($key)))##
     'angular-resource': '//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-resource.min',
     liveTable: '$xwiki.getURL("FileManagerCode.LiveTable", "jsx", "language=$xcontext.language&amp;minify=false")',
     pagination: '$xwiki.getURL("FileManagerCode.Pagination", "jsx", "language=$xcontext.language&amp;minify=false")',
+    jsTree: '//cdnjs.cloudflare.com/ajax/libs/jstree/3.0.2/jstree.min'
   },
   shim: {
     angular: {
@@ -285,11 +287,22 @@ $!escapetool.xml($escapetool.javascript($services.localization.render($key)))##
     'angular-resource': {
       deps: ['angular'],
       exports: 'angular'
+    },
+    jsTree: {
+      deps: ['jquery']
     }
   }
 });
 
-require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angular) {
+(function loadCss(url) {
+  var link = document.createElement("link");
+  link.type = "text/css";
+  link.rel = "stylesheet";
+  link.href = url;
+  document.getElementsByTagName("head")[0].appendChild(link);
+})('//cdnjs.cloudflare.com/ajax/libs/jstree/3.0.2/themes/default/style.min.css');
+
+require(['angular', 'angular-resource', 'liveTable', 'jquery', 'jsTree'], function(angular) {
   var drive = angular.module('drive', ['driveServices', 'driveDirectives', 'driveFilters', 'liveTable']);
 
   drive.controller('DriveCtrl', ['$scope', 'Drive', function ($scope, Drive) {
@@ -387,7 +400,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
       <cache>long</cache>
     </property>
     <property>
-      <code>require(['jquery', 'angular'], function($, angular) {
+      <code>require(['jquery', 'angular', 'angular-resource'], function($, angular) {
   var driveServices = angular.module('driveServices', ['ngResource']);
 
   var defaultParams = {
@@ -452,7 +465,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
     return $resource(url, defaultParams, api);
   }]);
 
-  driveServices.factory('Folder', ['$resource', function($resource) {
+  driveServices.factory('File', ['$resource', function($resource) {
     var data = [];
     var actions = ['label', 'move', 'copy', 'delete'];
     var api = createAPI(data, actions);
@@ -557,7 +570,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
       <cache>long</cache>
     </property>
     <property>
-      <code>require(['angular'], function(angular) {
+      <code>require(['jquery', 'angular', 'jsTree'], function($, angular) {
   var driveDirectives = angular.module('driveDirectives', ['driveServices']);
 
   driveDirectives.directive('file',  function() {
@@ -724,6 +737,102 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable'], function($, angu
         });
       }
     }
+  }]);
+
+  driveDirectives.directive('driveTree', ['Drive', 'Folder', function(Drive, Folder) {
+    var getChildren = function(node, callback) {
+      callback = $.proxy(callback, this);
+      if (node.id == '#') {
+        getRootNodes(callback);
+      } else if (node.id == '/orphanFolders') {
+        Drive.getOrphanFolders({}, getChildrenCallback(callback));
+      } else if (node.id == '/activeJobs') {
+        // TODO
+        callback([]);
+      } else {
+        Folder.getFolders({page: node.id}, getChildrenCallback(callback));
+      }
+    };
+
+    var getChildrenCallback = function(callback) {
+      return function(folders) {
+        callback(asFolderNodes(folders.list));
+      };
+    };
+
+    var rootNodes = [
+      {
+        id: '/allFiles',
+        text: 'All files',
+        icon: '$xwiki.getSkinFile("icons/silk/page_white_stack.png")',
+        state: {
+          selected: true
+        }
+      },
+      {
+        id: '/orphanFiles',
+        text: 'Orphan files',
+        icon: '$xwiki.getSkinFile("icons/silk/page_white_error.png")',
+        state: {
+          selected: false
+        }
+      },
+      {
+        id: '/orphanFolders',
+        text: 'Orphan folders',
+        icon: '$xwiki.getSkinFile("icons/silk/folder_error.png")',
+        state: {
+          selected: false
+        },
+        children: true
+      },
+      {
+        id: '/activeJobs',
+        text: 'Active jobs',
+        icon: '$xwiki.getSkinFile("icons/silk/clock.png")',
+        state: {
+          selected: false
+        },
+        children: true
+      }
+    ];
+
+    var getRootNodes = function(callback) {
+      Drive.getFolders({}, function(folders) {
+        var rootFolders = asFolderNodes(folders.list);
+        callback(rootFolders.concat(rootNodes));
+      });
+    };
+
+    var asFolderNodes = function(folders) {
+      var folderNodes = [];
+      for (var i = 0; i &lt; folders.length; i++) {
+        folderNodes.push(asFolderNode(folders[i]));
+      }
+      return folderNodes;
+    };
+
+    var asFolderNode = function(folder) {
+      return {
+        id: folder.id,
+        text: folder.name,
+        icon: '$xwiki.getSkinFile("icons/silk/folder.png")',
+        state: {
+          selected: false
+        },
+        children: true
+      }
+    };
+
+    return {
+      restrict: 'E',
+      scope: {},
+      link: function(scope, element, attrs) {
+        $(element).jstree({
+          core: {data: getChildren}
+        });
+      }
+    };
   }]);
 });</code>
     </property>
