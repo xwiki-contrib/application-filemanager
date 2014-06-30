@@ -153,7 +153,7 @@ $!escapetool.xml($escapetool.javascript($services.localization.render($key)))##
   #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
   &lt;div ng-app="drive" ng-controller="DriveCtrl"&gt;
     &lt;drive-tree&gt;&lt;/drive-tree&gt;
-    &lt;livetable id="files" service="service" columns="[
+    &lt;livetable ng-if="source" id="files" source="source" columns="[
       {
         id: 'name',
         title: '#xmlJsL10n('Name')',
@@ -302,11 +302,36 @@ $!escapetool.xml($escapetool.javascript($services.localization.render($key)))##
   document.getElementsByTagName("head")[0].appendChild(link);
 })('//cdnjs.cloudflare.com/ajax/libs/jstree/3.0.2/themes/default/style.min.css');
 
-require(['angular', 'angular-resource', 'liveTable', 'jquery', 'jsTree'], function(angular) {
+require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], function($, angular) {
   var drive = angular.module('drive', ['driveServices', 'driveDirectives', 'driveFilters', 'liveTable']);
 
-  drive.controller('DriveCtrl', ['$scope', 'Drive', function ($scope, Drive) {
-    $scope.service = Drive.getAllFiles;
+  drive.controller('DriveCtrl', ['$scope', 'Drive', 'Folder', function ($scope, Drive, Folder) {
+    var asSource = function(service){
+      return {get: service};
+    }
+
+    var selectedNode = null;
+    $scope.$on('driveTree:selectionChange', function(event, selectedNodes) {
+      if (selectedNodes.length != 1) {
+        $scope.source = null;
+        return;
+      } else if (selectedNode == selectedNodes[0]) {
+        return;
+      } else if (selectedNodes[0] == '/allFiles') {
+        $scope.source = asSource(Drive.getAllFiles);
+      } else if (selectedNodes[0] == '/orphanFiles') {
+        $scope.source = asSource(Drive.getOrphanFiles);
+      } else if (selectedNodes[0] == '/activeJobs') {
+        // TODO
+        $scope.source = null;
+      } else if (selectedNodes[0] == '/orphanFolders') {
+        $scope.source = null;
+      } else {
+        var selectedFolder = Folder.bind({page: selectedNodes[0]});
+        $scope.source = asSource($.proxy(selectedFolder.getFiles, selectedFolder));
+      }
+      selectedNode = selectedNodes[0];
+    });
   }]);
 });</code>
     </property>
@@ -828,7 +853,11 @@ require(['angular', 'angular-resource', 'liveTable', 'jquery', 'jsTree'], functi
       restrict: 'E',
       scope: {},
       link: function(scope, element, attrs) {
-        $(element).jstree({
+        $(element).on('changed.jstree', function(event, data) {
+          scope.$apply(function() {
+            scope.$emit('driveTree:selectionChange', data.selected);
+          });
+        }).jstree({
           core: {data: getChildren}
         });
       }

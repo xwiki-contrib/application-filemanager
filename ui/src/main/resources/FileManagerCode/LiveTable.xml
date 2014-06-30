@@ -165,6 +165,10 @@
   var liveTable = angular.module('liveTable', ['pagination']);
 
   liveTable.directive('livetable',  ["$location", function($location) {
+    var key = function(id, name) {
+      return id + name.substr(0, 1).toUpperCase() + name.substr(1);
+    };
+
     var getSelectedColumn = function(columns) {
       var firstSortableColumn = null;
       for (var i = 0; i &lt; columns.length; i++) {
@@ -178,47 +182,47 @@
       return firstSortableColumn;
     };
 
+    var readParams = function(id, columns) {
+      // Read the parameter values from the URL.
+      var params = {
+        offset: $location.search()[key(id, 'offset')],
+        limit: 5,
+        sort: $location.search()[key(id, 'sort')],
+        order: $location.search()[key(id, 'order')]
+      };
+
+      if (!params.sort) {
+        var selectedColumn = getSelectedColumn(columns);
+        if (selectedColumn) {
+          params.sort = selectedColumn.id;
+          params.order = selectedColumn.order;
+        }
+      }
+
+      return params;
+    };
+
+    var storeParams = function(id, params, newValues) {
+      newValues &amp;&amp; angular.extend(params, newValues);
+      // Save the parameters in the URL in order to have a bookmarkable state.
+      for (var param in params) {
+        $location.search(key(id, param), params[param]);
+      }
+    };
+
     return {
       restrict: 'E',
       scope: {
         'id': '@',
-        'service': '=',
+        'source': '=',
         'columns': '='
       },
       templateUrl: new XWiki.Document('LiveTable', 'FileManagerCode').getURL('get'),
       link: function(scope, element, attrs) {
-        var key = function(name) {
-          return scope.id + name.substr(0, 1).toUpperCase() + name.substr(1);
-        };
-
-        // Initialize the parameters with the values specified in the URL.
-        scope.params = {
-          offset: $location.search()[key('offset')],
-          limit: 5,
-          sort: $location.search()[key('sort')],
-          order: $location.search()[key('order')]
-        };
-
-        if (!scope.params.sort) {
-          var selectedColumn = getSelectedColumn(scope.columns);
-          if (selectedColumn) {
-            scope.params.sort = selectedColumn.id;
-            scope.params.order = selectedColumn.order;
-          }
-        }
-
-        // Save the parameters in the URL in order to have a bookmarkable state.
-        var saveParams = function(newParamValues) {
-          newParamValues &amp;&amp; angular.extend(scope.params, newParamValues);
-          for (var param in scope.params) {
-            $location.search(key(param), scope.params[param]);
-          }
-        };
-
         var fetchRows = function(newParamValues) {
           newParamValues &amp;&amp; angular.extend(scope.params, newParamValues);
-          scope.rows = scope.service(scope.params, function(rows) {
-            saveParams();
+          scope.rows = scope.source.get(scope.params, function(rows) {
+            storeParams(scope.id, scope.params);
             scope.$broadcast('pagination:pageLoaded', scope.id, rows);
           });
         }
@@ -239,10 +243,15 @@
         // This can be made configurable.
         scope.liveTableCellTemplate = new XWiki.Document('LiveTableCell', 'FileManagerCode').getURL('get');
 
-        // Collect the selected rows.
-        scope.selectedRows = {};
+        scope.params = {};
 
-        fetchRows();
+        scope.$watch('source', function(newValue, oldValue) {
+          // Reset the selected rows.
+          scope.selectedRows = {};
+          // Read the parameters from the URL when the source is initialized.
+          // Reset the pagination whenever the source is changed afterwards.
+          fetchRows(newValue === oldValue ? readParams(scope.id, scope.columns) : {offset: null});
+        });
       }
     };
   }]);
