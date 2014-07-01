@@ -137,8 +137,7 @@
   #end
   #set ($data = {
     'id': $doc.space,
-    'name': $name,
-    'url': $doc.getURL('get')
+    'name': $name
   })
 #end
 
@@ -185,10 +184,12 @@ $!escapetool.xml($escapetool.javascript($services.localization.render($key)))##
 #end
 {{/velocity}}
 
-{{velocity}}
+{{velocity wiki="false"}}
 #if ($xcontext.action == 'get')
   #handleDriveWebServiceRequest
-#else
+#end
+{{/velocity}}{{velocity}}
+#if ($xcontext.action != 'get')
   #displayDrive
 #end
 {{/velocity}}</content>
@@ -764,7 +765,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
     }
   }]);
 
-  driveDirectives.directive('driveTree', ['Drive', 'Folder', function(Drive, Folder) {
+  driveDirectives.directive('driveTree', ['$location', 'Drive', 'Folder', function($location, Drive, Folder) {
     var getChildren = function(node, callback) {
       callback = $.proxy(callback, this);
       if (node.id == '#') {
@@ -791,7 +792,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
         text: 'All files',
         icon: '$xwiki.getSkinFile("icons/silk/page_white_stack.png")',
         state: {
-          selected: true
+          selected: false
         }
       },
       {
@@ -849,14 +850,51 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       }
     };
 
+    var selectNode = function(tree, nodeId) {
+      if (tree.get_node(nodeId)) {
+        // The specified node is already loaded in the tree.
+        tree.select_node(nodeId);
+      } else {
+        // The specified node must be a folder. We need to get the folder path in order to load all its ancestors.
+        Folder.get({'page': nodeId}, function(folder) {
+          var path = folder.path.slice().reverse();
+          path.push(folder.id);
+          selectPath(tree, path, true);
+        });
+      }
+    };
+
+    var selectPath = function(tree, path, isRoot) {
+      if (path.length &gt; 0) {
+        if (tree.get_node(path[0])) {
+          // The specified node is already loaded in the tree.
+          if (path.length &gt; 1) {
+            tree.open_node(path[0], function() {
+              selectPath(tree, path.slice(1));
+            });
+          } else {
+            tree.select_node(path[0]);
+          }
+        } else if (isRoot) {
+          // Probably an orphan (root) folder.
+          tree.open_node('/orphanFolders', function() {
+            selectPath(tree, path);
+          });
+        }
+      }
+    };
+
     return {
       restrict: 'E',
       scope: {},
       link: function(scope, element, attrs) {
         $(element).on('changed.jstree', function(event, data) {
+          ${escapetool.d}location.search('driveNode', data.selected.length == 1 ? data.selected[0] : null);
           scope.$apply(function() {
             scope.$emit('driveTree:selectionChange', data.selected);
           });
+        }).on('ready.jstree', function(event, data) {
+          selectNode(data.instance, $location.search()['driveNode'] || '/allFiles');
         }).jstree({
           core: {data: getChildren}
         });

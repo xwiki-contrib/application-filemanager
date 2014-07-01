@@ -81,27 +81,16 @@
 #end
 
 #macro (getFolder $folderDoc $return)
-  #set ($parent = $NULL)
-  #if ("$!folderDoc.parent" != '')
-    #set ($parentReference = $services.model.resolveDocument($folderDoc.parent, 'explicit', $folderDoc.documentReference))
-    ## The parent must be on the same drive (space).
-    #if ($folderDoc.documentReference.parent.equals($parentReference.parent))
-      #set ($parentDoc = $xwiki.getDocument($parentReference))
-      ## The parent must be either a folder or a drive.
-      #if ($parentDoc.getObject('FileManagerCode.FolderClass') || $parentDoc.getObject('FileManagerCode.DriveClass'))
-        #set ($parent = {
-          'id': $parentReference.name,
-          'url': $xwiki.getURL($parentReference, 'get', $NULL)
-        })
-      #end
-    #end
+  #set ($path = [])
+  #getPath($folderDoc $path)
+  #if (!$path.isEmpty())
+    #set ($path = $path.subList(1, $path.size()))
   #end
   #set ($return = $NULL)
   #setVariable("$return" {
     'id': $folderDoc.name,
     'name': $folderDoc.plainTitle,
-    'parent': $parent,
-    'url': $folderDoc.getURL('get')
+    'path': $path
   })
 #end
 
@@ -182,7 +171,7 @@
 #end
 
 #macro (getFile $fileDoc $return)
-  #getFileParents($fileDoc $parents)
+  #getFilePaths($fileDoc $paths)
   #set ($attach = $fileDoc.attachmentList.get(0))
   #set ($return = $NULL)
   #setVariable("$return" {
@@ -194,26 +183,42 @@
     'mediaType': $attach.mimeType,
     'version': $fileDoc.version,
     'description': $fileDoc.display('description'),
-    'parents': $parents,
-    'url': $fileDoc.getURL('get')
+    'paths': $paths
   })
 #end
 
-#macro (getFileParents $fileDoc $return)
+#macro (getFilePaths $fileDoc $return)
   #set ($tags = $fileDoc.getObject('XWiki.TagClass').getProperty('tags').value)
-  #set ($_parents = [])
+  #set ($_paths = [])
   #if ($tags &amp;&amp; $tags.size() &gt; 0)
     #set ($statement = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.name in (:tags)')
     #foreach ($folderId in $services.query.xwql($statement).bindValue('tags', $tags).execute())
       #set ($folderReference = $services.model.resolveDocument($folderId, 'explicit', $fileDoc.documentReference))
-      #set ($discard = $_parents.add({
-        'id': $folderReference.name,
-        'url': $xwiki.getURL($folderReference, 'get', $NULL)
-      }))
+      #set ($folderDoc = $xwiki.getDocument($folderReference))
+      #set ($path = [])
+      #getPath($folderDoc $path)
+      #if (!$path.isEmpty())
+        #set ($discard = $_paths.add($path))
+      #end
     #end
   #end
   #set ($return = $NULL)
-  #setVariable("$return" $_parents)
+  #setVariable("$return" $_paths)
+#end
+
+#macro (getPath $folderDoc $path)
+  ## Prevent cycles. Also make sure the given document is a folder.
+  #if ($folderDoc &amp;&amp; !$folderDoc.isNew() &amp;&amp; !$path.contains($folderDoc.name)
+      &amp;&amp; $folderDoc.getObject('FileManagerCode.FolderClass'))
+    #set ($discard = $path.add($folderDoc.name))
+    #if ("$!folderDoc.parent" != '')
+      #set ($parentReference = $services.model.resolveDocument($folderDoc.parent, 'explicit', $folderDoc.documentReference))
+      ## The parent must be on the same drive (space).
+      #if ($folderDoc.documentReference.parent.equals($parentReference.parent))
+        #getPath($xwiki.getDocument($parentReference) $path)
+      #end
+    #end
+  #end
 #end
 
 ## TODO: Use the script service to avoid duplicated code!

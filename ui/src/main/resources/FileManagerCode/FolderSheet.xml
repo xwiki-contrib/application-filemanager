@@ -67,8 +67,6 @@
       #getChildFiles($doc $data)
     #elseif ($request.data == 'folders')
       #getChildFolders($doc $data)
-    #elseif ($request.data == 'jobStatus')
-      #getJobStatus($request.jobId $data)
     #else
       #getFolder($doc $data)
     #end
@@ -131,10 +129,12 @@
 #end
 {{/velocity}}
 
-{{velocity}}
+{{velocity wiki="false"}}
 #if ($xcontext.action == 'get')
   #handleFolderWebServiceRequest
-#else
+#end
+{{/velocity}}{{velocity}}
+#if ($xcontext.action != 'get')
   #displayFolder
 #end
 {{/velocity}}</content>
