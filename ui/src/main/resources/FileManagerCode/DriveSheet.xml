@@ -1035,6 +1035,14 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       return service(params, postData, onJobUpdate, onError);
     }
 
+    var isFolder = function(node) {
+      return !!(node.data &amp;&amp; node.data.type == 'folder');
+    };
+
+    var isDrive = function(node) {
+      return !!(node.data &amp;&amp; node.data.type == 'drive');
+    };
+
     return {
       restrict: 'E',
       scope: {},
@@ -1043,8 +1051,10 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
           core: {
             data: getChildren,
             'check_callback' : function (operation, node, node_parent, node_position, more) {
-              // Allow operations on folders.
-              return !readOnly &amp;&amp; node.data &amp;&amp; node.data.type == 'folder';
+              // Allow operations on folders. The target parent must be either a folder or the drive itself, unless the
+              // operation is delete in which case we only care that the deleted node is a folder.
+              return !readOnly &amp;&amp; isFolder(node) &amp;&amp; (operation == 'delete_node' || isFolder(node_parent)
+                || isDrive(node_parent));
             }
           },
           plugins: ['dnd', 'contextmenu'],
@@ -1053,9 +1063,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
               var menu;
               if (!node.data) {
                 // No context menu.
-              } else if (node.data.type == 'folder') {
+              } else if (isFolder(node)) {
                 menu = folderMenu;
-              } else if (node.data.type == 'drive') {
+              } else if (isDrive(node)) {
                 menu = driveMenu;
               }
               if (menu) {
@@ -1067,6 +1077,22 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
                 }
               }
               return menu;
+            }
+          },
+          dnd: {
+            is_draggable: function(nodes) {
+              if (readOnly) {
+                return false;
+              } else {
+                // Only folder nodes can be dragged.
+                for (var i = 0; i &lt; nodes.length; i++) {
+                  var node = nodes[i];
+                  if (!isFolder(node)) {
+                    return false;
+                  }
+                }
+              }
+              return true;
             }
           }
 
@@ -1088,18 +1114,21 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
           // created when the user 'renames' the node that has been created with the default folder name ('New Folder').
 
         }).on('delete_node.jstree', function(event, data) {
-          runJob(Folder.delete, {page: data.node.id}, null, null, function() {
+          // Make sure the deleted tree node has an associated folder.
+          var folderId = data.node.data.id;
+          folderId &amp;&amp; runJob(Folder.delete, {page: folderId}, null, null, function() {
             data.instance.refresh_node(data.node.parent);
           });
 
         }).on('rename_node.jstree', function(event, data) {
-          if (data.node.data.id) {
+          var folderId = data.node.data.id;
+          if (folderId) {
             // Rename a node that has a corresponding folder.
             if (data.old != data.text) {
               var refreshParent = function() {
                 data.instance.refresh_node(data.node.parent);
               };
-              runJob(Folder.move, {page: data.node.id}, $.param({
+              runJob(Folder.move, {page: folderId}, $.param({
                 parent: data.node.parent,
                 name: data.text
               }), refreshParent, refreshParent);
@@ -1115,6 +1144,45 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
               data.instance.delete_node(data.node);
             });
           }
+
+        }).on('move_node.jstree', function(event, data) {
+          var folder = data.node.data;
+          // Don't trigger the server-side move unless the tree node has a folder associated.
+          if (!folder.id || data.parent == data.old_parent) {
+            return;
+          }
+          runJob(Folder.move, {page: folder.id}, $.param({
+            parent: data.parent
+          }), function(job) {
+            // Job finished. Refresh the new parent node.
+            data.instance.refresh_node(data.parent);
+          }, function(response) {
+            // Job failed. Undo the move.
+            // Disconnect the node from the associated folder to prevent moving the folder.
+            var folderId = folder.id;
+            folder.id = null;
+            data.instance.move_node(data.node, data.old_parent, data.old_position);
+            // Reconnect the tree node to the folder as soon as possible.
+            setTimeout(function() {folder.id = folderId;}, 0);
+          });
+
+        }).on('copy_node.jstree', function(event, data) {
+          var folder = data.original.data;
+          // Don't trigger the server-side move unless the tree node has a folder associated.
+          if (!folder.id) {
+            return;
+          }
+          // Mark the copy as folder to be able to delete it in case of error.
+          data.node.data = {type: 'folder'};
+          runJob(Folder.copy, {page: folder.id}, $.param({
+            parent: data.parent
+          }), function(job) {
+            // Job finished. Refresh the new parent node.
+            data.instance.refresh_node(data.parent);
+          }, function(response) {
+            // Job failed. Undo the copy.
+            data.instance.delete_node(data.node);
+          });
         });
       }
     };
