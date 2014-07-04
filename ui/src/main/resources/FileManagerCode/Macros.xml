@@ -244,12 +244,26 @@
   #setVariable("$return" $uniqueName)
 #end
 
+#macro (getDriveReference $return)
+  #set ($statement = 'from doc.object(FileManagerCode.DriveClass) as drive where doc.space = :space')
+  #set ($drives = $services.query.xwql($statement).bindValue('space', $doc.space).setLimit(1).execute())
+  #if ($drives &amp;&amp; !$drives.isEmpty())
+    #set ($driveReference = $services.model.resolveDocument($drives.get(0), 'explicit', $doc.documentReference))
+  #else
+    ## Fall-back on the space home page.
+    #set ($driveReference = $services.model.createDocumentReference($doc.wiki, $doc.space, 'WebHome'))
+  #end
+  #set ($return = $NULL)
+  #setVariable("$return" $driveReference)
+#end
+
 #macro (handleJobStartFailure $jobId)
   #if ($jobId)
-    #set ($discard = $response.sendRedirect($doc.getURL('get', $escapetool.url({
+    #getDriveReference($driveReference)
+    #set ($discard = $response.sendRedirect($xwiki.getURL($driveReference, 'get', $escapetool.url({
       'outputSyntax': 'plain',
       'data': 'jobStatus',
-      'jobId': $jobId
+      'id': $jobId
     }))))
   #else
     $response.sendError(500, $services.drive.lastError.message);
@@ -277,6 +291,7 @@
       }))
     #end
     #set ($jobStatusAsJSON = {
+      'id': $jobId,
       'state': $jobStatus.state,
       'request': {
         'type': $jobStatus.request.getProperty('job.type'),
