@@ -56,9 +56,9 @@ public class CopyJobTest extends AbstractJobTest
     @Test
     public void copyFolder() throws Exception
     {
-        File pom = mockFile("pom.xml", "Concerto");
-        Folder specs = mockFolder("Specs", "Concerto");
-        Folder concerto = mockFolder("Concerto", null, Arrays.asList("Specs"), Arrays.asList("pom.xml"));
+        File pom = mockFile("pom.xml", "Concerto1");
+        Folder specs = mockFolder("Specs", "Concerto1");
+        Folder concerto = mockFolder("Concerto1", "Concerto", null, Arrays.asList("Specs"), Arrays.asList("pom.xml"));
         Folder projects = mockFolder("Projects");
 
         MoveRequest request = new MoveRequest();
@@ -67,7 +67,7 @@ public class CopyJobTest extends AbstractJobTest
 
         execute(request);
 
-        DocumentReference concertoCopyRef = ref("Concerto1");
+        DocumentReference concertoCopyRef = ref("Concerto");
         verify(fileSystem).copy(concerto.getReference(), concertoCopyRef);
 
         Folder concertoCopy = fileSystem.getFolder(concertoCopyRef);
@@ -81,7 +81,7 @@ public class CopyJobTest extends AbstractJobTest
         File pomCopy = fileSystem.getFile(pomCopyRef);
         verify(pomCopy).setName("pom.xml");
         verify(fileSystem).save(pomCopy);
-        assertEquals(Arrays.asList("Concerto1"), getParents(pomCopy));
+        assertEquals(Arrays.asList("Concerto"), getParents(pomCopy));
 
         DocumentReference specsCopyRef = ref("Specs1");
         verify(fileSystem).copy(specs.getReference(), specsCopyRef);

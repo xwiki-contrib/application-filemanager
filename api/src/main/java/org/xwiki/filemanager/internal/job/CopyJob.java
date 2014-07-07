@@ -169,7 +169,9 @@ public class CopyJob extends MoveJob
                 boolean copyToDifferentFolder = !destination.getFolderReference().equals(folder.getParentReference());
                 if (destination.getFileReference() == null && copyToDifferentFolder) {
                     // Same name but a different folder.
-                    copyFolder(folder, new Path(destination.getFolderReference(), folderReference));
+                    DocumentReference copyReference =
+                        new DocumentReference(folder.getName(), folderReference.getLastSpaceReference());
+                    copyFolder(folder, new Path(destination.getFolderReference(), copyReference));
                 } else if (destination.getFileReference() != null
                     && (!destination.getFileReference().getName().equals(folder.getName()) || copyToDifferentFolder)) {
                     // Either different name or different folder.
