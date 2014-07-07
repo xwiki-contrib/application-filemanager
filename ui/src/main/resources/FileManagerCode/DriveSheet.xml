@@ -1042,30 +1042,44 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
             }, 0);
           });
         },
-        _disabled: isReadOnly
+        __disabled: isReadOnly
       },
       createFile: {
         label: 'New File',
         icon: '$xwiki.getSkinFile("icons/silk/page_white_add.png")',
         action: function(data) {},
-        _disabled: isReadOnly
+        __disabled: isReadOnly
       },
       cut: {
         separator_before: true,
         label: 'Cut',
         icon: '$xwiki.getSkinFile("icons/silk/cut.png")',
-        action: function(data) {}
+        action: function(data) {
+          var tree = $.jstree.reference(data.reference);
+          var node = tree.get_node(data.reference);
+          tree.cut(node);
+        }
       },
       copy: {
         label: 'Copy',
         icon: '$xwiki.getSkinFile("icons/silk/page_white_copy.png")',
-        action: function(data) {}
+        action: function(data) {
+          var tree = $.jstree.reference(data.reference);
+          var node = tree.get_node(data.reference);
+          tree.copy(node);
+        }
       },
       paste: {
         label: 'Paste Into Folder',
         icon: '$xwiki.getSkinFile("icons/silk/page_white_paste.png")',
-        action: function(data) {},
-        _disabled: isReadOnly
+        action: function(data) {
+          var tree = $.jstree.reference(data.reference);
+          var node = tree.get_node(data.reference);
+          tree.paste(node);
+        },
+        __disabled: function(node) {
+          return readOnly || !this.can_paste();
+        }
       },
       rename: {
         separator_before: true,
@@ -1076,7 +1090,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
           var node = tree.get_node(data.reference);
           setTimeout(function() {tree.edit(node);}, 0);
         },
-        _disabled: isReadOnly
+        __disabled: isReadOnly
       },
       delete: {
         label: 'Move to Trash',
@@ -1086,19 +1100,15 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
           var node = tree.get_node(data.reference);
           tree.delete_node(node);
         },
-        _disabled: isReadOnly
+        __disabled: isReadOnly
       }
     };
 
     var driveMenu = {
       createFolder: folderMenu.createFolder,
-      paste: {
-        label: 'Paste',
-        icon: '$xwiki.getSkinFile("icons/silk/page_white_paste.png")',
-        action: function(data) {},
-        _disabled: isReadOnly
-      }
+      paste: angular.copy(folderMenu.paste)
     };
+    driveMenu.paste.label = 'Paste';
 
     var runJob = function(service, params, postData, success, error) {
       readOnly = true;
@@ -1165,8 +1175,8 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
               if (menu) {
                 for (var item in menu) {
                   var menuItem = menu[item];
-                  if (typeof menuItem._disabled == 'function') {
-                    menuItem.disabled = menuItem._disabled(node);
+                  if (typeof menuItem.__disabled == 'function') {
+                    menuItem._disabled = menuItem.__disabled.call(this, node);
                   }
                 }
               }
