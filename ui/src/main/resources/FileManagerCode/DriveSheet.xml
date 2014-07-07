@@ -1105,6 +1105,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
     };
 
     var driveMenu = {
+      refresh: folderMenu.refresh,
       createFolder: folderMenu.createFolder,
       paste: angular.copy(folderMenu.paste)
     };
