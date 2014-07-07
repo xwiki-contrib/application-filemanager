@@ -1190,8 +1190,14 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
             }
           }
 
-        }).on('ready.jstree', function(event, data) {
-          selectNode(data.instance, $location.search()['driveNode'] || '/allFiles');
+        // Select the node specified on the request URL after the tree is loaded. We tried to listen to the
+        // 'ready.jstree' event but it is fired before the drive child nodes are fetched. As a workaround we listen once
+        // to the 'after_open.jstree' event, knowing that the drive node is the first tree node that will be opened.
+        }).one('after_open.jstree', function(event, data) {
+          if (data.node.id == XWiki.currentPage) {
+            // The drive node has been opened.
+            selectNode(data.instance, $location.search()['driveNode'] || '/allFiles');
+          }
 
         }).on('select_node.jstree deselect_node.jstree', function(event, data) {
           ${escapetool.d}location.search('driveNode', data.selected.length == 1 ? data.selected[0] : null);
