@@ -20,29 +20,55 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc>
+<xwikidoc version="1.1">
   <web>FileManager</web>
   <name>WebHome</name>
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
-  <parent>Main.WebHome</parent>
   <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1400770505000</creationDate>
+  <parent>Main.WebHome</parent>
   <author>xwiki:XWiki.Admin</author>
-  <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <creationDate>1389884930000</creationDate>
-  <date>1390995297000</date>
-  <contentUpdateDate>1390995297000</contentUpdateDate>
+  <date>1404829761000</date>
+  <contentUpdateDate>1404829761000</contentUpdateDate>
   <version>1.1</version>
   <title>#set ($discard = $services.localization.use('document', 'FileManager.FileManagerTranslations')) $services.localization.render('platform.appwithinminutes.appHomePageTitle', $services.localization.render("filemanager.appname"))</title>
-  <defaultTemplate/>
-  <validationScript/>
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.0</syntaxId>
   <hidden>false</hidden>
+  <content>{{velocity}}
+#set ($discard = $services.localization.use('document', 'FileManager.FileManagerTranslations'))
+#set ($columnsProperties = {
+  'doc.name': {"type":"text","size":10,"link":"view"},
+  '_attachments': {"sortable":false,"filterable":false,"html":true},
+  '_actions': {"sortable":false,"filterable":false,"html":true,"actions":["edit","delete"]}
+})
+#set ($options = {
+  'className': 'FileManager.FileManagerClass',
+  'resultPage': 'FileManager.FileManagerLiveTableResults',
+  'translationPrefix': 'filemanager.livetable.',
+  'tagCloud': true,
+  'rowCount': 15,
+  'maxPages': 10,
+  'selectedColumn': 'doc.name',
+  'defaultOrder': 'asc'
+})
+## Add the filter by selected tags
+  #if($request.tag)
+    #set ($discard = $options.put('selectedTags',["${request.tag}"]))
+  #end
+##
+#set ($columns = ['doc.name', '_attachments', '_actions'])
+#livetable('filemanager' $columns $columnsProperties $options)
+{{/velocity}}</content>
   <object>
+    <name>FileManager.WebHome</name>
+    <number>0</number>
+    <className>AppWithinMinutes.LiveTableClass</className>
+    <guid>aa5805f1-5967-42ad-b106-3393c8dd348c</guid>
     <class>
       <name>AppWithinMinutes.LiveTableClass</name>
       <customClass/>
@@ -94,10 +120,6 @@
         <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
       </description>
     </class>
-    <name>FileManager.WebHome</name>
-    <number>0</number>
-    <className>AppWithinMinutes.LiveTableClass</className>
-    <guid>9070a9b8-91d6-4486-9c41-58809eeaff16</guid>
     <property>
       <class>FileManager.FileManagerClass</class>
     </property>
@@ -119,6 +141,10 @@ $services.rendering.render($ext.execute(), "xhtml/1.0")
     </property>
   </object>
   <object>
+    <name>FileManager.WebHome</name>
+    <number>0</number>
+    <className>XWiki.UIExtensionClass</className>
+    <guid>1658b90f-3ae5-49d1-9172-5fccfdf006f1</guid>
     <class>
       <name>XWiki.UIExtensionClass</name>
       <customClass/>
@@ -183,10 +209,6 @@ $services.rendering.render($ext.execute(), "xhtml/1.0")
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </scope>
     </class>
-    <name>FileManager.WebHome</name>
-    <number>0</number>
-    <className>XWiki.UIExtensionClass</className>
-    <guid>1658b90f-3ae5-49d1-9172-5fccfdf006f1</guid>
     <property>
       <content/>
     </property>
@@ -206,29 +228,4 @@ icon=icon:folder_page</parameters>
       <scope>wiki</scope>
     </property>
   </object>
-  <content>{{velocity}}
-#set ($discard = $services.localization.use('document', 'FileManager.FileManagerTranslations'))
-#set ($columnsProperties = {
-  'doc.name': {"type":"text","size":10,"link":"view"},
-  '_attachments': {"sortable":false,"filterable":false,"html":true},
-  '_actions': {"sortable":false,"filterable":false,"html":true,"actions":["edit","delete"]}
-})
-#set ($options = {
-  'className': 'FileManager.FileManagerClass',
-  'resultPage': 'FileManager.FileManagerLiveTableResults',
-  'translationPrefix': 'filemanager.livetable.',
-  'tagCloud': true,
-  'rowCount': 15,
-  'maxPages': 10,
-  'selectedColumn': 'doc.name',
-  'defaultOrder': 'asc'
-})
-## Add the filter by selected tags
-  #if($request.tag)
-    #set ($discard = $options.put('selectedTags',["${request.tag}"]))
-  #end
-##
-#set ($columns = ['doc.name', '_attachments', '_actions'])
-#livetable('filemanager' $columns $columnsProperties $options)
-{{/velocity}}</content>
 </xwikidoc>
