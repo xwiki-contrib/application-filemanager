@@ -141,44 +141,53 @@
   })
 #end
 
-#macro (xmlJsL10n $key)
-$!escapetool.xml($escapetool.javascript($services.localization.render($key)))##
-#end
-
 #macro (displayDrive)
   {{html clean="false"}}
   #set ($discard = $xwiki.ssx.use('FileManagerCode.DriveSheet'))
   #set ($discard = $xwiki.jsx.use('FileManagerCode.DriveSheet', {'minify': false}))
   #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
+  #set ($columns = [
+    {
+      'id': 'name',
+      'title': $services.localization.render('Name'),
+      'type': 'file',
+      'sortable': true
+    }, {
+      'id': 'size',
+      'title': $services.localization.render('Size'),
+      'type': 'bytes',
+      'sortable': true
+    }, {
+      'id': 'mediaType',
+      'title': $services.localization.render('Type'),
+      'type': 'mediaType'
+    }, {
+      'id': 'date',
+      'title': $services.localization.render('Modified'),
+      'type': 'date',
+      'sortable': true
+    }, {
+      'id': 'author',
+      'title': $services.localization.render('Author'),
+      'type': 'user',
+      'sortable': true
+    }
+  ])
   &lt;div ng-app="drive" ng-controller="DriveCtrl"&gt;
-    &lt;drive-tree&gt;&lt;/drive-tree&gt;
-    &lt;livetable ng-if="source" id="files" source="source" columns="[
-      {
-        id: 'name',
-        title: '#xmlJsL10n('Name')',
-        type: 'file',
-        sortable: true
-      }, {
-        id: 'size',
-        title: '#xmlJsL10n('Size')',
-        type: 'bytes',
-        sortable: true
-      }, {
-        id: 'mediaType',
-        title: '#xmlJsL10n('Type')',
-        type: 'mediaType'
-      }, {
-        id: 'date',
-        title: '#xmlJsL10n('Modified')',
-        type: 'date',
-        sortable: true
-      }, {
-        id: 'author',
-        title: '#xmlJsL10n('Author')',
-        type: 'user',
-        sortable: true
-      }
-    ]"&gt;&lt;/livetable&gt;
+    &lt;table class="pane-splitter"&gt;
+      &lt;tr&gt;
+        &lt;td class="pane left"&gt;
+          &lt;drive-tree&gt;&lt;/drive-tree&gt;
+        &lt;/td&gt;
+        &lt;td class="pane-splitter-handler"&gt;
+          &lt;div&gt;&amp;equiv;&lt;/div&gt;
+        &lt;/td&gt;
+        &lt;td class="pane right"&gt;
+          &lt;livetable ng-if="source" id="files" source="source"
+            columns="$escapetool.xml($jsontool.serialize($columns))"&gt;&lt;/livetable&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
   &lt;/div&gt;
   {{/html}}
 #end
@@ -596,7 +605,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       <cache>long</cache>
     </property>
     <property>
-      <code>require(['angular'], function(angular) {
+      <code>require(['jquery', 'angular'], function($, angular) {
   var driveDirectives = angular.module('driveDirectives', ['driveServices']);
 
   driveDirectives.directive('file',  function() {
@@ -764,10 +773,63 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       }
     }
   }]);
+
+  driveDirectives.directive('paneSplitterHandler', function() {
+    return {
+      restrict: 'C',
+      scope: {},
+      link: function(scope, element, attrs) {
+        var splitter = $(element).closest('.pane-splitter');
+        var leftPane = $(element).prev();
+        var startClientX, leftPaneWidth, splitterWidthFactor;
+
+        var resize = function(delta) {
+          var absoluteWidth = leftPaneWidth + delta;
+          var width = Math.max(absoluteWidth, 0) * splitterWidthFactor;
+          // The width must be between 10% and 90%.
+          width = Math.min(Math.max(width, 10), 90);
+          leftPane.css('width', width + '%');
+        };
+
+        splitter.on('mousemove', function (event) {
+          if (!startClientX) {
+            return;
+          }
+
+          var delta = event.clientX - startClientX;
+          var callback = function() {
+            resize(delta);
+          };
+
+          // See https://developer.mozilla.org/en-US/docs/Web/Events/resize#requestAnimationFrame
+          if (window.requestAnimationFrame) {
+            window.requestAnimationFrame(callback);
+          } else {
+            setTimeout(callback, 66);
+          }
+        });
+
+        element.on('mousedown', function (event) {
+          event.preventDefault();
+          startClientX = event.clientX;
+          leftPaneWidth = leftPane[0].offsetWidth;
+          splitterWidthFactor = 100 / splitter[0].offsetWidth;
+          // Make sure the cursor doesn't flicker.
+          splitter.css('cursor', 'ew-resize');
+        });
+
+        $(document).on('mouseup', function (event) {
+          startClientX = null;
+          // Reset the cursor.
+          splitter.css('cursor', '');
+        });
+      }
+    };
+  });
 });</code>
     </property>
     <property>
-      <name>Directives: file, user</name>
+      <name>Directives: file, user, pane-splitter-handler</name>
     </property>
     <property>
       <parse>1</parse>
@@ -1653,7 +1715,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       <cache>long</cache>
     </property>
     <property>
-      <code>#files img.avatar, #files img.icon {
+      <code>#template('colorThemeInit.vm')
+
+#files img.avatar, #files img.icon {
   height: 16px;
   vertical-align: bottom;
 }
@@ -1674,13 +1738,44 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
 }
 .jstree &gt; .jstree-children &gt; .jstree-node &gt; .jstree-children &gt; .jstree-node {
   margin-left: 0;
+}
+
+/* Pane Splitter */
+table.pane-splitter {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+table.pane-splitter td.pane {
+  overflow: hidden;
+  padding: 0;
+  vertical-align: top;
+}
+table.pane-splitter td.pane.left {
+  width: 25%;
+}
+table.pane-splitter td.pane-splitter-handler {
+  background-color: $theme.borderColor;
+  color: $theme.textColor;
+  cursor: ew-resize;
+  overflow: hidden;
+  padding: 0;
+  vertical-align: middle;
+  width: 1px;
+}
+table.pane-splitter td.pane-splitter-handler &gt; div {
+  margin-left: -3px;
+}
+table.pane-splitter td.pane .jstree-container-ul,
+table.pane-splitter td.pane .xwiki-livetable-container {
+  margin: .5em;
 }</code>
     </property>
     <property>
       <name>Style</name>
     </property>
     <property>
-      <parse>0</parse>
+      <parse>1</parse>
     </property>
     <property>
       <use>onDemand</use>
