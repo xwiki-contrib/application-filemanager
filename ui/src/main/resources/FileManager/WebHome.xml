@@ -67,10 +67,10 @@
   <object>
     <name>FileManager.WebHome</name>
     <number>0</number>
-    <className>AppWithinMinutes.LiveTableClass</className>
-    <guid>aa5805f1-5967-42ad-b106-3393c8dd348c</guid>
+    <className>FileManagerCode.DriveClass</className>
+    <guid>b4aa3d2f-639b-4462-9737-9e4085d02948</guid>
     <class>
-      <name>AppWithinMinutes.LiveTableClass</name>
+      <name>FileManagerCode.DriveClass</name>
       <customClass/>
       <customMapping/>
       <defaultViewSheet/>
@@ -78,67 +78,19 @@
       <defaultWeb/>
       <nameField/>
       <validationScript/>
-      <class>
+      <name>
         <customDisplay/>
         <disabled>0</disabled>
-        <name>class</name>
+        <name>name</name>
         <number>1</number>
-        <picker>0</picker>
-        <prettyName>Class</prettyName>
-        <size>30</size>
+        <prettyName>Name</prettyName>
+        <script>{{velocity}}$doc.plainTitle{{/velocity}}</script>
         <unmodifiable>0</unmodifiable>
         <validationMessage/>
         <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </class>
-      <columns>
-        <customDisplay/>
-        <disabled>0</disabled>
-        <name>columns</name>
-        <number>3</number>
-        <picker>0</picker>
-        <prettyName>Columns</prettyName>
-        <size>30</size>
-        <unmodifiable>0</unmodifiable>
-        <validationMessage/>
-        <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
-      </columns>
-      <description>
-        <customDisplay/>
-        <disabled>0</disabled>
-        <editor>---</editor>
-        <name>description</name>
-        <number>2</number>
-        <picker>0</picker>
-        <prettyName>Description</prettyName>
-        <rows>5</rows>
-        <size>40</size>
-        <unmodifiable>0</unmodifiable>
-        <validationMessage/>
-        <validationRegExp/>
-        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
-      </description>
+        <classType>com.xpn.xwiki.objects.classes.ComputedFieldClass</classType>
+      </name>
     </class>
-    <property>
-      <class>FileManager.FileManagerClass</class>
-    </property>
-    <property>
-      <columns>doc.name _attachments _actions</columns>
-    </property>
-    <property>
-      <description>{{velocity}}
-$msg.get('contrib.FM.application.message')
-{{/velocity}}
-
-{{velocity}}
-{{html clean=false}}
-#foreach($ext in $services.uix.getExtensions('contrib.filemanager.actions'))
-$services.rendering.render($ext.execute(), "xhtml/1.0")
-#end
-{{/html}}
-{{/velocity}}</description>
-    </property>
   </object>
   <object>
     <name>FileManager.WebHome</name>
