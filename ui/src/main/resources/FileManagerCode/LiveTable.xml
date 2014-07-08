@@ -219,6 +219,9 @@
       },
       templateUrl: new XWiki.Document('LiveTable', 'FileManagerCode').getURL('get'),
       link: function(scope, element, attrs) {
+        // Remove the id attribute because we set it on the table element in the live table template.
+        angular.element(element).removeAttr('id');
+
         var fetchRows = function(newParamValues) {
           newParamValues &amp;&amp; angular.extend(scope.params, newParamValues);
           scope.rows = scope.source.get(scope.params, function(rows) {
