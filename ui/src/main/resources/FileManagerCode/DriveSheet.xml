@@ -197,9 +197,22 @@
 #if ($xcontext.action == 'get')
   #handleDriveWebServiceRequest
 #end
-{{/velocity}}{{velocity}}
+{{/velocity}}
+
+{{velocity}}
 #if ($xcontext.action != 'get')
-  #displayDrive
+  {{include reference="FileManagerCode.Migrator" /}}
+#end
+{{/velocity}}
+
+{{velocity}}
+#if ($xcontext.action != 'get')
+  #checkIfMigrationIsNeeded($isMigrationNeeded)
+  #if ($isMigrationNeeded)
+    #handleMigration
+  #else
+    #displayDrive
+  #end
 #end
 {{/velocity}}</content>
   <object>
