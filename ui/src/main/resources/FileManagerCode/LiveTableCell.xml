@@ -42,7 +42,7 @@
   <content>{{velocity}}
 {{html clean="false"}}
 &lt;div ng-switch="column.type"&gt;
-  &lt;div ng-switch-when="file" file="{{row[column.id]}}"&gt;&lt;/div&gt;
+  &lt;div ng-switch-when="file" file="row"&gt;&lt;/div&gt;
   &lt;div ng-switch-when="bytes"&gt;{{ row[column.id] | bytes }}&lt;/div&gt;
   &lt;div ng-switch-when="mediaType"&gt;{{ row[column.id] | mediaType }}&lt;/div&gt;
   #set ($dateFormat = $xwiki.getXWikiPreference('dateformat', 'yyyy/MM/dd HH:mm'))

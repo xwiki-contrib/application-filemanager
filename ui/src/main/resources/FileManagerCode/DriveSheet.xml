@@ -696,14 +696,15 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
 
     return {
       restrict: 'A',
-      scope: {},
-      template: '&lt;img ng-src="{{icon}}" alt="{{type}}" title="{{type}}" class="icon" /&gt; &lt;a href="{{url}}"&gt;{{name}}&lt;/a&gt;',
+      scope: {
+        'file': '='
+      },
+      template: '&lt;img ng-src="{{icon}}" alt="{{type}}" title="{{type}}" class="icon" /&gt; &lt;a href="{{url}}"&gt;{{file.name}}&lt;/a&gt;',
       link: function(scope, element, attrs) {
-        scope.name = attrs.file;
-        scope.url = new XWiki.Document(attrs.file).getURL();
+        scope.url = new XWiki.Document(scope.file.id).getURL();
         scope.icon = "$xwiki.getSkinFile('icons/silk/page_white.png')";
         scope.type = 'Attachment';
-        var icon = getIcon(attrs.file);
+        var icon = getIcon(scope.file.name);
         if (icon) {
           scope.icon = scope.icon.replace('page_white', icon.name);
           scope.type = icon.type;
