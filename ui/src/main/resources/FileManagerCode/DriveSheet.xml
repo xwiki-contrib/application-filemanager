@@ -297,8 +297,8 @@
     <property>
       <code>require.config({
   paths: {
-    angular: '//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular.min',
-    'angular-resource': '//ajax.googleapis.com/ajax/libs/angularjs/1.2.18/angular-resource.min',
+    angular: '//ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.min',
+    'angular-resource': '//ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular-resource.min',
     liveTable: '$xwiki.getURL("FileManagerCode.LiveTable", "jsx", "language=$xcontext.language&amp;minify=false")',
     pagination: '$xwiki.getURL("FileManagerCode.Pagination", "jsx", "language=$xcontext.language&amp;minify=false")',
     jsTree: '//cdnjs.cloudflare.com/ajax/libs/jstree/3.0.2/jstree.min'
