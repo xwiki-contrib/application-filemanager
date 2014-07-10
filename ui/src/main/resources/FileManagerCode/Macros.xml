@@ -95,15 +95,19 @@
   })
 #end
 
-#macro (createFolder $name $parentDoc)
+#macro (createFolder $name $parent)
   #if ("$!name" == '')
     #set ($name = 'Untitled Folder')
   #end
   #getUniquePageName($name $id)
-  #set ($folderReference = $services.model.createDocumentReference($parentDoc.wiki, $parentDoc.space, $id))
+  #set ($folderReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $id))
+  #if ("$!parent" == '')
+    #set ($parent = $doc.name)
+  #end
+  #set ($parentReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $parent))
   $response.sendRedirect($xwiki.getURL($folderReference, 'save', $escapetool.url({
     'title': $name,
-    'parent': $parentDoc.fullName,
+    'parent': $services.model.serialize($parentReference, 'compactwiki'),
     'template': 'FileManagerCode.FolderTemplate',
     'comment': 'Folder created',
     'form_token': $request.form_token,

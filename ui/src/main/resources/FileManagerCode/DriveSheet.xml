@@ -49,7 +49,7 @@
   #if ($request.action)
     #if ($services.csrf.isTokenValid($request.form_token))
       #if ($request.action == 'createFolder')
-        #createFolder($request.name $doc)
+        #createFolder($request.name $request.parent)
       #elseif ($request.action == 'move')
         #batchMove
       #elseif ($request.action == 'copy')
@@ -89,24 +89,22 @@
 #end
 
 #macro (batchMove)
-  ## TODO: Read the collection of paths and the destination from the request.
-  #set ($paths = [])
-  #set ($destination = [])
-  #set ($jobId = $services.drive.move($paths, $destination))
+    #set ($paths = $request.getParameterValues('path'))
+  #set ($paths = $paths.subList(0, $paths.size()))
+  #set ($jobId = $services.drive.move($paths, $request.destination))
   #handleJobStartFailure($jobId)
 #end
 
 #macro (batchCopy)
-  ## TODO: Read the collection of paths and the destination from the request.
-  #set ($paths = [])
-  #set ($destination = [])
-  #set ($jobId = $services.drive.copy($paths, $destination))
+    #set ($paths = $request.getParameterValues('path'))
+  #set ($paths = $paths.subList(0, $paths.size()))
+  #set ($jobId = $services.drive.copy($paths, $request.destination))
   #handleJobStartFailure($jobId)
 #end
 
 #macro (batchDelete)
-  ## TODO: Read the collection of paths from the request.
-  #set ($paths = [])
+  #set ($paths = $request.getParameterValues('path'))
+  #set ($paths = $paths.subList(0, $paths.size()))
   #set ($jobId = $services.drive.delete($paths))
   #handleJobStartFailure($jobId)
 #end
@@ -146,6 +144,25 @@
   #set ($discard = $xwiki.ssx.use('FileManagerCode.DriveSheet'))
   #set ($discard = $xwiki.jsx.use('FileManagerCode.DriveSheet', {'minify': false}))
   #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
+  &lt;div ng-app="drive" ng-controller="DriveCtrl"&gt;
+    &lt;table class="pane-splitter"&gt;
+      &lt;tr&gt;
+        &lt;td class="pane left"&gt;
+          &lt;drive-tree drive="drive"&gt;&lt;/drive-tree&gt;
+        &lt;/td&gt;
+        &lt;td class="pane-splitter-handler"&gt;
+          &lt;div&gt;&amp;equiv;&lt;/div&gt;
+        &lt;/td&gt;
+        &lt;td class="pane right"&gt;
+          &lt;files ng-if="drive.location.type == 'folder' || drive.location.type == 'files'" drive="drive"&gt;&lt;/files&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+  {{/html}}
+#end
+
+#macro (filesLiveTableTemplate)
   #set ($columns = [
     {
       'id': 'name',
@@ -173,29 +190,49 @@
       'sortable': true
     }
   ])
-  &lt;div ng-app="drive" ng-controller="DriveCtrl"&gt;
-    &lt;table class="pane-splitter"&gt;
-      &lt;tr&gt;
-        &lt;td class="pane left"&gt;
-          &lt;drive-tree&gt;&lt;/drive-tree&gt;
-        &lt;/td&gt;
-        &lt;td class="pane-splitter-handler"&gt;
-          &lt;div&gt;&amp;equiv;&lt;/div&gt;
-        &lt;/td&gt;
-        &lt;td class="pane right"&gt;
-          &lt;livetable ng-if="source" id="files" source="source"
-            columns="$escapetool.xml($jsontool.serialize($columns))"&gt;&lt;/livetable&gt;
-        &lt;/td&gt;
-      &lt;/tr&gt;
-    &lt;/table&gt;
+  {{ selectedFiles = getSelectedFiles(selection) | hide }}
+  &lt;div class="btn-toolbar file-actions" role="toolbar"&gt;
+    &lt;div class="btn-group" ng-if="drive.location.type == 'folder'"&gt;
+      &lt;button class="btn btn-default" ng-disabled="drive.readOnly"
+          title="Upload a new file to the current folder" type="button"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_add.png')" alt="New File" class="icon" /&gt;New File
+      &lt;/button&gt;
+    &lt;/div&gt;&lt;div class="btn-group"&gt;
+      &lt;button type="button" class="btn btn-default" title="Cut selected files"
+          ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="cut(selectedFiles)"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/cut.png')" alt="Cut" class="icon" /&gt;Cut
+      &lt;/button&gt;
+      &lt;button type="button" class="btn btn-default" title="Copy selected files"
+          ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="copy(selectedFiles)"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_copy.png')" alt="Copy" class="icon" /&gt;Copy
+      &lt;/button&gt;
+      &lt;button type="button" class="btn btn-default" title="Paste into the current folder"
+          ng-if="drive.location.type == 'folder'" ng-disabled="!clipboard" ng-click="paste()"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_paste.png')" alt="Paste" class="icon" /&gt;Paste
+      &lt;/button&gt;
+    &lt;/div&gt;&lt;div class="btn-group"&gt;
+      &lt;button type="button" class="btn btn-default" title="Rename selected file"
+          ng-disabled="drive.readOnly || selectedFiles.length != 1" ng-click="rename(selectedFiles[0])"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/textfield_rename.png')" alt="Rename" class="icon" /&gt;Rename...
+      &lt;/button&gt;
+      &lt;button type="button" class="btn btn-default" title="Delete selected files"
+          ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="delete(selectedFiles)"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/cross.png')" alt="Delete" class="icon" /&gt;Delete
+      &lt;/button&gt;
+    &lt;/div&gt;
   &lt;/div&gt;
-  {{/html}}
+  &lt;livetable id="{{id}}" columns="$escapetool.xml($jsontool.serialize($columns))"
+    source="source" selection="selection"&gt;&lt;/livetable&gt;
 #end
 {{/velocity}}
 
 {{velocity wiki="false"}}
 #if ($xcontext.action == 'get')
-  #handleDriveWebServiceRequest
+  #if ($request.template == 'files')
+    #filesLiveTableTemplate
+  #else
+    #handleDriveWebServiceRequest
+  #end
 #end
 {{/velocity}}
 
@@ -329,32 +366,85 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
   var drive = angular.module('drive', ['driveServices', 'driveDirectives', 'driveFilters', 'liveTable']);
 
   drive.controller('DriveCtrl', ['$scope', 'Drive', 'Folder', function ($scope, Drive, Folder) {
-    var asSource = function(service){
+    var asSource = function(service) {
       return {get: service};
-    }
+    };
 
-    var selectedNode = null;
-    $scope.$on('driveTree:selectionChange', function(event, selectedNodes) {
-      if (selectedNodes.length != 1) {
-        selectedNode = $scope.source = null;
-        return;
-      } else if (selectedNode == selectedNodes[0]) {
-        return;
-      } else if (selectedNodes[0] == '/allFiles') {
-        $scope.source = asSource(Drive.getAllFiles);
-      } else if (selectedNodes[0] == '/orphanFiles') {
-        $scope.source = asSource(Drive.getOrphanFiles);
-      } else if (selectedNodes[0] == '/activeJobs') {
-        // TODO
-        $scope.source = null;
-      } else if (selectedNodes[0] == '/orphanFolders' || selectedNodes[0] == XWiki.currentPage) {
-        $scope.source = null;
-      } else {
-        var selectedFolder = Folder.bind({page: selectedNodes[0]});
-        $scope.source = asSource($.proxy(selectedFolder.getFiles, selectedFolder));
+    var runJob = function(type, data, callback) {
+      $scope.drive.readOnly = true;
+
+      var onJobUpdate = function(job) {
+        if (job &amp;&amp; job.id) {
+          if (job.state == 'FINISHED') {
+            $scope.drive.readOnly = false;
+            callback &amp;&amp; typeof callback.finished == 'function' &amp;&amp; callback.finished(job);
+          } else if (job.state == 'WAITING') {
+            callback &amp;&amp; typeof callback.waiting == 'function' &amp;&amp; callback.waiting(job);
+          } else {
+            // The job is still running. Wait 1s before asking for a job status update.
+            setTimeout(function() {
+              Drive.getJobStatus({id: job.id}, onJobUpdate, onError);
+            }, 1000);
+          }
+        } else {
+          onError(job);
+        }
       }
-      selectedNode = selectedNodes[0];
-    });
+
+      var onError = function(response) {
+        $scope.drive.readOnly = false;
+        callback &amp;&amp; typeof callback.failed == 'function' &amp;&amp; callback.failed(response);
+      }
+
+      return Drive[type]({}, $.param(data, true), onJobUpdate, onError);
+    };
+
+    $scope.drive = {
+      readOnly: false,
+
+      location: {
+        id: null,
+        type: null
+      },
+
+      getFileSource: function(locationId) {
+        if (locationId == '/allFiles') {
+          return asSource(Drive.getAllFiles);
+        } else if (locationId == '/orphanFiles') {
+          return asSource(Drive.getOrphanFiles);
+        } else {
+          var folder = Folder.bind({page: locationId});
+          return asSource($.proxy(folder.getFiles, folder));
+        }
+      },
+
+      createFile: function() {},
+
+      createFolder: function(name, parent, onSuccess, onError) {
+        Drive.createFolder({}, $.param({
+          name: name,
+          parent: parent
+        }), onSuccess, onError);
+      },
+
+      move: function(paths, destination, callback) {
+        runJob('move', {
+          path: paths,
+          destination: destination
+        }, callback);
+      },
+
+      copy: function(paths, destination, callback) {
+        runJob('copy', {
+          path: paths,
+          destination: destination
+        }, callback);
+      },
+
+      delete: function(paths, callback) {
+        runJob('delete', {path: paths}, callback);
+      }
+    };
   }]);
 });</code>
     </property>
@@ -529,7 +619,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
 });</code>
     </property>
     <property>
-      <name>Services</name>
+      <name>Services: Drive, Folder, File, User</name>
     </property>
     <property>
       <parse>1</parse>
@@ -840,10 +930,84 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       }
     };
   });
+
+  driveDirectives.directive('files', function() {
+    return {
+      restrict: 'E',
+      scope: {
+        drive: '='
+      },
+      templateUrl: new XWiki.Document('DriveSheet', 'FileManagerCode').getURL('get', 'template=files&amp;outputSyntax=plain'),
+      link: function(scope, element, attrs) {
+        scope.id = attrs.id || 'files';
+        scope.selection = {};
+
+        scope.getSelectedFiles = function(selection) {
+          var selectedFiles = [];
+          for (var file in selection) {
+            if (selection.hasOwnProperty(file) &amp;&amp; selection[file]) {
+              selectedFiles.push(file);
+            }
+          }
+          return selectedFiles;
+        };
+
+        var getPaths = function(files) {
+          var paths = [];
+          var folder = scope.drive.location.type == 'folder' ? scope.drive.location.id : '';
+          for (var i = 0; i &lt; files.length; i++) {
+            paths.push(folder + '/' + files[i]);
+          }
+          return paths;
+        };
+
+        var refreshLiveTable = function() {
+          scope.source = scope.drive.getFileSource(scope.drive.location.id);
+        };
+
+        scope.$watch('drive.location', refreshLiveTable);
+
+        scope.cut = function(files) {
+          scope.clipboard = {
+            action: 'move',
+            paths: getPaths(files)
+          };
+        };
+
+        scope.copy = function(files) {
+          scope.clipboard = {
+            action: 'copy',
+            paths: getPaths(files)
+          };
+        };
+
+        scope.paste = function() {
+          scope.drive[scope.clipboard.action](scope.clipboard.paths, scope.drive.location.id, {
+            finished: refreshLiveTable
+          });
+          if (scope.clipboard.action == 'move') {
+            delete scope.clipboard;
+          }
+        };
+
+        scope.rename = function(file) {
+          // TODO
+        };
+
+        scope.delete = function(files) {
+          if (window.confirm('Are you sure you want to delete the selected files?')) {
+            // Clear the selection.
+            scope.selection = {};
+            scope.drive.delete(getPaths(files), {finished: refreshLiveTable});
+          }
+        };
+      }
+    };
+  });
 });</code>
     </property>
     <property>
-      <name>Directives: file, user, pane-splitter-handler</name>
+      <name>Directives: file, user, pane-splitter-handler, files</name>
     </property>
     <property>
       <parse>1</parse>
@@ -965,6 +1129,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
         icon: '$xwiki.getSkinFile("icons/silk/page_white_stack.png")',
         state: {
           selected: false
+        },
+        data: {
+          type: 'files'
         }
       },
       {
@@ -973,6 +1140,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
         icon: '$xwiki.getSkinFile("icons/silk/page_white_error.png")',
         state: {
           selected: false
+        },
+        data: {
+          type: 'files'
         }
       },
       {
@@ -982,7 +1152,10 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
         state: {
           selected: false
         },
-        children: true
+        children: true,
+        data: {
+          type: 'folders'
+        }
       },
       {
         id: '/activeJobs',
@@ -991,7 +1164,10 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
         state: {
           selected: false
         },
-        children: true
+        children: true,
+        data: {
+          type: 'jobs'
+        }
       }
     ];
 
@@ -1076,151 +1252,6 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       }
     };
 
-    var readOnly = false;
-    var isReadOnly = function() {return readOnly;};
-
-    var folderMenu = {
-      open: {
-        label: 'Open',
-        action: function(data) {
-          var tree = $.jstree.reference(data.reference);
-          var node = tree.get_node(data.reference);
-          window.location = new XWiki.Document(node.id).getURL();
-        }
-      },
-      openInNewTab: {
-        label: 'Open in New Tab',
-        action: function(data) {
-          var tree = $.jstree.reference(data.reference);
-          var node = tree.get_node(data.reference);
-          window.open(new XWiki.Document(node.id).getURL());
-        }
-      },
-      refresh: {
-        separator_after: true,
-        label: 'Refresh',
-        icon: '$xwiki.getSkinFile("icons/silk/arrow_refresh.png")',
-        action: function(data) {
-          var tree = $.jstree.reference(data.reference);
-          var node = tree.get_node(data.reference);
-          tree.refresh_node(node);
-        }
-      },
-      createFolder: {
-        label: 'New Folder',
-        icon: '$xwiki.getSkinFile("icons/silk/folder_add.png")',
-        action: function(data) {
-          var tree = $.jstree.reference(data.reference);
-          var parent = tree.get_node(data.reference);
-          tree.create_node(parent, asFolderNode({name: 'New Folder'}), 'last', function(newNode) {
-            setTimeout(function() {
-              tree.edit(newNode);
-            }, 0);
-          });
-        },
-        __disabled: isReadOnly
-      },
-      createFile: {
-        label: 'New File',
-        icon: '$xwiki.getSkinFile("icons/silk/page_white_add.png")',
-        action: function(data) {},
-        __disabled: isReadOnly
-      },
-      cut: {
-        separator_before: true,
-        label: 'Cut',
-        icon: '$xwiki.getSkinFile("icons/silk/cut.png")',
-        action: function(data) {
-          var tree = $.jstree.reference(data.reference);
-          var node = tree.get_node(data.reference);
-          tree.cut(node);
-        }
-      },
-      copy: {
-        label: 'Copy',
-        icon: '$xwiki.getSkinFile("icons/silk/page_white_copy.png")',
-        action: function(data) {
-          var tree = $.jstree.reference(data.reference);
-          var node = tree.get_node(data.reference);
-          tree.copy(node);
-        }
-      },
-      paste: {
-        label: 'Paste Into Folder',
-        icon: '$xwiki.getSkinFile("icons/silk/page_white_paste.png")',
-        action: function(data) {
-          var tree = $.jstree.reference(data.reference);
-          var node = tree.get_node(data.reference);
-          tree.paste(node);
-        },
-        __disabled: function(node) {
-          return readOnly || !this.can_paste();
-        }
-      },
-      rename: {
-        separator_before: true,
-        icon: '$xwiki.getSkinFile("icons/silk/textfield_rename.png")',
-        label: 'Rename...',
-        action: function(data) {
-          var tree = $.jstree.reference(data.reference);
-          var node = tree.get_node(data.reference);
-          setTimeout(function() {tree.edit(node);}, 0);
-        },
-        __disabled: isReadOnly
-      },
-      delete: {
-        label: 'Move to Trash',
-        icon: '$xwiki.getSkinFile("icons/silk/bin.png")',
-        action: function(data) {
-          // Display the confirmation after the context menu closes.
-          setTimeout(function() {
-            if (window.confirm('Are you sure you want to delete this folder?')) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              tree.delete_node(node);
-            }
-          }, 0);
-        },
-        __disabled: isReadOnly
-      }
-    };
-
-    var driveMenu = {
-      refresh: folderMenu.refresh,
-      createFolder: folderMenu.createFolder,
-      paste: angular.copy(folderMenu.paste)
-    };
-    driveMenu.paste.label = 'Paste';
-
-    var runJob = function(service, params, postData, success, error) {
-      readOnly = true;
-
-      var onJobUpdate = function(job) {
-        if (job &amp;&amp; job.id) {
-          if (job.state == 'FINISHED') {
-            readOnly = false;
-            typeof success == 'function' &amp;&amp; success(job);
-          } else if (job.state == 'WAITING') {
-            // TODO: Display the overwrite question.
-          } else {
-            // The job is still running. Wait 1s before asking for a job status update.
-            setTimeout(function() {
-              Drive.getJobStatus({id: job.id}, onJobUpdate, onError);
-            }, 1000);
-          }
-        } else {
-          onError(job);
-        }
-      }
-
-      var onError = function(response) {
-        readOnly = false;
-        typeof error == 'function' &amp;&amp; error(response);
-      }
-
-      return service(params, postData, onJobUpdate, onError);
-    }
-
     var isFolder = function(node) {
       return !!(node.data &amp;&amp; node.data.type == 'folder');
     };
@@ -1231,20 +1262,139 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
 
     return {
       restrict: 'E',
-      scope: {},
+      scope: {
+        drive: '='
+      },
       link: function(scope, element, attrs) {
+        var isReadOnly = function() {return scope.drive.readOnly;};
+
+        var folderMenu = {
+          open: {
+            label: 'Open',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+             window.location = new XWiki.Document(node.id).getURL();
+            }
+          },
+          openInNewTab: {
+            label: 'Open in New Tab',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+              window.open(new XWiki.Document(node.id).getURL());
+            }
+          },
+          refresh: {
+            separator_after: true,
+            label: 'Refresh',
+            icon: '$xwiki.getSkinFile("icons/silk/arrow_refresh.png")',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+              tree.refresh_node(node);
+            }
+          },
+          createFolder: {
+            label: 'New Folder',
+            icon: '$xwiki.getSkinFile("icons/silk/folder_add.png")',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var parent = tree.get_node(data.reference);
+              tree.create_node(parent, asFolderNode({name: 'New Folder'}), 'last', function(newNode) {
+                setTimeout(function() {
+                  tree.edit(newNode);
+                }, 0);
+              });
+            },
+            __disabled: isReadOnly
+          },
+          createFile: {
+            label: 'New File',
+            icon: '$xwiki.getSkinFile("icons/silk/page_white_add.png")',
+            action: function(data) {},
+            __disabled: isReadOnly
+          },
+          cut: {
+            separator_before: true,
+            label: 'Cut',
+            icon: '$xwiki.getSkinFile("icons/silk/cut.png")',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+              tree.cut(node);
+            }
+          },
+          copy: {
+            label: 'Copy',
+            icon: '$xwiki.getSkinFile("icons/silk/page_white_copy.png")',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+              tree.copy(node);
+            }
+          },
+          paste: {
+            label: 'Paste Into Folder',
+            icon: '$xwiki.getSkinFile("icons/silk/page_white_paste.png")',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+              tree.paste(node);
+            },
+            __disabled: function(node) {
+              return scope.drive.readOnly || !this.can_paste();
+            }
+          },
+          rename: {
+            separator_before: true,
+            icon: '$xwiki.getSkinFile("icons/silk/textfield_rename.png")',
+            label: 'Rename...',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+              setTimeout(function() {tree.edit(node);}, 0);
+            },
+            __disabled: isReadOnly
+          },
+          delete: {
+            label: 'Delete',
+            icon: '$xwiki.getSkinFile("icons/silk/cross.png")',
+           action: function(data) {
+              // Display the confirmation after the context menu closes.
+              setTimeout(function() {
+                if (window.confirm('Are you sure you want to delete this folder?')) {
+                  var tree = $.jstree.reference(data.reference);
+                  var node = tree.get_node(data.reference);
+                  tree.delete_node(node);
+                }
+              }, 0);
+            },
+            __disabled: isReadOnly
+          }
+        };
+
+        var driveMenu = {
+          refresh: folderMenu.refresh,
+          createFolder: folderMenu.createFolder,
+          paste: angular.copy(folderMenu.paste)
+        };
+        driveMenu.paste.label = 'Paste';
+
         $(element).jstree({
           core: {
             data: getChildren,
             'check_callback' : function (operation, node, node_parent, node_position, more) {
               // Allow operations on folders. The target parent must be either a folder or the drive itself, unless the
               // operation is delete in which case we only care that the deleted node is a folder.
-              return !readOnly &amp;&amp; isFolder(node) &amp;&amp; (operation == 'delete_node' || isFolder(node_parent)
+              return !scope.drive.readOnly &amp;&amp; isFolder(node) &amp;&amp; (operation == 'delete_node' || isFolder(node_parent)
                 || isDrive(node_parent));
-            }
+            },
+            multiple: false
           },
           plugins: ['dnd', 'contextmenu'],
           contextmenu: {
+            select_node: false,
             items: function(node, callback) {
               var menu;
               if (!node.data) {
@@ -1267,7 +1417,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
           },
           dnd: {
             is_draggable: function(nodes) {
-              if (readOnly) {
+              if (scope.drive.readOnly) {
                 return false;
               } else {
                 // Only folder nodes can be dragged.
@@ -1292,12 +1442,23 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
           }
 
         }).on('select_node.jstree deselect_node.jstree', function(event, data) {
-          ${escapetool.d}location.search('driveNode', data.selected.length == 1 ? data.selected[0] : null);
           // Prevent nested $apply calls by scheduling the changes to the scope in a future call stack.
           // See https://docs.angularjs.org/error/$rootScope/inprog#inconsistent-api-sync-async-
           setTimeout(function() {
             scope.$apply(function() {
-              scope.$emit('driveTree:selectionChange', data.selected);
+              if (data.selected.length != 1) {
+                delete scope.drive.location;
+                ${escapetool.d}location.search('driveNode', null);
+              } else {
+                var selectedNode = data.selected[0];
+                if (!scope.drive.location || selectedNode != scope.drive.location.id) {
+                  ${escapetool.d}location.search('driveNode', selectedNode);
+                  scope.drive.location = {
+                    id: selectedNode,
+                    type: data.node.data.type
+                  };
+                }
+              }
             })
           }, 0);
 
@@ -1308,8 +1469,10 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
         }).on('delete_node.jstree', function(event, data) {
           // Make sure the deleted tree node has an associated folder.
           var folderId = data.node.data.id;
-          folderId &amp;&amp; runJob(Folder.delete, {page: folderId}, null, null, function() {
-            data.instance.refresh_node(data.node.parent);
+          folderId &amp;&amp; scope.drive.delete([folderId], {
+            failed: function(response) {
+              data.instance.refresh_node(data.node.parent);
+            }
           });
 
         }).on('rename_node.jstree', function(event, data) {
@@ -1320,19 +1483,18 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
               var refreshParent = function() {
                 data.instance.refresh_node(data.node.parent);
               };
-              runJob(Folder.move, {page: folderId}, $.param({
-                parent: data.node.parent,
-                name: data.text
-              }), refreshParent, refreshParent);
+              scope.drive.move([folderId], data.node.parent + '/' + data.text, {
+                finished: refreshParent,
+                failed: refreshParent
+              });
             }
           } else {
             // Create a new folder.
-            var service = data.node.parent == XWiki.currentPage ? Drive.createFolder : Folder.createFolder;
-            service({page: data.node.parent}, $.param({name: data.node.text}), function(folder) {
+            scope.drive.createFolder(data.node.text, data.node.parent, function(folder) {
               data.instance.set_id(data.node, folder.id);
               data.node.data = folder;
               data.node.data.type = 'folder';
-            }, function() {
+            }, function(response) {
               data.instance.delete_node(data.node);
             });
           }
@@ -1343,19 +1505,20 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
           if (!folder.id || data.parent == data.old_parent) {
             return;
           }
-          runJob(Folder.move, {page: folder.id}, $.param({
-            parent: data.parent
-          }), function(job) {
-            // Job finished. Refresh the new parent node.
-            data.instance.refresh_node(data.parent);
-          }, function(response) {
-            // Job failed. Undo the move.
-            // Disconnect the node from the associated folder to prevent moving the folder.
-            var folderId = folder.id;
-            folder.id = null;
-            data.instance.move_node(data.node, data.old_parent, data.old_position);
-            // Reconnect the tree node to the folder as soon as possible.
-            setTimeout(function() {folder.id = folderId;}, 0);
+          scope.drive.move([folder.id], data.parent, {
+            finished: function(job) {
+              // Refresh the new parent node.
+              data.instance.refresh_node(data.parent);
+            },
+            failed: function(response) {
+              // Undo the move.
+              // Disconnect the node from the associated folder to prevent moving the folder.
+              var folderId = folder.id;
+              folder.id = null;
+              data.instance.move_node(data.node, data.old_parent, data.old_position);
+              // Reconnect the tree node to the folder as soon as possible.
+              setTimeout(function() {folder.id = folderId;}, 0);
+            }
           });
 
         }).on('copy_node.jstree', function(event, data) {
@@ -1366,14 +1529,15 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
           }
           // Mark the copy as folder to be able to delete it in case of error.
           data.node.data = {type: 'folder'};
-          runJob(Folder.copy, {page: folder.id}, $.param({
-            parent: data.parent
-          }), function(job) {
-            // Job finished. Refresh the new parent node.
-            data.instance.refresh_node(data.parent);
-          }, function(response) {
-            // Job failed. Undo the copy.
-            data.instance.delete_node(data.node);
+          scope.drive.copy([folder.id], data.parent, {
+            finished: function(job) {
+              // Refresh the new parent node.
+              data.instance.refresh_node(data.parent);
+            },
+            failed: function(response) {
+              // Undo the copy.
+              data.instance.delete_node(data.node);
+            }
           });
         });
       }
@@ -1637,10 +1801,16 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       return $filter('date')(timestamp, dateFormat);
     }
   }]);
+
+  driveFilters.filter('hide', function() {
+    return function(value) {
+      return '';
+    }
+  });
 });</code>
     </property>
     <property>
-      <name>Filters</name>
+      <name>Filters: bytes, mediaType, timeAgo, hide</name>
     </property>
     <property>
       <parse>1</parse>
@@ -1731,21 +1901,33 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
     <property>
       <code>#template('colorThemeInit.vm')
 
+/**
+ * File Live Table
+ */
 #files img.avatar, #files img.icon {
   height: 16px;
   vertical-align: bottom;
 }
+.file-actions .icon {
+  margin-right: .3em;
+  vertical-align: bottom;
+}
+/* Overwrite the bottom border because we don't display the filters */
+#files table.xwiki-livetable table.xwiki-livetable-display thead.xwiki-livetable-display-header {
+  border-bottom: 0 none;
+}
 
-/* Overwrite the margin from the XWiki skin. */
+/**
+ * Drive Tree
+ */
 .jstree ul.jstree-children {
+ /* Overwrite the margin from the XWiki skin. */
   margin: 0;
 }
-
-/* Overwrite the line height from the XWiki skin. */
 .jstree-contextmenu a * {
+  /* Overwrite the line height from the XWiki skin. */
   line-height: inherit;
 }
-
 /* Display the root node differently. */
 .jstree &gt; .jstree-children &gt; .jstree-node &gt; .jstree-icon {
   display: none;
@@ -1754,7 +1936,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
   margin-left: 0;
 }
 
-/* Pane Splitter */
+/**
+ * Pane Splitter
+ */
 table.pane-splitter {
   border-collapse: collapse;
   table-layout: fixed;
@@ -1781,12 +1965,101 @@ table.pane-splitter td.pane-splitter-handler &gt; div {
   margin-left: -3px;
 }
 table.pane-splitter td.pane .jstree-container-ul,
-table.pane-splitter td.pane .xwiki-livetable-container {
+table.pane-splitter td.pane .xwiki-livetable-container,
+table.pane-splitter td.pane .file-actions {
   margin: .5em;
+}
+table.pane-splitter td.pane .file-actions {
+  margin-bottom: 0;
+}
+
+/**
+ * Button Group (Bootstrap)
+ */
+.btn-group {
+  display: inline-block;
+  vertical-align: middle;
+}
+.btn {
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  float: left;
+  margin: 0;
+  padding: 6px 12px;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.btn::-moz-focus-inner {
+  padding: 0;
+  border: 0;
+}
+.btn:focus, .btn:active:focus, .btn.active:focus {
+  outline: thin dotted;
+  outline: 5px auto -webkit-focus-ring-color;
+  outline-offset: -2px;
+}
+.btn:hover, .btn:focus {
+  text-decoration:none
+}
+.btn:active, .btn.active {
+  background-image: none;
+  box-shadow: inset 0 3px 5px rgba(0,0,0,.125);
+  outline: 0;
+  -webkit-box-shadow: inset 0 3px 5px rgba(0,0,0,.125);
+}
+.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+  box-shadow: none;
+  cursor: not-allowed;
+  filter: alpha(opacity=65);
+  opacity: .65
+  pointer-events: none;
+  -webkit-box-shadow: none;
+}
+.btn-group &gt; .btn:focus {
+  outline: 0 none;
+}
+.btn-group &gt; .btn:hover,
+.btn-group &gt; .btn:focus,
+.btn-group &gt; .btn:active {
+  z-index: 2;
+}
+.btn.btn-default {
+  background-color: $theme.pageContentBackgroundColor;
+  border-color: $theme.borderColor;
+  color: $theme.textColor;
+}
+.btn.btn-default:hover,
+.btn.btn-default:focus,
+.btn.btn-default:active,
+.btn.btn-default.active {
+  background-color: $theme.pageBackgroundColor;
+}
+.btn-group &gt; .btn:first-child:not(:last-child):not(.dropdown-toggle) {
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+.btn-group &gt; .btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {
+  border-radius: 0;
+}
+.btn-group &gt; .btn:last-child:not(:first-child), .btn-group &gt; .dropdown-toggle:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.btn-group .btn + .btn, .btn-group .btn + .btn-group, .btn-group .btn-group + .btn, .btn-group .btn-group + .btn-group {
+  margin-left: -1px;
+}
+.btn-toolbar .btn-group {
+  margin-left: .5em;
+}
+.btn-toolbar .btn-group:first-of-type {
+  margin-left: 0;
 }</code>
     </property>
     <property>
-      <name>Style</name>
+      <name>Styles: File Live Table, Drive Tree, Pane Splitter, Button Group</name>
     </property>
     <property>
       <parse>1</parse>

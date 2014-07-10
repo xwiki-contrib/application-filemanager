@@ -52,7 +52,7 @@
         &lt;table class="xwiki-livetable-display"&gt;
           &lt;thead class="xwiki-livetable-display-header"&gt;
             &lt;tr&gt;
-              &lt;th class="xwiki-livetable-display-header-text"&gt;&lt;/th&gt;
+              &lt;th ng-if="selection" class="xwiki-livetable-display-header-text"&gt;&lt;/th&gt;
               &lt;th ng-repeat="column in columns" class="xwiki-livetable-display-header-text"
                   ng-class="{
                     sortable: column.sortable,
@@ -66,7 +66,7 @@
           &lt;/thead&gt;
           &lt;tbody class="xwiki-livetable-display-body"&gt;
             &lt;tr ng-repeat="row in rows.list"&gt;
-              &lt;td&gt;&lt;input type="checkbox" ng-model="selectedRows[row.id]" /&gt;&lt;/td&gt;
+              &lt;td ng-if="selection"&gt;&lt;input type="checkbox" ng-model="selection[row.id]" /&gt;&lt;/td&gt;
               &lt;td ng-repeat="column in columns" ng-include="liveTableCellTemplate"&gt;&lt;/td&gt;
             &lt;/tr&gt;
           &lt;/tbody&gt;
@@ -215,13 +215,11 @@
       scope: {
         'id': '@',
         'source': '=',
-        'columns': '='
+        'columns': '=',
+        'selection': '=?'
       },
       templateUrl: new XWiki.Document('LiveTable', 'FileManagerCode').getURL('get'),
       link: function(scope, element, attrs) {
-        // Remove the id attribute because we set it on the table element in the live table template.
-        angular.element(element).removeAttr('id');
-
         var fetchRows = function(newParamValues) {
           newParamValues &amp;&amp; angular.extend(scope.params, newParamValues);
           scope.rows = scope.source.get(scope.params, function(rows) {
@@ -250,7 +248,9 @@
 
         scope.$watch('source', function(newValue, oldValue) {
           // Reset the selected rows.
-          scope.selectedRows = {};
+          if (scope.selection) {
+            scope.selection = {};
+          }
           // Read the parameters from the URL when the source is initialized.
           // Reset the pagination whenever the source is changed afterwards.
           fetchRows(newValue === oldValue ? readParams(scope.id, scope.columns) : {offset: null});

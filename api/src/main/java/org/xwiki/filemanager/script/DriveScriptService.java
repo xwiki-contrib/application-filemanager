@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -62,6 +63,11 @@ public class DriveScriptService implements ScriptService
     private static final String ERROR_KEY = "scriptservice.drive.error";
 
     /**
+     * The pattern used to split a path.
+     */
+    private static final Pattern PATH_PATTERN = Pattern.compile("/");
+
+    /**
      * Used to schedule file system jobs.
      */
     @Inject
@@ -86,7 +92,7 @@ public class DriveScriptService implements ScriptService
      * @param destination where to move the specified files and folders
      * @return the id of the move job that has been scheduled
      */
-    public String move(Collection<List<String>> paths, List<String> destination)
+    public String move(Collection<String> paths, String destination)
     {
         setError(null);
 
@@ -105,7 +111,7 @@ public class DriveScriptService implements ScriptService
      * @param destination where to copy the specified files and folders
      * @return the id of the copy job that has been scheduled
      */
-    public String copy(Collection<List<String>> paths, List<String> destination)
+    public String copy(Collection<String> paths, String destination)
     {
         setError(null);
 
@@ -123,7 +129,7 @@ public class DriveScriptService implements ScriptService
      * @param paths the files and folders to delete
      * @return the id of the delete job that has been scheduled
      */
-    public String delete(Collection<List<String>> paths)
+    public String delete(Collection<String> paths)
     {
         setError(null);
 
@@ -189,43 +195,46 @@ public class DriveScriptService implements ScriptService
     }
 
     /**
-     * Converts a list of path elements into a {@link Path} object. If the given list has one item then the path points
-     * to a folder. If the list has two items then the path points either to a file or to a new folder.
+     * Converts a serialized path into a {@link Path} object. The serialized path has the format {@code parent/child}.
+     * If there's no separator (slash) then the path points to a folder. Otherwise the path points either to a file (in
+     * the specified parent folder) or to a new folder (in the specified parent folder). If the parent is missing (e.g.
+     * {@code /child}) then the path points to a file, targeting all occurrences of that file in the current drive
+     * (because a file can have multiple parent folders). This is useful for instance if you want to delete a file from
+     * all its parent folders.
      * 
      * @param pathElements the path elements
      * @return the {@link Path} object
      */
-    private Path asPath(List<String> pathElements)
+    private Path asPath(String serializedPath)
     {
         DocumentReference parentReference = null;
         DocumentReference childReference = null;
-        if (pathElements != null && pathElements.size() > 0) {
-            String parentId = pathElements.get(0);
-            if (!StringUtils.isEmpty(parentId)) {
-                parentReference = new DocumentReference(parentId, getCurrentDriveReference());
-            }
-            if (pathElements.size() > 1) {
-                String childId = pathElements.get(1);
-                if (!StringUtils.isEmpty(childId)) {
-                    childReference = new DocumentReference(childId, getCurrentDriveReference());
-                }
+        String[] pathElements = PATH_PATTERN.split(serializedPath, 2);
+        String parentId = pathElements[0];
+        if (!StringUtils.isEmpty(parentId)) {
+            parentReference = new DocumentReference(parentId, getCurrentDriveReference());
+        }
+        if (pathElements.length > 1) {
+            String childId = pathElements[1];
+            if (!StringUtils.isEmpty(childId)) {
+                childReference = new DocumentReference(childId, getCurrentDriveReference());
             }
         }
         return new Path(parentReference, childReference);
     }
 
     /**
-     * Converts a collection of lists of path elements into a collection of {@link Path} objects.
+     * Converts a collection of serialized paths into a collection of {@link Path} objects.
      * 
-     * @param pathElementsCollection the collection of lists of path elements
+     * @param serializedPaths the collection of serialized paths
      * @return the collection of {@link Path} objects
      * @see #asPath(List)
      */
-    private Collection<Path> asPath(Collection<List<String>> pathElementsCollection)
+    private Collection<Path> asPath(Collection<String> serializedPaths)
     {
         Collection<Path> paths = new LinkedList<Path>();
-        for (List<String> pathElements : pathElementsCollection) {
-            paths.add(asPath(pathElements));
+        for (String serializedPath : serializedPaths) {
+            paths.add(asPath(serializedPath));
         }
         return paths;
     }

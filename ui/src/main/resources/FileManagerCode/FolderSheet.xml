@@ -46,7 +46,7 @@
   #if ($request.action)
     #if ($services.csrf.isTokenValid($request.form_token))
       #if ($request.action == 'createFolder')
-        #createFolder($request.name $doc)
+        #createFolder($request.name $doc.name)
       #elseif ($request.action == 'createFile')
         #createFile
       #elseif ($request.action == 'move')
@@ -84,17 +84,17 @@
 #end
 
 #macro (moveFolder)
-  #set ($jobId = $services.drive.move([[$doc.name]], [$request.parent, $request.name]))
+  #set ($jobId = $services.drive.move([$doc.name], "$!request.parent/$!request.name"))
   #handleJobStartFailure($jobId)
 #end
 
 #macro (copyFolder)
-  #set ($jobId = $services.drive.copy([[$doc.name]], [$request.parent, $request.name]))
+  #set ($jobId = $services.drive.copy([$doc.name], "$!request.parent/$!request.name"))
   #handleJobStartFailure($jobId)
 #end
 
 #macro (deleteFolder)
-  #set ($jobId = $services.drive.delete([[$doc.name]]))
+  #set ($jobId = $services.drive.delete([$doc.name]))
   #handleJobStartFailure($jobId)
 #end
 
