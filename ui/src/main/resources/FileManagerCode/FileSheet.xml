@@ -39,5 +39,69 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content/>
+  <content>{{include reference="FileManagerCode.Macros" /}}
+
+{{velocity output="false"}}
+#macro (handleFileWebServiceRequest)
+  #if ($request.action)
+    #if ($services.csrf.isTokenValid($request.form_token))
+      #if ($request.action == 'label')
+        #labelFile
+      #elseif ($request.action == 'move')
+        #moveFile
+      #elseif ($request.action == 'copy')
+        #copyFile
+      #elseif ($request.action == 'delete')
+        #deleteFile
+      #end
+    #elseif ($isAjaxRequest)
+      $response.sendError(403, 'The CSRF token is missing.')
+    #else
+      $response.sendRedirect($services.csrf.getResubmissionURL())
+    #end
+  #else
+    #set ($data = $NULL)
+    #getFile($doc $data)
+    #if ($data)
+      #set ($discard = $response.setContentType('application/json'))
+      $jsontool.serialize($data)
+    #else
+      $response.sendError(404);
+    #end
+  #end
+#end
+
+#macro (labelFile)
+  ## TODO
+#end
+
+#macro (moveFile)
+  #set ($jobId = $services.drive.move(["$!request.fromParent/$doc.name"], "$!request.toParent/$!request.name"))
+  #handleJobStartFailure($jobId)
+#end
+
+#macro (copyFile)
+  #set ($jobId = $services.drive.copy(["/$doc.name"], "$!request.parent/$!request.name"))
+  #handleJobStartFailure($jobId)
+#end
+
+#macro (deleteFile)
+  #set ($jobId = $services.drive.delete(["$!request.fromParent/$doc.name"]))
+  #handleJobStartFailure($jobId)
+#end
+
+#macro (displayFile)
+  ## TODO
+#end
+{{/velocity}}
+
+{{velocity wiki="false"}}
+#if ($xcontext.action == 'get')
+  #handleFileWebServiceRequest
+#end
+{{/velocity}}{{velocity}}
+#if ($xcontext.action != 'get')
+  #displayFile
+#end
+{{/velocity}}</content>
 </xwikidoc>
