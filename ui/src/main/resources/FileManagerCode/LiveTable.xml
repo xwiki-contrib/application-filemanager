@@ -186,7 +186,7 @@
       // Read the parameter values from the URL.
       var params = {
         offset: $location.search()[key(id, 'offset')],
-        limit: 5,
+        limit: 15,
         sort: $location.search()[key(id, 'sort')],
         order: $location.search()[key(id, 'order')]
       };
