@@ -155,6 +155,7 @@
         &lt;/td&gt;
         &lt;td class="pane right"&gt;
           &lt;files ng-if="drive.location.type == 'folder' || drive.location.type == 'files'" drive="drive"&gt;&lt;/files&gt;
+          #maybeDisplayActiveJobs
         &lt;/td&gt;
       &lt;/tr&gt;
     &lt;/table&gt;
@@ -223,6 +224,34 @@
   &lt;/div&gt;
   &lt;livetable id="{{id}}" columns="$escapetool.xml($jsontool.serialize($columns))"
     source="source" selection="selection"&gt;&lt;/livetable&gt;
+#end
+
+#macro (maybeDisplayActiveJobs)
+  &lt;ul ng-cloak ng-if="drive.location.type == 'jobs'" ng-repeat="job in drive.jobs" class="jobs"&gt;
+    &lt;li class="job"&gt;
+      &lt;dl&gt;
+        &lt;dt&gt;Job Type&lt;/dt&gt;
+        &lt;dd ng-bind="job.request.type"&gt;&lt;/dd&gt;
+        &lt;dt&gt;Paths&lt;/dt&gt;
+        &lt;dd&gt;
+          &lt;ul ng-repeat="path in job.request.paths"&gt;
+            &lt;li&gt;{{path.parent}}/{{path.child}}&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;/dd&gt;
+        &lt;dt ng-if="job.request.destination"&gt;Destination&lt;/dt&gt;
+        &lt;dd ng-if="job.request.destination"&gt;
+          {{job.request.destination.parent}}/{{job.request.destination.child}}
+        &lt;/dd&gt;
+        &lt;dt&gt;Started&lt;/dt&gt;
+        #set ($dateFormat = $xwiki.getXWikiPreference('dateformat', 'yyyy/MM/dd HH:mm'))
+        &lt;dd title="{{ job.startDate | date : '$dateFormat' }}"&gt;{{ job.startDate | timeAgo : '$dateFormat' }}&lt;/dd&gt;
+        &lt;dt&gt;By&lt;/dt&gt;
+        &lt;dd user="{{job.request.user}}"&gt;&lt;/dd&gt;
+        &lt;dt&gt;Progress&lt;/dt&gt;
+        &lt;dd ng-bind="job.progress.offset"&gt;&lt;/dd&gt;
+      &lt;/dl&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
 #end
 {{/velocity}}
 
@@ -406,6 +435,8 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
         id: null,
         type: null
       },
+
+      jobs: Drive.getActiveJobs(),
 
       getFileSource: function(locationId) {
         if (locationId == '/allFiles') {
@@ -1108,9 +1139,6 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
         getDriveChildNodes(callback);
       } else if (node.id == '/orphanFolders') {
         Drive.getOrphanFolders({}, getChildrenCallback(callback));
-      } else if (node.id == '/activeJobs') {
-        // TODO
-        callback([]);
       } else {
         Folder.getFolders({page: node.id}, getChildrenCallback(callback));
       }
@@ -1123,6 +1151,18 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
     };
 
     var metaNodes = [
+      {
+        id: '/orphanFolders',
+        text: 'Orphan Folders',
+        icon: '$xwiki.getSkinFile("icons/silk/folder_error.png")',
+        state: {
+          selected: false
+        },
+        children: true,
+        data: {
+          type: 'folders'
+        }
+      },
       {
         id: '/allFiles',
         text: 'All Files',
@@ -1146,25 +1186,12 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
         }
       },
       {
-        id: '/orphanFolders',
-        text: 'Orphan Folders',
-        icon: '$xwiki.getSkinFile("icons/silk/folder_error.png")',
-        state: {
-          selected: false
-        },
-        children: true,
-        data: {
-          type: 'folders'
-        }
-      },
-      {
         id: '/activeJobs',
         text: 'Active Jobs',
         icon: '$xwiki.getSkinFile("icons/silk/clock.png")',
         state: {
           selected: false
         },
-        children: true,
         data: {
           type: 'jobs'
         }
@@ -1900,6 +1927,10 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
     </property>
     <property>
       <code>#template('colorThemeInit.vm')
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
 
 /**
  * File Live Table
