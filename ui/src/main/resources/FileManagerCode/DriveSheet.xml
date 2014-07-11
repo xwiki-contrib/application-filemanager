@@ -1914,7 +1914,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
 }
 /* Overwrite the bottom border because we don't display the filters */
 #files table.xwiki-livetable table.xwiki-livetable-display thead.xwiki-livetable-display-header {
-  border-bottom: 0 none;
+  border-bottom-color: $theme.pageContentBackgroundColor;
 }
 
 /**
