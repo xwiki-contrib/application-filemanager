@@ -2150,6 +2150,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 /**
  * Drive Tree
  */
+drive-tree {
+  display: block;
+}
 .jstree ul.jstree-children {
  /* Overwrite the margin from the XWiki skin. */
   margin: 0;
