@@ -148,14 +148,18 @@
     &lt;table class="pane-splitter"&gt;
       &lt;tr&gt;
         &lt;td class="pane left"&gt;
-          &lt;drive-tree drive="drive"&gt;&lt;/drive-tree&gt;
+          &lt;div class="pane-content"&gt;
+            &lt;drive-tree drive="drive"&gt;&lt;/drive-tree&gt;
+          &lt;/div&gt;
         &lt;/td&gt;
         &lt;td class="pane-splitter-handler"&gt;
           &lt;div&gt;&amp;equiv;&lt;/div&gt;
         &lt;/td&gt;
         &lt;td class="pane right"&gt;
-          &lt;files ng-if="drive.location.type == 'folder' || drive.location.type == 'files'" drive="drive"&gt;&lt;/files&gt;
-          #maybeDisplayActiveJobs
+          &lt;div class="pane-content"&gt;
+            &lt;files ng-if="drive.location.type == 'folder' || drive.location.type == 'files'" drive="drive"&gt;&lt;/files&gt;
+            #maybeDisplayActiveJobs
+          &lt;/div&gt;
         &lt;/td&gt;
       &lt;/tr&gt;
     &lt;/table&gt;
@@ -192,9 +196,9 @@
     }
   ])
   {{ selectedFiles = getSelectedFiles(selection) | hide }}
-  &lt;div class="btn-toolbar file-actions" role="toolbar"&gt;
-    &lt;div class="btn-group" ng-if="drive.location.type == 'folder'"&gt;
-      &lt;button class="btn btn-default" ng-disabled="drive.readOnly"
+  &lt;div ng-show="!viewer" class="btn-toolbar file-actions" role="toolbar"&gt;
+    &lt;div class="btn-group" ng-show="drive.location.type == 'folder'"&gt;
+      &lt;button class="btn btn-default" ng-disabled="drive.readOnly" ng-click="viewer = 'upload'"
           title="Upload a new file to the current folder" type="button"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_add.png')" alt="New File" class="icon" /&gt;New File
       &lt;/button&gt;
@@ -222,8 +226,54 @@
       &lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-  &lt;livetable id="{{id}}" columns="$escapetool.xml($jsontool.serialize($columns))"
-    source="source" selection="selection"&gt;&lt;/livetable&gt;
+  &lt;livetable ng-show="!viewer" id="{{id}}" source="source" selection="selection"
+    columns="$escapetool.xml($jsontool.serialize($columns))"&gt;&lt;/livetable&gt;
+  &lt;file-upload ng-show="viewer == 'upload'" drive="drive" back="backToList()"&gt;&lt;/file-upload&gt;
+#end
+
+#macro (fileUploadTemplate)
+  &lt;h3&gt;Upload files to {{drive.location.id}} folder&lt;/h3&gt;
+  &lt;input type="file" id="fileUploadPath" ng-file-select="uploadFiles($files)" /&gt;
+  &lt;div ng-file-drop="uploadFiles($files)" ng-file-drag-over-class="active"
+    ng-if="dropSupported" class="file-drop-zone"&gt;... or you can drop files here&lt;/div&gt;
+  &lt;ul class="uploads"&gt;
+    &lt;li class="upload" ng-repeat="upload in drive.uploads.slice().reverse()" file-upload-status="upload"&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;div class="btn-toolbar" role="toolbar"&gt;
+    &lt;div class="btn-group"&gt;
+      &lt;button type="button" class="btn btn-default" title="Back to the file list" ng-if="back" ng-click="back()"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')" alt="Back" class="icon" /&gt;Back
+      &lt;/button&gt;
+      &lt;button type="button" class="btn btn-default" title="Clear upload status"
+        ng-if="drive.uploads.length &gt; 0" ng-click="clearUploads()"&gt;Clear&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+#end
+
+#macro (fileUploadStatusTemplate)
+  &lt;div class="upload-file"&gt;
+    &lt;span file="upload.file"&gt;&lt;/span&gt;
+    &lt;span class="upload-file-path"&gt;
+      &lt;span ng-if="upload.status == 'Done'"&gt;({{ upload.file.size | bytes }}) {{ upload.file.date | timeAgo }}&lt;/span&gt;
+      in {{upload.path.join(' / ')}}
+    &lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div class="progress-container {{upload.status}}" ng-if="upload.status != 'Done'"&gt;
+    &lt;xprogress value="{{upload.loaded}}" max="{{upload.total}}"&gt;&lt;/xprogress&gt;
+    &lt;input type="image" src="$xwiki.getSkinFile('icons/silk/cancel.png')" ng-if="upload.status == 'InProgress'"
+      class="cancel icon" title="Cancel this upload" ng-click="upload.abort()" /&gt;
+    &lt;div class="progress-info"&gt;
+      &lt;span ng-if="upload.status == 'InProgress' &amp;&amp; upload.estimatedRemainingTime"&gt;
+        {{ upload.estimatedRemainingTime | duration }} remaining
+        &amp;#8212
+      &lt;/span&gt;
+      &lt;span ng-if="upload.status == 'Aborted'"&gt;
+        {{ upload.end | timeAgo }}
+        &amp;#8212
+      &lt;/span&gt;
+      {{ upload.loaded | bytes }} of {{ upload.total | bytes }}
+    &lt;/div&gt;
+  &lt;/div&gt;
 #end
 
 #macro (maybeDisplayActiveJobs)
@@ -259,6 +309,10 @@
 #if ($xcontext.action == 'get')
   #if ($request.template == 'files')
     #filesLiveTableTemplate
+  #elseif ($request.template == 'fileUpload')
+    #fileUploadTemplate
+  #elseif ($request.template == 'fileUploadStatus')
+    #fileUploadStatusTemplate
   #else
     #handleDriveWebServiceRequest
   #end
@@ -367,10 +421,13 @@
     'angular-resource': '//ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular-resource.min',
     liveTable: '$xwiki.getURL("FileManagerCode.LiveTable", "jsx", "language=$xcontext.language&amp;minify=false")',
     pagination: '$xwiki.getURL("FileManagerCode.Pagination", "jsx", "language=$xcontext.language&amp;minify=false")',
-    jsTree: '//cdnjs.cloudflare.com/ajax/libs/jstree/3.0.2/jstree.min'
+    jsTree: '//cdnjs.cloudflare.com/ajax/libs/jstree/3.0.2/jstree.min',
+    fileUploadHTML5Shim: '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/1.4.0/angular-file-upload-html5-shim.min',
+    fileUpload: '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/1.4.0/angular-file-upload.min'
   },
   shim: {
     angular: {
+      deps: ['fileUploadHTML5Shim'],
       exports: 'angular'
     },
     'angular-resource': {
@@ -379,6 +436,9 @@
     },
     jsTree: {
       deps: ['jquery']
+    },
+    fileUpload: {
+      deps: ['angular']
     }
   }
 });
@@ -391,7 +451,7 @@
   document.getElementsByTagName("head")[0].appendChild(link);
 })('//cdnjs.cloudflare.com/ajax/libs/jstree/3.0.2/themes/default/style.min.css');
 
-require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], function($, angular) {
+require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUpload'], function($, angular) {
   var drive = angular.module('drive', ['driveServices', 'driveDirectives', 'driveFilters', 'liveTable']);
 
   drive.controller('DriveCtrl', ['$scope', 'Drive', 'Folder', function ($scope, Drive, Folder) {
@@ -437,6 +497,8 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       },
 
       jobs: Drive.getActiveJobs(),
+
+      uploads: [],
 
       getFileSource: function(locationId) {
         if (locationId == '/allFiles') {
@@ -740,9 +802,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
     </property>
     <property>
       <code>require(['jquery', 'angular'], function($, angular) {
-  var driveDirectives = angular.module('driveDirectives', ['driveServices']);
+  var driveDirectives = angular.module('driveDirectives', ['driveServices', 'angularFileUpload']);
 
-  driveDirectives.directive('file',  function() {
+  driveDirectives.directive('file', function() {
     var categories = {
       Text: {
         html: 'html',
@@ -794,9 +856,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
 
     var getIcon = function(fileName) {
       var extensionIndex = fileName.lastIndexOf('.');
-      if (extensionIndex &lt; 0) {
-        return null;
-      } else {
+      if (extensionIndex &gt;= 0) {
         var extension = fileName.substr(extensionIndex + 1);
         for (var category in categories) {
           var icons = categories[category];
@@ -813,6 +873,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
           }
         }
       }
+      return null;
     };
 
     return {
@@ -820,9 +881,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       scope: {
         'file': '='
       },
-      template: '&lt;img ng-src="{{icon}}" alt="{{type}}" title="{{type}}" class="icon" /&gt; &lt;a href="{{url}}"&gt;{{file.name}}&lt;/a&gt;',
+      template: '&lt;img ng-src="{{icon}}" alt="{{type}}" title="{{type}}" class="icon" /&gt; '
+        + '&lt;a href="{{url}}" ng-if="url"&gt;{{file.name}}&lt;/a&gt;&lt;span ng-if="!url"&gt;{{file.name}}&lt;/span&gt;',
       link: function(scope, element, attrs) {
-        scope.url = new XWiki.Document(scope.file.id).getURL();
         scope.icon = "$xwiki.getSkinFile('icons/silk/page_white.png')";
         scope.type = 'Attachment';
         var icon = getIcon(scope.file.name);
@@ -830,6 +891,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
           scope.icon = scope.icon.replace('page_white', icon.name);
           scope.type = icon.type;
         }
+        scope.$watch('file.id', function(newValue, oldValue) {
+          scope.url = scope.file.id ? new XWiki.Document(scope.file.id).getURL() : null;
+        });
       }
     }
   });
@@ -972,6 +1036,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       link: function(scope, element, attrs) {
         scope.id = attrs.id || 'files';
         scope.selection = {};
+        scope.viewer = '';
 
         scope.getSelectedFiles = function(selection) {
           var selectedFiles = [];
@@ -996,7 +1061,12 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
           scope.source = scope.drive.getFileSource(scope.drive.location.id);
         };
 
-        scope.$watch('drive.location', refreshLiveTable);
+        scope.backToList = function() {
+          scope.viewer = '';
+          refreshLiveTable();
+        }
+
+        scope.$watch('drive.location', scope.backToList);
 
         scope.cut = function(files) {
           scope.clipboard = {
@@ -1035,10 +1105,106 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       }
     };
   });
+
+  driveDirectives.directive('xprogress', function() {
+    return {
+      restrict: 'E',
+      scope: {
+        value: '@',
+        max: '@'
+      },
+      template: '&lt;div class="progress"&gt;&lt;div class="progress-bar" role="progressbar" aria-valuemin="0" '
+        + 'aria-valuemax="{{max}}" aria-valuenow="{{value}}" style="width: {{100 * value / max}}%;"&gt;&lt;/div&gt;&lt;/div&gt;'
+    };
+  });
+
+  driveDirectives.directive('fileUpload', ['$upload', function($upload) {
+    var formToken = $('meta[name=form_token]').attr('content');
+
+    var uploadFile = function(file, folder, uploads) {
+      var upload = {
+        file: {
+          name: file.name
+        },
+        path: [folder],
+        start: new Date().getTime(),
+        loaded: 0,
+        total: file.size,
+        status: 'InProgress',
+        abort: function() {
+          this.status = 'Aborted';
+          this.end = new Date().getTime();
+          this.request.abort();
+        }
+      };
+      uploads.push(upload);
+      upload.request = ${escapetool.d}upload.upload({
+        url: new XWiki.Document(folder).getURL('get'),
+        data: {
+          form_token: formToken,
+          action: 'createFile'
+        },
+        file: file,
+        fileFormDataName: 'filepath'
+      }).progress(function(event) {
+        upload.loaded = event.loaded;
+        upload.total = event.total;
+      }).success(function(data, status, headers, config) {
+        upload.status = 'Done';
+        upload.file = data;
+      }).error(function() {
+        upload.abort();
+      });
+    };
+
+    return {
+      restrict: 'E',
+      scope: {
+        'drive': '=',
+        'back': '&amp;?'
+      },
+      templateUrl: new XWiki.Document('DriveSheet', 'FileManagerCode').getURL('get', 'template=fileUpload&amp;outputSyntax=plain'),
+      link: function(scope, element, attrs) {
+        scope.dropSupported = 'draggable' in document.createElement('span');
+
+        scope.clearUploads = function() {
+          var inProgress = [];
+          angular.forEach(scope.drive.uploads, function(upload) {
+            upload.status == 'InProgress' &amp;&amp; this.push(upload);
+          }, inProgress);
+          scope.drive.uploads = inProgress;
+        };
+
+        scope.uploadFiles = function(files) {
+          angular.forEach(files, function(file) {
+            uploadFile(file, scope.drive.location.id, scope.drive.uploads)
+          });
+        };
+      }
+    };
+  }]);
+
+  driveDirectives.directive('fileUploadStatus', function() {
+    return {
+      restrict: 'A',
+      scope: {
+        'upload': '=fileUploadStatus'
+      },
+      templateUrl: new XWiki.Document('DriveSheet', 'FileManagerCode').getURL('get', 'template=fileUploadStatus&amp;outputSyntax=plain'),
+      link: function(scope, element, attrs) {
+        scope.$watch('upload.loaded', function(newValue, oldValue) {
+          if (scope.upload.loaded &gt; 0 &amp;&amp; scope.upload.loaded &lt; scope.upload.total) {
+            scope.upload.estimatedRemainingTime = (new Date().getTime() - scope.upload.start) *
+              (scope.upload.total - scope.upload.loaded) / scope.upload.loaded;
+          }
+        });
+      }
+    };
+  });
 });</code>
     </property>
     <property>
-      <name>Directives: file, user, pane-splitter-handler, files</name>
+      <name>Directives: file, user, pane-splitter-handler, files, progress, file-upload, file-upload-status</name>
     </property>
     <property>
       <parse>1</parse>
@@ -1834,10 +2000,25 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
       return '';
     }
   });
+
+  driveFilters.filter('duration', function() {
+    return function(millis) {
+      var seconds = Math.floor(millis / 1000);
+      if (seconds &lt;= 1) {
+        return '1s';
+      } else if (seconds &lt; 60) {
+        return seconds + 's';
+      } else if (seconds &lt; 3600) {
+        return Math.floor(seconds / 60) + 'm ' + Math.floor(seconds % 60) + 's';
+      } else {
+        return Math.floor(seconds / 3600) + 'h ' + Math.floor((seconds % 3600) / 60) + 'm';
+      }
+    }
+  });
 });</code>
     </property>
     <property>
-      <name>Filters: bytes, mediaType, timeAgo, hide</name>
+      <name>Filters: bytes, mediaType, timeAgo, hide, duration</name>
     </property>
     <property>
       <parse>1</parse>
@@ -1939,10 +2120,6 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree'], functi
   height: 16px;
   vertical-align: bottom;
 }
-.file-actions .icon {
-  margin-right: .3em;
-  vertical-align: bottom;
-}
 /* Overwrite the bottom border because we don't display the filters */
 #files table.xwiki-livetable table.xwiki-livetable-display thead.xwiki-livetable-display-header {
   border-bottom-color: $theme.pageContentBackgroundColor;
@@ -1995,13 +2172,8 @@ table.pane-splitter td.pane-splitter-handler {
 table.pane-splitter td.pane-splitter-handler &gt; div {
   margin-left: -3px;
 }
-table.pane-splitter td.pane .jstree-container-ul,
-table.pane-splitter td.pane .xwiki-livetable-container,
-table.pane-splitter td.pane .file-actions {
+table.pane-splitter .pane-content {
   margin: .5em;
-}
-table.pane-splitter td.pane .file-actions {
-  margin-bottom: 0;
 }
 
 /**
@@ -2017,6 +2189,7 @@ table.pane-splitter td.pane .file-actions {
   cursor: pointer;
   float: left;
   margin: 0;
+  min-height: 30px;
   padding: 6px 12px;
   white-space: nowrap;
   -webkit-user-select: none;
@@ -2048,6 +2221,10 @@ table.pane-splitter td.pane .file-actions {
   opacity: .65
   pointer-events: none;
   -webkit-box-shadow: none;
+}
+.btn img.icon {
+  margin-right: .3em;
+  vertical-align: bottom;
 }
 .btn-group &gt; .btn:focus {
   outline: 0 none;
@@ -2087,6 +2264,83 @@ table.pane-splitter td.pane .file-actions {
 }
 .btn-toolbar .btn-group:first-of-type {
   margin-left: 0;
+}
+
+/**
+ * Uploads
+ */
+ul.uploads {
+  list-style-type: none;
+  margin: 1em 0 .5em 0;
+}
+ul.uploads li.upload {
+  padding: .5em 0;
+}
+ul.uploads li.upload:hover {
+  background-color: $theme.highlightColor;
+}
+li.upload .progress-container {
+  margin-right: 20px;
+  position: relative;
+}
+li.upload progress {
+  width: 100%;
+}
+li.upload .progress-container.Aborted .progress-bar {
+  background-color: $theme.notificationErrorColor;
+}
+li.upload .progress-container .cancel.icon {
+  padding: 0;
+  position: absolute;
+  right: -18px;
+  top: -1px;
+}
+li.upload .progress-info,
+li.upload .upload-file-path {
+  color: $theme.textSecondaryColor;
+  font-size: smaller;
+}
+li.upload .upload-file,
+li.upload .progress-info {
+  opacity: 1;
+  padding-left: 3px;
+}
+li.upload .upload-file {
+  margin-bottom: 2px;
+}
+li.upload .upload-file .icon {
+  vertical-align: bottom;
+}
+.file-drop-zone {
+  background-color: $theme.pageBackgroundColor;
+  border: 3px dashed $theme.borderColor;
+  color: $theme.textSecondaryColor;
+  height: 100px;
+  line-height: 100px;
+  text-align: center;
+}
+.file-drop-zone.active {
+  background-color: $theme.highlightColor;
+  border-color: $theme.textSecondaryColor;
+}
+
+/**
+ * Progress bar
+ */
+.progress {
+  background-color: $theme.pageBackgroundColor;
+  border-radius: 4px;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.1) inset;
+  height: 15px;
+  overflow: hidden;
+}
+.progress-bar {
+  float: left;
+  width: 0;
+  height: 100%;
+  background-color: $theme.titleColor;
+  box-shadow: 0px -1px 0px rgba(0, 0, 0, 0.15) inset;
+  transition: width 0.6s ease 0s;
 }</code>
     </property>
     <property>
