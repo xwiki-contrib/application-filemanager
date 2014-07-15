@@ -196,9 +196,9 @@
     }
   ])
   {{ selectedFiles = getSelectedFiles(selection) | hide }}
-  &lt;div ng-show="!viewer" class="btn-toolbar file-actions" role="toolbar"&gt;
+  &lt;div ng-show="drive.viewer == 'files'" class="btn-toolbar file-actions" role="toolbar"&gt;
     &lt;div class="btn-group" ng-show="drive.location.type == 'folder'"&gt;
-      &lt;button class="btn btn-default" ng-disabled="drive.readOnly" ng-click="viewer = 'upload'"
+      &lt;button class="btn btn-default" ng-disabled="drive.readOnly" ng-click="drive.viewer = 'upload'"
           title="Upload a new file to the current folder" type="button"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_add.png')" alt="New File" class="icon" /&gt;New File
       &lt;/button&gt;
@@ -226,9 +226,9 @@
       &lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-  &lt;livetable ng-show="!viewer" id="{{id}}" source="source" selection="selection"
+  &lt;livetable ng-show="drive.viewer == 'files'" id="{{id}}" source="source" selection="selection"
     columns="$escapetool.xml($jsontool.serialize($columns))"&gt;&lt;/livetable&gt;
-  &lt;file-upload ng-show="viewer == 'upload'" drive="drive" back="backToList()"&gt;&lt;/file-upload&gt;
+  &lt;file-upload ng-show="drive.viewer == 'upload'" drive="drive" back="backToList()"&gt;&lt;/file-upload&gt;
 #end
 
 #macro (fileUploadTemplate)
@@ -496,6 +496,8 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         type: null
       },
 
+      viewer: null,
+
       jobs: Drive.getActiveJobs(),
 
       uploads: [],
@@ -683,7 +685,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 
   driveServices.factory('Drive', ['$resource', function($resource) {
     var data = ['folders', 'allFiles', 'orphanFolders', 'orphanFiles', 'activeJobs', 'jobStatus'];
-    var actions = ['createFolder', 'createFile', 'move', 'copy', 'delete'];
+    var actions = ['createFolder', 'move', 'copy', 'delete'];
     var api = createAPI(data, actions);
     api.getActiveJobs.isArray = true;
     return $resource(url, defaultParams, api);
@@ -691,7 +693,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 
   driveServices.factory('Folder', ['$resource', function($resource) {
     var data = ['files', 'folders'];
-    var actions = ['createFolder', 'createFile', 'move', 'copy', 'delete'];
+    var actions = ['createFolder', 'move', 'copy', 'delete'];
     var api = createAPI(data, actions);
     return $resource(url, defaultParams, api);
   }]);
@@ -1036,7 +1038,6 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
       link: function(scope, element, attrs) {
         scope.id = attrs.id || 'files';
         scope.selection = {};
-        scope.viewer = '';
 
         scope.getSelectedFiles = function(selection) {
           var selectedFiles = [];
@@ -1062,7 +1063,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         };
 
         scope.backToList = function() {
-          scope.viewer = '';
+          scope.drive.viewer = 'files';
           refreshLiveTable();
         }
 
@@ -1453,6 +1454,14 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
       return !!(node.data &amp;&amp; node.data.type == 'drive');
     };
 
+    var defaultViewerByNodeType = {
+      drive: null,
+      folder: 'files',
+      folders: null,
+      files: 'files',
+      jobs: 'jobs'
+    };
+
     return {
       restrict: 'E',
       scope: {
@@ -1505,7 +1514,16 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
           createFile: {
             label: 'New File',
             icon: '$xwiki.getSkinFile("icons/silk/page_white_add.png")',
-            action: function(data) {},
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+              tree.deselect_all(true);
+              tree.select_node(node);
+              setTimeout(function() {
+                scope.drive.viewer = 'upload';
+                scope.$apply();
+              }, 0);
+            },
             __disabled: isReadOnly
           },
           cut: {
@@ -1646,6 +1664,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
                 var selectedNode = data.selected[0];
                 if (!scope.drive.location || selectedNode != scope.drive.location.id) {
                   ${escapetool.d}location.search('driveNode', selectedNode);
+                  scope.drive.viewer = defaultViewerByNodeType[data.node.data.type];
                   scope.drive.location = {
                     id: selectedNode,
                     type: data.node.data.type
