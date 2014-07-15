@@ -1929,7 +1929,8 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
   });
 
   driveFilters.filter('timeAgo', ['$filter', function($filter) {
-    var referenceTime = (new Date()).getTime();
+    // We keep the reference time a bit (1s) in the future to prevent displaying absolutes dates for very recent events.
+    var referenceTime = (new Date()).getTime() + 1000;
     // Inspired by http://momentjs.com/docs/#/displaying/fromnow/ .
     var milestones = [
       {
@@ -1985,11 +1986,13 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 
     return function(timestamp, dateFormat) {
       var now = (new Date()).getTime();
-      if (now - referenceTime &gt; 1000) {
+      if (now &gt; referenceTime) {
         // The reference time is older than a second. Update it.
         // Note that we need this in order to avoid and infinite $digest loop.
         // See https://docs.angularjs.org/error/$rootScope/infdig .
-        referenceTime = now;
+        // We keep the reference time a bit (1s) in the future to prevent displaying
+        // absolutes dates for very recent events.
+        referenceTime = now + 1000;
       }
 
       var diff = referenceTime - timestamp;
