@@ -67,7 +67,7 @@
       <name>name</name>
       <number>1</number>
       <prettyName>Name</prettyName>
-      <script>{{velocity}}$doc.attachmentList.get(0).filename{{/velocity}}</script>
+      <script>{{velocity}}#set ($attachments = $doc.attachmentList)#if ($attachments.size() &gt; 0)$attachments.get(0).filename#else$doc.name#end{{/velocity}}</script>
       <unmodifiable>0</unmodifiable>
       <validationMessage/>
       <validationRegExp/>

@@ -177,7 +177,16 @@
 
 #macro (getFile $fileDoc $return)
   #getFilePaths($fileDoc $paths)
-  #set ($attach = $fileDoc.attachmentList.get(0))
+  #set ($attachments = $fileDoc.attachmentList)
+  #if ($attachments.size() &gt; 0)
+    #set ($attach = $attachments.get(0))
+  #else
+    ## Fail safe.
+    #set ($attach = {
+      'filename': $fileDoc.name,
+      'filesize': 0
+    })
+  #end
   #set ($return = $NULL)
   #setVariable("$return" {
     'id': $fileDoc.name,
