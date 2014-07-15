@@ -96,7 +96,13 @@
       #set ($discard = $fileDoc.addAttachment($fileName, $xwiki.fileupload.getFileItemData('filepath')))
       #set ($discard = $fileDoc.save('File created'))
       #set ($discard = $response.sendRedirect($fileDoc.getURL('get', 'outputSyntax=plain')))
+    #else
+      ## Forbidden
+      #set ($discard = $response.sendError(403, 'You are not allowed to perform this action.'))
     #end
+  #else
+    ## Bad Request
+    $response.sendError(400, "'filepath' request parameter missing.")
   #end
   #set ($discard = $xwiki.fileupload.cleanFileList())
 #end
