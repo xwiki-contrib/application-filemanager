@@ -77,6 +77,38 @@
   <object>
     <name>FileManagerCode.FileClass</name>
     <number>0</number>
+    <className>XWiki.ClassSheetBinding</className>
+    <guid>8404e342-0627-422e-9b9d-fd2fe868cd25</guid>
+    <class>
+      <name>XWiki.ClassSheetBinding</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <sheet>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>sheet</name>
+        <number>1</number>
+        <picker>0</picker>
+        <prettyName>Sheet</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </sheet>
+    </class>
+    <property>
+      <sheet>FileSheet</sheet>
+    </property>
+  </object>
+  <object>
+    <name>FileManagerCode.FileClass</name>
+    <number>0</number>
     <className>XWiki.DocumentSheetBinding</className>
     <guid>36081537-0284-4b39-a1e8-61be517efd01</guid>
     <class>
