@@ -183,7 +183,7 @@
   #else
     ## Fail safe.
     #set ($attach = {
-      'filename': $fileDoc.name,
+      'filename': $fileDoc.plainTitle,
       'filesize': 0
     })
   #end
