@@ -32,6 +32,7 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.EntityReference;
 
 import com.xpn.xwiki.XWikiException;
+import com.xpn.xwiki.doc.XWikiAttachment;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.BaseProperty;
 
@@ -48,7 +49,7 @@ public class DefaultFile extends AbstractDocument implements File
     /**
      * The reference to the Tag class which is used to store the parent folders.
      */
-    private static final EntityReference TAG_CLASS_REFERENCE = new EntityReference("TagClass", EntityType.DOCUMENT,
+    static final EntityReference TAG_CLASS_REFERENCE = new EntityReference("TagClass", EntityType.DOCUMENT,
         new EntityReference("XWiki", EntityType.SPACE));
 
     /**
@@ -60,6 +61,28 @@ public class DefaultFile extends AbstractDocument implements File
      * The cached collection of references to parent folders.
      */
     private Collection<DocumentReference> parentReferences;
+
+    @Override
+    public String getName()
+    {
+        List<XWikiAttachment> attachments = getDocument().getAttachmentList();
+        if (attachments.size() > 0) {
+            return attachments.get(0).getFilename();
+        } else {
+            return super.getName();
+        }
+    }
+
+    @Override
+    public void setName(String name)
+    {
+        List<XWikiAttachment> attachments = getDocument().getAttachmentList();
+        if (attachments.size() > 0) {
+            attachments.get(0).setFilename(name);
+        } else {
+            super.setName(name);
+        }
+    }
 
     @Override
     public Collection<DocumentReference> getParentReferences()

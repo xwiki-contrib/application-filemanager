@@ -511,7 +511,7 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
      */
     private void renameFile(File file, DocumentReference newReference)
     {
-        if (!file.getReference().getName().equals(newReference.getName())) {
+        if (!file.getName().equals(newReference.getName())) {
             for (DocumentReference parentReference : file.getParentReferences()) {
                 Folder folder = fileSystem.getFolder(parentReference);
                 if (folder != null && getChildFileByName(folder, newReference.getName()) != null) {
