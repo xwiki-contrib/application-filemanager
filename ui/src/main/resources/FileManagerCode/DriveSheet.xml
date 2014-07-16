@@ -1093,7 +1093,67 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         };
 
         scope.rename = function(file) {
-          // TODO
+          // Clear the selection.
+          delete scope.selection[file];
+
+          var selectedRows = $(element).find('.xwiki-livetable-display-body').find('input:checked').closest('tr');
+          if (selectedRows.length != 1) return;
+          var rowScope = angular.element(selectedRows[0]).scope();
+
+          var backToView = function(event) {
+            // 'this' is the rename text input.
+            // Reset the cell width (it is set below when the rename text input is added).
+            $(this).parent().css('width', '').children().show();
+            $(this).remove();
+          };
+
+          var onRename = function(event) {
+            // 'this' is the rename text input.
+            backToView.call(this, event);
+            // Don't allow slash character inside the file name and make sure the file name is really changed.
+            if (this.value != rowScope.row.name &amp;&amp; this.value.indexOf('/') &lt; 0) {
+              var oldName = rowScope.row.name;
+              scope.drive.move(['/' + rowScope.row.id], '/' + this.value, {
+                finished: refreshLiveTable,
+                failed: function() {
+                  // Revert the rename.
+                  rowScope.row.name = oldName;
+                  rowScope.$apply();
+                }
+              });
+              // Visual rename, until we get confirmation from the server.
+              rowScope.row.name = this.value;
+              rowScope.$apply();
+            }
+          };
+
+          var onKeyUp = function(event) {
+            // 'this' is the rename text input;
+            if (event.keyCode == 13) {
+              // Enter/Return Key
+              onRename.call(this, event);
+            } else if (event.keyCode == 27) {
+              // Escape Key
+              backToView.call(this, event);
+            }
+          };
+
+          var inputElement = $(document.createElement('input'))
+            .prop('type', 'text')
+            .val(rowScope.row.name)
+            .css('width', '100%')
+            .one('blur', onRename)
+            .keyup(onKeyUp);
+
+          var cell = selectedRows.find('td').eq(1);
+          // Make sure the column width doesn't change when we insert the rename text input.
+          // 6px represents the padding which is included in clientWidth.
+          cell.css('width', (cell.prop('clientWidth') - 6) + 'px')
+            .children().hide()
+            .end().append(inputElement);
+
+          // Focus and select the current file name.
+          inputElement.select();
         };
 
         scope.delete = function(files) {
