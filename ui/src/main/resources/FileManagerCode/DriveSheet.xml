@@ -831,7 +831,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         music: ['ogg', 'flac', 'mp3', 'wav']
       },
       Video: {
-        film: ['ogv', 'mk', 'avi', 'divx', 'mov'],
+        film: ['mp4', 'ogv', 'mk', 'avi', 'divx', 'mov'],
         page_white_flash: ['flv', 'fla', 'swf']
       },
       Document: {

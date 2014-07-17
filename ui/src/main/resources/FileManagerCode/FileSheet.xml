@@ -90,8 +90,100 @@
   #handleJobStartFailure($jobId)
 #end
 
-#macro (displayFile)
-  ## TODO
+#macro (openFile)
+  #set ($openAs = $collectionstool.orderedMap)
+  ## The order is important: from specific to generic viewers/players.
+  #set ($openAs.PDF = ['application/pdf'])
+  #set ($openAs.Office = ['application/msword', 'application/vnd.ms-', 'application/vnd.oasis.opendocument.',
+    'application/vnd.openxmlformats-officedocument.'])
+  #set ($openAs.Text = ['text/', 'application/xml', 'application/javascript', 'application/ecmascript',
+    'application/json', 'application/x-sh', '+xml'])
+  #set ($openAs.Image = ['image/'])
+  #set ($openAs.Audio = ['audio/'])
+  #set ($openAs.Video = ['video/'])
+  #if ($doc.attachmentList.size() &gt; 0)
+    #set ($attachment = $doc.attachmentList.get(0))
+    #set ($mediaType = $attachment.mimeType.toLowerCase())
+    #set ($fileType = $NULL)
+    #foreach ($entry in $openAs.entrySet())
+      #foreach ($pattern in $entry.value)
+        #if ($mediaType == $pattern || $mediaType.startsWith($pattern) || $mediaType.endsWith($pattern))
+          #set ($fileType = $entry.key)
+          #break
+        #end
+      #end
+      #if ($fileType)
+        #break
+      #end
+    #end
+    #if ($fileType)
+      #evaluate("${escapetool.h}open${fileType}File(${escapetool.d}attachment)")
+    #else
+      {{info}}No viewer/player found for media type: $mediaType .{{/info}}
+    #end
+  #else
+    {{error}}No attachment found.{{/error}}
+  #end
+#end
+
+#macro (openPDFFile $attachment)
+  {{pdfviewer file="$attachment.filename" /}}
+#end
+
+#macro (openOfficeFile $attachment)
+  #if ("$!services.officemanager.serverState" == "Connected")
+    #if ($services.officeviewer.isMimeTypeSupported($attachment.mimeType.toLowerCase()))
+      #set ($attachmentReference = $services.model.createAttachmentReference($doc.documentReference, $attachment.filename))
+      #set ($fileNameAsReference = $services.model.serialize($attachmentReference, 'compact', $doc.documentReference))
+      {{office attachment="$fileNameAsReference" filterStyles="false" /}}
+    #else
+      {{info}}Unsupported office file type: $attachment.mimeType .{{/info}}
+    #end
+  #else
+    {{info}}The wiki needs to be connected to an office server in order to view this file.{{/info}}
+  #end
+#end
+
+#macro (openTextFile $attachment)
+  #if ($attachment.filesize &lt; 500000)
+    #set ($language = $stringtool.substringAfterLast($attachment.filename, '.'))
+    #if (!$language)
+      #set ($language = 'none')
+    #end
+    {{code language="$language"}}
+    $attachment.contentAsString
+    {{/code}}
+  #else
+    {{info}}Text file too large to display.{{/info}}
+  #end
+#end
+
+#macro (openImageFile $attachment)
+  [[image:path:$doc.getAttachmentURL($attachment.filename)]]
+#end
+
+#macro (openAudioFile $attachment)
+  #if ($xwiki.exists('Macros.JWPlayer'))
+    {{jwplayer attachment="$doc.getAttachmentURL($attachment.filename)" /}}
+  #else
+    {{html clean="false"}}
+    &lt;audio src="$doc.getAttachmentURL($attachment.filename)" controls="controls"&gt;
+      Your browser doesn't support HTML5 audio playback.
+    &lt;/audio&gt;
+    {{/html}}
+  #end
+#end
+
+#macro (openVideoFile $attachment)
+  #if ($xwiki.exists('Macros.JWPlayer'))
+    {{jwplayer attachment="$doc.getAttachmentURL($attachment.filename)" /}}
+  #else
+    {{html clean="false"}}
+    &lt;video src="$doc.getAttachmentURL($attachment.filename)" controls="controls"&gt;
+      Your browser doesn't support HTML5 video playback.
+    &lt;/video&gt;
+    {{/html}}
+  #end
 #end
 {{/velocity}}
 
@@ -99,9 +191,11 @@
 #if ($xcontext.action == 'get')
   #handleFileWebServiceRequest
 #end
-{{/velocity}}{{velocity}}
+{{/velocity}}
+
+{{velocity}}
 #if ($xcontext.action != 'get')
-  #displayFile
+  #openFile
 #end
 {{/velocity}}</content>
 </xwikidoc>
