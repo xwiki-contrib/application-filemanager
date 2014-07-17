@@ -152,7 +152,7 @@ public class DefaultFileManager implements FileManager
     {
         MoveRequest moveRequest = initBatchPathRequest(new MoveRequest(), paths, jobType);
         moveRequest.setDestination(destination);
-        moveRequest.setInteractive(true);
+        moveRequest.setInteractive(false);
         return moveRequest;
     }
 

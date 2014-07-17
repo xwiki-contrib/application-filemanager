@@ -88,7 +88,7 @@ public class DefaultFileManagerTest
         assertEquals(destination, request.getValue().getDestination());
         assertEquals(currentUserReference, request.getValue().getProperty("user.reference"));
         assertEquals(MoveJob.JOB_TYPE, request.getValue().getProperty("job.type"));
-        assertTrue(request.getValue().isInteractive());
+        assertFalse(request.getValue().isInteractive());
 
         verify(activeJobQueue).offer(jobId);
     }
@@ -108,7 +108,7 @@ public class DefaultFileManagerTest
         assertEquals(destination, request.getValue().getDestination());
         assertEquals(currentUserReference, request.getValue().getProperty("user.reference"));
         assertEquals(CopyJob.JOB_TYPE, request.getValue().getProperty("job.type"));
-        assertTrue(request.getValue().isInteractive());
+        assertFalse(request.getValue().isInteractive());
 
         verify(activeJobQueue).offer(jobId);
     }
