@@ -142,7 +142,7 @@
 #macro (displayDrive)
   {{html clean="false"}}
   #set ($discard = $xwiki.ssx.use('FileManagerCode.DriveSheet'))
-  #set ($discard = $xwiki.jsx.use('FileManagerCode.DriveSheet', {'minify': false}))
+  #set ($discard = $xwiki.jsx.use('FileManagerCode.DriveSheet'))
   #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
   &lt;div ng-app="drive" ng-controller="DriveCtrl"&gt;
     &lt;table class="pane-splitter"&gt;
@@ -536,7 +536,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         }, callback);
       },
 
-      delete: function(paths, callback) {
+      'delete': function(paths, callback) {
         runJob('delete', {path: paths}, callback);
       }
     };
@@ -847,7 +847,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
       },
       Archive: {
         cup: 'jar',
-        package: 'xar',
+        'package': 'xar',
         page_white_compressed: ['bz', 'bz2', 'tbz', 'gz', 'tgz', 'rar'],
         page_white_zip: ['zip', '7z']
       },
@@ -1156,11 +1156,11 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
           inputElement.select();
         };
 
-        scope.delete = function(files) {
+        scope['delete'] = function(files) {
           if (window.confirm('Are you sure you want to delete the selected files?')) {
             // Clear the selection.
             scope.selection = {};
-            scope.drive.delete(getPaths(files), {finished: refreshLiveTable});
+            scope.drive['delete'](getPaths(files), {finished: refreshLiveTable});
           }
         };
       }
@@ -1628,15 +1628,16 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
             },
             __disabled: isReadOnly
           },
-          delete: {
+          'delete': {
             label: 'Delete',
             icon: '$xwiki.getSkinFile("icons/silk/cross.png")',
-           action: function(data) {
+            action: function(data) {
               // Display the confirmation after the context menu closes.
               setTimeout(function() {
                 if (window.confirm('Are you sure you want to delete this folder?')) {
                   var tree = $.jstree.reference(data.reference);
                   var node = tree.get_node(data.reference);
+                  tree.deselect_node(node);
                   tree.delete_node(node);
                 }
               }, 0);
@@ -1741,7 +1742,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         }).on('delete_node.jstree', function(event, data) {
           // Make sure the deleted tree node has an associated folder.
           var folderId = data.node.data.id;
-          folderId &amp;&amp; scope.drive.delete([folderId], {
+          folderId &amp;&amp; scope.drive['delete']([folderId], {
             failed: function(response) {
               data.instance.refresh_node(data.node.parent);
             }
