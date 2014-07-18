@@ -41,11 +41,10 @@
   <hidden>true</hidden>
   <content>{{velocity output=false}}
 #set ($isAjaxRequest = $request.getHeader('X-Requested-With') == 'XMLHttpRequest')
-#set ($selectChildFolders = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and doc.parent in (:parent)')
+#set ($selectChildFolders = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and doc.parent = :parent')
 
 #macro (getChildFolders $parentDoc $return)
-  #set ($parentNameAsReference = $services.model.serialize($parentDoc.documentReference, 'compact', $parentDoc.documentReference))
-  #getFolders($selectChildFolders {'space': $parentDoc.space, 'parent': [$parentDoc.fullName, $parentNameAsReference]} $_return)
+  #getFolders($selectChildFolders {'space': $parentDoc.space, 'parent': $parentDoc.fullName} $_return)
   #set ($return = $NULL)
   #setVariable("$return" $_return)
 #end
@@ -205,8 +204,13 @@
   #set ($tags = $fileDoc.getObject('XWiki.TagClass').getProperty('tags').value)
   #set ($_paths = [])
   #if ($tags &amp;&amp; $tags.size() &gt; 0)
-    #set ($statement = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.name in (:tags)')
-    #foreach ($folderId in $services.query.xwql($statement).bindValue('tags', $tags).execute())
+    #set ($docNameInTags = [])
+    #foreach ($tag in $tags)
+      #set ($discard = $docNameInTags.add("doc.name = ?$foreach.count"))
+    #end
+    #set ($docNameInTags = $stringtool.join($docNameInTags, ' or '))
+    #set ($statement = "from doc.object(FileManagerCode.FolderClass) as folder where $docNameInTags")
+    #foreach ($folderId in $services.query.xwql($statement).bindValues($tags).execute())
       #set ($folderReference = $services.model.resolveDocument($folderId, 'explicit', $fileDoc.documentReference))
       #set ($folderDoc = $xwiki.getDocument($folderReference))
       #set ($path = [])
