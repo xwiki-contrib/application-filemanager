@@ -39,6 +39,8 @@
       tdelafosse:file-manager-application,
       org.xwiki.contrib:application-filemanager
     </xwiki.extension.features>
+    <!-- Name to display by the Extension Manager -->
+    <xwiki.extension.name>File Manager Application</xwiki.extension.name>
     <!-- Don't run CLIRR here since there's no Java code. -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
   </properties>
