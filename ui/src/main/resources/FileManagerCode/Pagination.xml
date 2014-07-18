@@ -196,7 +196,7 @@
         showResultsRange: '@'
       },
       templateUrl: new XWiki.Document('Pagination', 'FileManagerCode').getURL('get'),
-      controller: function($scope) {
+      controller: ['$scope', function($scope) {
         $scope.loadPage = function(pageNumber) {
           $scope.$emit('pagination:pageLoading', $scope.sourceId, {
             offset: pageNumber * $scope.limit,
@@ -228,7 +228,7 @@
             }
           }
         });
-      }
+      }]
     };
   });
 

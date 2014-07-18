@@ -419,8 +419,8 @@
   paths: {
     angular: '//ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.min',
     'angular-resource': '//ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular-resource.min',
-    liveTable: '$xwiki.getURL("FileManagerCode.LiveTable", "jsx", "language=$xcontext.language&amp;minify=false")',
-    pagination: '$xwiki.getURL("FileManagerCode.Pagination", "jsx", "language=$xcontext.language&amp;minify=false")',
+    liveTable: '$xwiki.getURL("FileManagerCode.LiveTable", "jsx", "language=$xcontext.language")',
+    pagination: '$xwiki.getURL("FileManagerCode.Pagination", "jsx", "language=$xcontext.language")',
     jsTree: '//cdnjs.cloudflare.com/ajax/libs/jstree/3.0.2/jstree.min',
     fileUploadHTML5Shim: '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/1.4.0/angular-file-upload-html5-shim.min',
     fileUpload: '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/1.4.0/angular-file-upload.min'
