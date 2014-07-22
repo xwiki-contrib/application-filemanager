@@ -232,22 +232,24 @@
 #end
 
 #macro (fileUploadTemplate)
-  &lt;h3&gt;Upload files to {{drive.location.id}} folder&lt;/h3&gt;
-  &lt;input type="file" id="fileUploadPath" ng-file-select="uploadFiles($files)" /&gt;
-  &lt;div ng-file-drop="uploadFiles($files)" ng-file-drag-over-class="active"
-    ng-if="dropSupported" class="file-drop-zone"&gt;... or you can drop files here&lt;/div&gt;
-  &lt;ul class="uploads"&gt;
-    &lt;li class="upload" ng-repeat="upload in drive.uploads.slice().reverse()" file-upload-status="upload"&gt;&lt;/li&gt;
-  &lt;/ul&gt;
   &lt;div class="btn-toolbar" role="toolbar"&gt;
     &lt;div class="btn-group"&gt;
       &lt;button type="button" class="btn btn-default" title="Back to the file list" ng-if="back" ng-click="back()"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')" alt="Back" class="icon" /&gt;Back
       &lt;/button&gt;
-      &lt;button type="button" class="btn btn-default" title="Clear upload status"
+    &lt;/div&gt;
+    &lt;div class="btn-group"&gt;
+      &lt;button type="button" class="btn btn-default" title="Clear the upload status"
         ng-if="drive.uploads.length &gt; 0" ng-click="clearUploads()"&gt;Clear&lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
+  &lt;h3&gt;Upload files to {{drive.location.id}} folder&lt;/h3&gt;
+  &lt;input type="file" id="fileUploadPath" ng-file-select="uploadFiles($files)" multiple /&gt;
+  &lt;div ng-file-drop="uploadFiles($files)" ng-file-drag-over-class="active"
+    ng-if="dropSupported" class="file-drop-zone"&gt;... or you can drop files here&lt;/div&gt;
+  &lt;ul class="uploads"&gt;
+    &lt;li class="upload" ng-repeat="upload in drive.uploads.slice().reverse()" file-upload-status="upload"&gt;&lt;/li&gt;
+  &lt;/ul&gt;
 #end
 
 #macro (fileUploadStatusTemplate)
