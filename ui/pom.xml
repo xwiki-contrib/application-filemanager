@@ -83,36 +83,36 @@
       <scope>runtime</scope>
       <type>xar</type>
     </dependency>
-    <!-- Optional file viewers/players -->
+    <!-- Embedded file viewers/players -->
     <dependency>
+      <!-- Text files -->
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-rendering-macro-code</artifactId>
       <version>${commons.version}</version>
       <scope>runtime</scope>
-      <optional>true</optional>
     </dependency>
     <dependency>
+      <!-- Office documents -->
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-office-macro</artifactId>
       <version>${commons.version}</version>
       <scope>runtime</scope>
-      <optional>true</optional>
     </dependency>
     <dependency>
+      <!-- PDF documents -->
       <groupId>org.xwiki.contrib</groupId>
       <artifactId>xwiki-macro-pdfviewer</artifactId>
       <version>1.4</version>
       <type>xar</type>
       <scope>runtime</scope>
-      <optional>true</optional>
     </dependency>
     <dependency>
+      <!-- Video/Audio files -->
       <groupId>org.xwiki.contrib</groupId>
       <artifactId>macro-jwplayer</artifactId>
       <version>2.0</version>
       <type>xar</type>
       <scope>runtime</scope>
-      <optional>true</optional>
     </dependency>
   </dependencies>
   <build>
