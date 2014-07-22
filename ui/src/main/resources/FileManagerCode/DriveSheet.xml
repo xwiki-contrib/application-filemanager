@@ -415,15 +415,35 @@
       <cache>long</cache>
     </property>
     <property>
-      <code>require.config({
+      <code>/*
+#set ($angularVersion = '1.2.20')
+#set ($angularFileUploadVersion = '1.6.1')
+#set ($jstreeVersion = '3.0.2')
+*/
+require.config({
   paths: {
-    angular: '//ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular.min',
-    'angular-resource': '//ajax.googleapis.com/ajax/libs/angularjs/1.2.19/angular-resource.min',
+    angular: [
+      '//ajax.googleapis.com/ajax/libs/angularjs/$angularVersion/angular.min',
+      '$!services.webjars.url("angularjs/$angularVersion/angular.min.js")'
+    ],
+    'angular-resource': [
+      '//ajax.googleapis.com/ajax/libs/angularjs/$angularVersion/angular-resource.min',
+      '$!services.webjars.url("angularjs/$angularVersion/angular-resource.min.js")'
+    ],
     liveTable: '$xwiki.getURL("FileManagerCode.LiveTable", "jsx", "language=$xcontext.language")',
     pagination: '$xwiki.getURL("FileManagerCode.Pagination", "jsx", "language=$xcontext.language")',
-    jsTree: '//cdnjs.cloudflare.com/ajax/libs/jstree/3.0.2/jstree.min',
-    fileUploadHTML5Shim: '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/1.4.0/angular-file-upload-html5-shim.min',
-    fileUpload: '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/1.4.0/angular-file-upload.min'
+    jsTree: [
+      '//cdnjs.cloudflare.com/ajax/libs/jstree/$jstreeVersion/jstree.min',
+      '$!services.webjars.url("jstree/$jstreeVersion/jstree.min.js")'
+    ],
+    fileUploadHTML5Shim: [
+      '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/$angularFileUploadVersion/angular-file-upload-html5-shim.min',
+      '$!services.webjars.url("angular-file-upload/$angularFileUploadVersion/angular-file-upload-html5-shim.min.js")'
+    ],
+    fileUpload: [
+      '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/$angularFileUploadVersion/angular-file-upload.min',
+      '$!services.webjars.url("angular-file-upload/$angularFileUploadVersion/angular-file-upload.min.js")'
+    ]
   },
   shim: {
     angular: {
@@ -449,7 +469,8 @@
   link.rel = "stylesheet";
   link.href = url;
   document.getElementsByTagName("head")[0].appendChild(link);
-})('//cdnjs.cloudflare.com/ajax/libs/jstree/3.0.2/themes/default/style.min.css');
+// We load the CSS only from CDN due to XWIKI-10674 (Cannot load CSS files from webjars).
+})('//cdnjs.cloudflare.com/ajax/libs/jstree/$jstreeVersion/themes/default/style.min.css');
 
 require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUpload'], function($, angular) {</code>
     </property>
