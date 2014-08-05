@@ -93,7 +93,14 @@
       ## Add the file object.
       #set ($discard = $fileDoc.newObject('FileManagerCode.FileClass').set('description', "$!request.description"))
       ## Add the attachment.
-      #set ($discard = $fileDoc.addAttachment($fileName, $xwiki.fileupload.getFileItemData('filepath')))
+      ## FIXME: Get the file content as an input stream instead of a byte array, but for this we need to expose
+      ## getFileItemInputStream in the public API of the fileupload plugin (or use a script service).
+      #set ($bytes = $xwiki.fileupload.getFileItemData('filepath'))
+      #if (!$bytes)
+        ## Empty file (unfortunately getFileItemData returns null instead of an empty byte array).
+        #set ($bytes = [])
+      #end
+      #set ($discard = $fileDoc.addAttachment($fileName, $bytes))
       #set ($discard = $fileDoc.save('File created'))
       #set ($discard = $response.sendRedirect($fileDoc.getURL('get', 'outputSyntax=plain')))
     #else
