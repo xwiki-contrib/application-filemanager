@@ -244,9 +244,13 @@
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;h3&gt;Upload files to {{drive.location.id}} folder&lt;/h3&gt;
-  &lt;input type="file" id="fileUploadPath" ng-file-select="uploadFiles($files)" multiple /&gt;
-  &lt;div ng-file-drop="uploadFiles($files)" ng-file-drag-over-class="active"
-    ng-if="dropSupported" class="file-drop-zone"&gt;... or you can drop files here&lt;/div&gt;
+  &lt;input type="file" on-file-select="uploadFiles($files)" multiple
+    folder-selection-enabled="folderSelectionEnabled" /&gt;
+  &lt;label ng-show="folderSelectionSupported"&gt;
+    &lt;input type="checkbox" ng-model="folderSelectionEnabled" /&gt; Enable folder selection
+  &lt;/label&gt;
+  &lt;div ng-if="dropSupported" on-file-drop="uploadFiles($files)" drag-over-class="active"
+    class="file-drop-zone"&gt;... or you can drop files here&lt;/div&gt;
   &lt;ul class="uploads"&gt;
     &lt;li class="upload" ng-repeat="upload in drive.uploads.slice().reverse()" file-upload-status="upload"&gt;&lt;/li&gt;
   &lt;/ul&gt;
@@ -642,7 +646,119 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
     return $resource(url, {}, {
       get: {cache: true}
     });
-  }]);</code>
+  }]);
+
+  driveServices.factory('FileTree', function() {
+    var createFolder = function(name, parent) {
+      return {
+        name: name,
+        type: 'folder',
+        size: 0,
+        parent: parent,
+        children: [],
+        addFile: function(file) {
+          this.children.push(file);
+          var parent = this;
+          while (parent) {
+            parent.size += file.size;
+            parent = parent.parent;
+          }
+        }
+      };
+    };
+
+    var getPath = function(file) {
+      var path = file.webkitRelativePath || '';
+      return path.split('/').slice(0, -1);
+    };
+
+    var getFolder = function(parent, path) {
+      if (!path.length) {
+        return parent;
+      } else {
+        var folder;
+        for (var i = 0; i &lt; parent.children.length; i++) {
+          var child = parent.children[i];
+          if (child.type == 'folder' &amp;&amp; child.name == path[0]) {
+            folder = child;
+            break;
+          }
+        }
+        if (!folder) {
+          folder = createFolder(path[0], parent);
+          parent.children.push(folder);
+        }
+        return getFolder(folder, path.slice(1));
+      }
+    };
+
+    return {
+      fromFileList: function(files) {
+        var root = createFolder();
+        angular.forEach(files, function(file) {
+          var folder = getFolder(root, getPath(file));
+          folder.addFile(file);
+        });
+        return root.children;
+      },
+
+      fromEntryList: function(items, callback) {
+        items = items || [];
+        var processing = items.length;
+        var root = createFolder();
+
+        var maybeCallback = function() {
+          !--processing &amp;&amp; callback(root.children);
+        };
+
+        var traverseFileTree = function(entry, parent) {
+          if (entry.isDirectory) {
+            var folder = createFolder(entry.name, parent);
+            parent.children.push(folder);
+            var directoryReader = entry.createReader();
+            var onReadEntries = function(childEntries) {
+              if (!childEntries.length) {
+                maybeCallback();
+              } else {
+                processing += childEntries.length;
+                angular.forEach(childEntries, function(childEntry) {
+                  traverseFileTree(childEntry, folder);
+                });
+                // Keep calling readEntries() until no more results are returned.
+                // See https://developer.mozilla.org/en-US/docs/Web/API/DirectoryReader#readEntries
+                directoryReader.readEntries(onReadEntries, maybeCallback);
+              }
+            };
+            directoryReader.readEntries(onReadEntries, maybeCallback);
+          } else {
+            entry.file(function(file) {
+              parent.addFile(file);
+              maybeCallback();
+            }, maybeCallback);
+          }
+        };
+
+        var isASCII = function(str) {
+          return /^[\000-\177]*$/.test(str);
+        };
+
+        angular.forEach(items || [], function(item) {
+          var entry = item.webkitGetAsEntry();
+          if (entry) {
+            // Fix for Chrome bug https://code.google.com/p/chromium/issues/detail?id=149735
+            if (entry.isFile &amp;&amp; !isASCII(entry.name)) {
+              root.addFile(item.getAsFile());
+              maybeCallback();
+            } else {
+              traverseFileTree(entry, root);
+            }
+          } else {
+            maybeCallback();
+          }
+        });
+      }
+    };
+  });</code>
     </property>
     <property>
       <name>Services: Drive, Folder, File, User</name>
@@ -1428,6 +1544,18 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
       });
     };
 
+    var uploadFileTree = function(node, parent, drive) {
+      if (node.type == 'folder') {
+        drive.createFolder(node.name, parent, function(folder) {
+          angular.forEach(node.children, function(child) {
+            uploadFileTree(child, folder.id, drive);
+          });
+        });
+      } else {
+        uploadFile(node, parent, drive.uploads);
+      }
+    };
+
     return {
       restrict: 'E',
       scope: {
@@ -1436,6 +1564,8 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
       },
       templateUrl: new XWiki.Document('DriveSheet', 'FileManagerCode').getURL('get', 'template=fileUpload&amp;outputSyntax=plain'),
       link: function(scope, element, attrs) {
+        scope.folderSelectionSupported = typeof document.createElement('input').webkitdirectory == 'boolean';
+        scope.folderSelectionEnabled = false;
         scope.dropSupported = 'draggable' in document.createElement('span');
 
         scope.clearUploads = function() {
@@ -1446,9 +1576,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
           scope.drive.uploads = inProgress;
         };
 
-        scope.uploadFiles = function(files) {
-          angular.forEach(files, function(file) {
-            uploadFile(file, scope.drive.location.id, scope.drive.uploads)
+        scope.uploadFiles = function(rootNodes) {
+          angular.forEach(rootNodes, function(rootNode) {
+            uploadFileTree(rootNode, scope.drive.location.id, scope.drive);
           });
         };
       }
@@ -1471,10 +1601,62 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         });
       }
     };
-  });</code>
+  });
+
+  driveDirectives.directive('onFileSelect', ['FileTree', function(FileTree) {
+    return {
+      restrict: 'A',
+      scope: {
+        'onFileSelect': '&amp;',
+        'folderSelectionEnabled': '='
+      },
+      link: function(scope, element, attrs) {
+        scope.$watch('folderSelectionEnabled', function(newValue, oldValue) {
+          element.prop('webkitdirectory', scope.folderSelectionEnabled);
+        });
+        element.bind('change', function(event) {
+          scope.onFileSelect({$files: FileTree.fromFileList(event.target.files)});
+        });
+      }
+    };
+  }]);
+
+  driveDirectives.directive('onFileDrop', ['FileTree', function(FileTree) {
+    return {
+      restrict: 'A',
+      scope: {
+        'onFileDrop': '&amp;'
+      },
+      link: function(scope, element, attrs) {
+        var dragOverClass = attrs.dragOverClass || 'dragOver';
+        element.bind('dragenter', function(event) {
+          element.addClass(dragOverClass);
+        });
+        element.bind('dragover', function(event) {
+          event.preventDefault();
+        });
+        element.bind('dragleave', function(event) {
+          element.removeClass(dragOverClass);
+        });
+        element.bind('drop', function(event) {
+          event.preventDefault();
+          element.removeClass(dragOverClass);
+          var dataTransfer = event.originalEvent.dataTransfer;
+          var items = dataTransfer.items;
+          if (items &amp;&amp; items.length &gt; 0 &amp;&amp; items[0].webkitGetAsEntry) {
+            FileTree.fromEntryList(items, function(fileTree) {
+              scope.onFileDrop({$files: fileTree});
+            });
+          } else {
+            scope.onFileDrop({$files: FileTree.fromFileList(dataTransfer.files)});
+          }
+        });
+      }
+    };
+  }]);</code>
     </property>
     <property>
-      <name>Directives: file, user, pane-splitter-handler, files, progress, file-upload, file-upload-status</name>
+      <name>Directives: file, user, pane-splitter-handler, files, progress, file-upload, file-upload-status, on-file-select, on-file-drop</name>
     </property>
     <property>
       <parse>1</parse>
@@ -2610,6 +2792,9 @@ li.upload .upload-file .icon {
 .file-drop-zone.active {
   background-color: $theme.highlightColor;
   border-color: $theme.textSecondaryColor;
+}
+.pane-content label input {
+  vertical-align: middle;
 }
 
 /**
