@@ -693,12 +693,35 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
     };
 
     return {
-      fromFileList: function(files) {
+      fromFileList: function(files, callback) {
         var root = createFolder();
+        var processing = files.length;
+
+        var maybeCallback = function() {
+          !--processing &amp;&amp; callback(root.children);
+        };
+
         angular.forEach(files, function(file) {
           var folder = getFolder(root, getPath(file));
-          folder.addFile(file);
+          if (callback &amp;&amp; folder == root &amp;&amp; file.size &lt; 10000) {
+            // Make sure the root files can be read. This is especially useful for browsers that don't support folder
+            // upload: if you drop a folder the file list will contain an item that looks like a file but that cannot be
+            // read. See http://hs2n.wordpress.com/2012/08/13/detecting-folders-in-html-drop-area/ .
+            try {
+              var reader = new FileReader();
+              reader.onloadend = function (event) {
+                !(event || window.event).target.error &amp;&amp; folder.addFile(file);
+                maybeCallback();
+              };
+              reader.readAsDataURL(file);
+            } catch (error) {
+              maybeCallback();
+            }
+          } else {
+            folder.addFile(file);
+          }
         });
+
         return root.children;
       },
 
@@ -761,7 +784,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
   });</code>
     </property>
     <property>
-      <name>Services: Drive, Folder, File, User</name>
+      <name>Services: Drive, Folder, File, User, FileTree</name>
     </property>
     <property>
       <parse>1</parse>
@@ -1641,14 +1664,16 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         element.bind('drop', function(event) {
           event.preventDefault();
           element.removeClass(dragOverClass);
-          var dataTransfer = event.originalEvent.dataTransfer;
+          var dataTransfer = event.dataTransfer || event.originalEvent.dataTransfer;
           var items = dataTransfer.items;
           if (items &amp;&amp; items.length &gt; 0 &amp;&amp; items[0].webkitGetAsEntry) {
             FileTree.fromEntryList(items, function(fileTree) {
               scope.onFileDrop({$files: fileTree});
             });
           } else {
-            scope.onFileDrop({$files: FileTree.fromFileList(dataTransfer.files)});
+            FileTree.fromFileList(dataTransfer.files, function(fileTree) {
+              scope.onFileDrop({$files: fileTree});
+            });
           }
         });
       }
