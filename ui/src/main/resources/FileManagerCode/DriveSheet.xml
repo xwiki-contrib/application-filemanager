@@ -707,7 +707,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 
         angular.forEach(files, function(file) {
           var folder = getFolder(root, getPath(file));
-          if (callback &amp;&amp; folder == root &amp;&amp; file.size &lt; 10000) {
+          if (callback &amp;&amp; folder == root &amp;&amp; file.size &lt;= 4096) {
             // Make sure the root files can be read. This is especially useful for browsers that don't support folder
             // upload: if you drop a folder the file list will contain an item that looks like a file but that cannot be
             // read. See http://hs2n.wordpress.com/2012/08/13/detecting-folders-in-html-drop-area/ .
@@ -723,6 +723,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
             }
           } else {
             folder.addFile(file);
+            callback &amp;&amp; maybeCallback();
           }
         });
 
