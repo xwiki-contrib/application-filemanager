@@ -240,7 +240,7 @@
     &lt;/div&gt;
     &lt;div class="btn-group"&gt;
       &lt;button type="button" class="btn btn-default" title="Clear the upload status"
-        ng-if="drive.uploads.length &gt; 0" ng-click="clearUploads()"&gt;Clear&lt;/button&gt;
+        ng-if="drive.uploads.finished.length &gt; 0" ng-click="clearUploads()"&gt;Clear&lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;h3&gt;Upload files to {{drive.location.id}} folder&lt;/h3&gt;
@@ -252,7 +252,11 @@
   &lt;div ng-if="dropSupported" on-file-drop="uploadFiles($files)" drag-over-class="active"
     class="file-drop-zone"&gt;... or you can drop files here&lt;/div&gt;
   &lt;ul class="uploads"&gt;
-    &lt;li class="upload" ng-repeat="upload in drive.uploads.slice().reverse()" file-upload-status="upload"&gt;&lt;/li&gt;
+    &lt;li class="upload loading uploads-pending" ng-show="drive.uploads.pending.length &gt; 0"&gt;
+      {{drive.uploads.pending.length}} uploads pending
+    &lt;/li&gt;
+    &lt;li class="upload" ng-repeat="upload in drive.uploads.running" file-upload-status="upload"&gt;&lt;/li&gt;
+    &lt;li class="upload" ng-repeat="upload in drive.uploads.finished" file-upload-status="upload"&gt;&lt;/li&gt;
   &lt;/ul&gt;
 #end
 
@@ -1531,30 +1535,39 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
   driveDirectives.directive('fileUpload', ['$upload', function($upload) {
     var formToken = $('meta[name=form_token]').attr('content');
 
-    var uploadFile = function(file, folder, uploads) {
+    var scheduleUpload = function(file, folder, uploads) {
       var upload = {
-        file: {
-          name: file.name
-        },
+        file: file,
         path: [folder],
-        start: new Date().getTime(),
         loaded: 0,
         total: file.size,
-        status: 'InProgress',
+        status: 'Pending',
         abort: function() {
           this.status = 'Aborted';
-          this.end = new Date().getTime();
           this.request.abort();
+          endUpload(this, uploads);
         }
       };
-      uploads.push(upload);
+      uploads.pending.push(upload);
+      maybePerformUpload(uploads);
+    };
+
+    var maybePerformUpload = function(uploads) {
+      if (uploads.pending.length == 0 || uploads.running.length &gt;= 4) {
+        return;
+      }
+      var upload = uploads.pending.shift();
+      uploads.running.unshift(upload);
+      upload.status = 'InProgress';
+      upload.start = new Date().getTime();
+      var parentFolder = upload.path[upload.path.length - 1];
       upload.request = ${escapetool.d}upload.upload({
-        url: new XWiki.Document(folder).getURL('get'),
+        url: new XWiki.Document(parentFolder).getURL('get'),
         data: {
           form_token: formToken,
           action: 'createFile'
         },
-        file: file,
+        file: upload.file,
         fileFormDataName: 'filepath'
       }).progress(function(event) {
         upload.loaded = event.loaded;
@@ -1562,9 +1575,20 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
       }).success(function(data, status, headers, config) {
         upload.status = 'Done';
         upload.file = data;
+        endUpload(upload, uploads);
       }).error(function() {
         upload.abort();
       });
+    };
+
+    var endUpload = function(upload, uploads) {
+      upload.end = new Date().getTime();
+      uploads.running.splice(uploads.running.indexOf(upload), 1);
+      maybePerformUpload(uploads);
+      uploads.finished.unshift(upload);
+      if (uploads.finished.length &gt; 6) {
+        uploads.finished.splice(-1, 1);
+      }
     };
 
     var uploadFileTree = function(node, parent, drive) {
@@ -1575,7 +1599,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
           });
         });
       } else {
-        uploadFile(node, parent, drive.uploads);
+        scheduleUpload(node, parent, drive.uploads);
       }
     };
 
@@ -1592,11 +1616,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         scope.dropSupported = 'draggable' in document.createElement('span');
 
         scope.clearUploads = function() {
-          var inProgress = [];
-          angular.forEach(scope.drive.uploads, function(upload) {
-            upload.status == 'InProgress' &amp;&amp; this.push(upload);
-          }, inProgress);
-          scope.drive.uploads = inProgress;
+          scope.drive.uploads.finished.splice(0, scope.drive.uploads.finished.length);
         };
 
         scope.uploadFiles = function(rootNodes) {
@@ -2370,7 +2390,11 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 
       jobs: Drive.getActiveJobs(),
 
-      uploads: [],
+      uploads: {
+        pending: [],
+        running: [],
+        finished: []
+      },
 
       getFileSource: function(locationId) {
         if (locationId == '/allFiles') {
@@ -2767,6 +2791,14 @@ table.pane-splitter .pane-content {
 ul.uploads {
   list-style-type: none;
   margin: 1em 0 .5em 0;
+}
+ul.uploads li.uploads-pending {
+  color: $theme.textSecondaryColor;
+  font-size: smaller;
+}
+ul.uploads li.uploads-pending.loading {
+  background-position: 3px center;
+  padding-left: 24px;
 }
 ul.uploads li.upload {
   padding: .5em 0;
