@@ -1813,53 +1813,55 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
       };
     };
 
-    var metaNodes = [
-      {
-        id: '/orphanFolders',
-        text: 'Orphan Folders',
-        icon: '$xwiki.getSkinFile("icons/silk/folder_error.png")',
-        state: {
-          selected: false
+    var getMetaNodes = function() {
+      return [
+        {
+          id: '/orphanFolders',
+          text: 'Orphan Folders',
+          icon: '$xwiki.getSkinFile("icons/silk/folder_error.png")',
+          state: {
+            selected: false
+          },
+          children: true,
+          data: {
+            type: 'folders'
+          }
         },
-        children: true,
-        data: {
-          type: 'folders'
-        }
-      },
-      {
-        id: '/allFiles',
-        text: 'All Files',
-        icon: '$xwiki.getSkinFile("icons/silk/page_white_stack.png")',
-        state: {
-          selected: false
+        {
+          id: '/allFiles',
+          text: 'All Files',
+          icon: '$xwiki.getSkinFile("icons/silk/page_white_stack.png")',
+          state: {
+            selected: false
+          },
+          data: {
+            type: 'files'
+          }
         },
-        data: {
-          type: 'files'
-        }
-      },
-      {
-        id: '/orphanFiles',
-        text: 'Orphan Files',
-        icon: '$xwiki.getSkinFile("icons/silk/page_white_error.png")',
-        state: {
-          selected: false
+        {
+          id: '/orphanFiles',
+          text: 'Orphan Files',
+          icon: '$xwiki.getSkinFile("icons/silk/page_white_error.png")',
+          state: {
+            selected: false
+          },
+          data: {
+            type: 'files'
+          }
         },
-        data: {
-          type: 'files'
+        {
+          id: '/activeJobs',
+          text: 'Active Jobs',
+          icon: '$xwiki.getSkinFile("icons/silk/clock.png")',
+          state: {
+            selected: false
+          },
+          data: {
+            type: 'jobs'
+          }
         }
-      },
-      {
-        id: '/activeJobs',
-        text: 'Active Jobs',
-        icon: '$xwiki.getSkinFile("icons/silk/clock.png")',
-        state: {
-          selected: false
-        },
-        data: {
-          type: 'jobs'
-        }
-      }
-    ];
+      ];
+    };
 
     var getRootNode = function(callback) {
       Drive.get({}, function(drive) {
@@ -1880,7 +1882,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 
     var getDriveChildNodes = function(callback) {
       Drive.getFolders({}, function(folders) {
-        callback(asFolderNodes(folders.list).concat(metaNodes));
+        callback(asFolderNodes(folders.list).concat(getMetaNodes()));
       });
     };
 
