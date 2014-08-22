@@ -1910,6 +1910,8 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
     };
 
     var selectNode = function(tree, nodeId) {
+      // We don't allow multiple selection.
+      tree.deselect_all(true);
       if (tree.get_node(nodeId)) {
         // The specified node is already loaded in the tree.
         tree.select_node(nodeId);
@@ -1975,7 +1977,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
             action: function(data) {
               var tree = $.jstree.reference(data.reference);
               var node = tree.get_node(data.reference);
-             window.location = new XWiki.Document(node.id).getURL();
+              window.location = new XWiki.Document(node.id).getURL();
             }
           },
           openInNewTab: {
@@ -2251,6 +2253,11 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
               data.instance.delete_node(data.node);
             }
           });
+        });
+
+        scope.$on('$locationChangeSuccess', function(event) {
+          // Update the selected tree node when the location changes.
+          selectNode($(element).jstree(true), $location.search()['driveNode'] || '/allFiles');
         });
       }
     };
