@@ -426,9 +426,9 @@
     </property>
     <property>
       <code>/*
-#set ($angularVersion = '1.2.20')
+#set ($angularVersion = '1.2.22')
 #set ($angularFileUploadVersion = '1.6.1')
-#set ($jstreeVersion = '3.0.2')
+#set ($jstreeVersion = '3.0.3')
 */
 require.config({
   paths: {
@@ -1865,7 +1865,6 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 
     var getRootNode = function(callback) {
       Drive.get({}, function(drive) {
-        drive.type = 'drive';
         callback({
           id: drive.id,
           text: drive.name,
@@ -1875,7 +1874,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
             selected: false
           },
           children: true,
-          data: drive
+          data: {
+            type: 'drive'
+          }
         });
       });
     };

@@ -55,7 +55,7 @@
     <dependency>
       <groupId>org.webjars</groupId>
       <artifactId>angularjs</artifactId>
-      <version>1.2.20</version>
+      <version>1.2.22</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -67,7 +67,7 @@
     <dependency>
       <groupId>org.webjars</groupId>
       <artifactId>jstree</artifactId>
-      <version>3.0.2</version>
+      <version>3.0.3</version>
       <scope>runtime</scope>
     </dependency>
     <!-- Wiki syntax macros used in the File Manager sheets -->
