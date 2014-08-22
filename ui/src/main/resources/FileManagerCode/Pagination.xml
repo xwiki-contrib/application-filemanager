@@ -59,6 +59,11 @@
       &lt;/span&gt;
     &lt;/span&gt;
 
+    &lt;span ng-if="showResultsRange &amp;&amp; actualTotalCount === undefined" class="xwiki-livetable-loader"&gt;
+      &lt;img src="$xwiki.getSkinFile('icons/xwiki/ajax-loader-large.gif')" alt="$services.localization.render('platform.livetable.loading')"
+        title="$services.localization.render('platform.livetable.loading')" /&gt;
+    &lt;/span&gt;
+
     &lt;span ng-if="totalCount &gt; 0" class="controlPagination"&gt;
       &lt;span ng-if="pageNumber == 0" class="noPrevPagination"&gt; &lt;/span&gt;
       &lt;a ng-if="pageNumber &gt; 0" href="#previousPage" ng-click="loadPage(pageNumber - 1); $event.preventDefault()"
@@ -192,53 +197,57 @@
     return {
       restrict: 'E',
       scope: {
-        sourceId: '@for',
+        actualTotalCount: '=totalCount',
+        offset: '=',
+        limit: '=',
         showResultsRange: '@'
       },
       templateUrl: new XWiki.Document('Pagination', 'FileManagerCode').getURL('get'),
-      controller: ['$scope', function($scope) {
-        $scope.loadPage = function(pageNumber) {
-          $scope.$emit('pagination:pageLoading', $scope.sourceId, {
-            offset: pageNumber * $scope.limit,
-            limit: $scope.limit
-          });
+      link: function(scope, element, attrs) {
+        scope.loadPage = function(pageNumber) {
+          scope.offset = pageNumber * scope.limit;
         };
 
-        $scope.$on('pagination:pageLoaded', function(event, sourceId, page) {
-          if ($scope.sourceId == sourceId) {
-            $scope.totalCount = page.totalCount;
-            $scope.limit = page.limit;
-            $scope.from = page.offset + 1;
-            $scope.to = Math.min(page.offset + page.limit, page.totalCount);
-            $scope.pageNumber = Math.floor(page.offset / page.limit);
-            $scope.pageCount = Math.floor((page.totalCount + page.limit - 1) / page.limit);
+        scope.$watch('[actualTotalCount, offset, limit]', function(newValues, oldValues) {
+          // Initialize the scope once and then update the values only when the total count is defined.
+          // The total count is usually undefined while a new page is loaded and so we use the old value until we
+          // receive the new one. This way we reduce the UI flickering.
+          if (scope.actualTotalCount === undefined &amp;&amp; scope.totalCount) return;
 
-            var contextRadius = 4;
-            var contextSize = 2 * contextRadius + 1;
-            if ($scope.pageCount &lt;= contextSize) {
-              $scope.contextFirstPage = 0;
-              $scope.contextLastPage = $scope.pageCount - 1;
-            } else {
-              $scope.contextFirstPage = Math.min(Math.max($scope.pageNumber - contextRadius, 0), $scope.pageCount - contextSize);
-              $scope.contextLastPage = Math.max(Math.min($scope.pageNumber + contextRadius, $scope.pageCount - 1), contextSize - 1);
-            }
-            $scope.pageNumbers = [];
-            for (var i = $scope.contextFirstPage; i &lt;= $scope.contextLastPage; i++) {
-              $scope.pageNumbers.push(i);
-            }
+          var totalCount = newValues[0] || 0;
+          var offset = newValues[1] || 0;
+          var limit = newValues[2] || 15;
+
+          scope.totalCount = totalCount;
+          scope.from = offset + 1;
+          scope.to = Math.min(offset + limit, totalCount);
+          scope.pageNumber = Math.floor(offset / limit);
+          scope.pageCount = Math.floor((totalCount + limit - 1) / limit);
+
+          var contextRadius = 4;
+          var contextSize = 2 * contextRadius + 1;
+          if (scope.pageCount &lt;= contextSize) {
+            scope.contextFirstPage = 0;
+            scope.contextLastPage = scope.pageCount - 1;
+          } else {
+            scope.contextFirstPage = Math.min(Math.max(scope.pageNumber - contextRadius, 0), scope.pageCount - contextSize);
+            scope.contextLastPage = Math.max(Math.min(scope.pageNumber + contextRadius, scope.pageCount - 1), contextSize - 1);
           }
-        });
-      }]
+          scope.pageNumbers = [];
+          for (var i = scope.contextFirstPage; i &lt;= scope.contextLastPage; i++) {
+            scope.pageNumbers.push(i);
+          }
+        }, true);
+      }
     };
   });
 
   pagination.directive('pageLink', function() {
     return {
-      require: '^pagination',
       restrict: 'E',
       scope: true,
       templateUrl: new XWiki.Document('Pagination', 'FileManagerCode').getURL('get', 'template=pageLink'),
-      link: function(scope, element, attrs, paginationCtrl) {
+      link: function(scope, element, attrs) {
         scope.number = parseInt(attrs.number);
       }
     };

@@ -44,7 +44,8 @@
   &lt;table id="{{id}}" class="xwiki-livetable"&gt;
     &lt;tr&gt;
       &lt;td class="xwiki-livetable-pagination"&gt;
-        &lt;pagination for="{{id}}" show-results-range="true"&gt;&lt;/pagination&gt;
+        &lt;pagination total-count="rows.totalCount" offset="params.offset" limit="params.limit"
+          show-results-range="true"&gt;&lt;/pagination&gt;
       &lt;/td&gt;
     &lt;/tr&gt;
     &lt;tr&gt;
@@ -63,6 +64,12 @@
                 &lt;a wrap-if="column.sortable" rel="{{column.id}}"&gt;{{column.title}}&lt;/a&gt;
               &lt;/th&gt;
             &lt;/tr&gt;
+            &lt;tr class="xwiki-livetable-display-filters"&gt;
+              &lt;td ng-if="selection" class="xwiki-livetable-display-header-filter"&gt;&lt;/td&gt;
+              &lt;td ng-repeat="column in columns" class="xwiki-livetable-display-header-filter"&gt;
+                &lt;input type="text" ng-if="column.filterable" ng-model="filter[column.id]" /&gt;
+              &lt;/td&gt;
+            &lt;/tr&gt;
           &lt;/thead&gt;
           &lt;tbody class="xwiki-livetable-display-body"&gt;
             &lt;tr ng-repeat="row in rows.list"&gt;
@@ -75,7 +82,7 @@
     &lt;/tr&gt;
     &lt;tr&gt;
       &lt;td class="xwiki-livetable-pagination"&gt;
-        &lt;pagination for="{{id}}"&gt;&lt;/pagination&gt;
+        &lt;pagination total-count="rows.totalCount" offset="params.offset" limit="params.limit"&gt;&lt;/pagination&gt;
       &lt;/td&gt;
     &lt;/tr&gt;
   &lt;/table&gt;
@@ -164,9 +171,13 @@
       <code>define(['angular', 'pagination'], function(angular) {
   var liveTable = angular.module('liveTable', ['pagination']);
 
-  liveTable.directive('livetable',  ["$location", function($location) {
+  liveTable.directive('livetable',  ['$location', '$timeout', function($location, $timeout) {
     var key = function(id, name) {
       return id + name.substr(0, 1).toUpperCase() + name.substr(1);
+    };
+
+    var getFilterParamName = function(filterName) {
+      return '.' + filterName;
     };
 
     var getSelectedColumn = function(columns) {
@@ -182,28 +193,37 @@
       return firstSortableColumn;
     };
 
-    var readParams = function(id, columns) {
+    // 'this' should be the directive scope.
+    var initParams = function() {
       // Read the parameter values from the URL.
-      var params = {
-        offset: $location.search()[key(id, 'offset')],
+      var urlParams = $location.search();
+
+      this.params = {
+        offset: parseInt(urlParams[key(this.id, 'offset')]) || 0,
         limit: 15,
-        sort: $location.search()[key(id, 'sort')],
-        order: $location.search()[key(id, 'order')]
+        sort: urlParams[key(this.id, 'sort')],
+        order: urlParams[key(this.id, 'order')]
       };
 
-      if (!params.sort) {
-        var selectedColumn = getSelectedColumn(columns);
+      if (!this.params.sort) {
+        var selectedColumn = getSelectedColumn(this.columns);
         if (selectedColumn) {
-          params.sort = selectedColumn.id;
-          params.order = selectedColumn.order;
+          this.params.sort = selectedColumn.id;
+          this.params.order = selectedColumn.order;
         }
       }
 
-      return params;
+      this.filter = {};
+      angular.forEach(this.columns, function(column) {
+        if (column.filterable) {
+          var paramName = getFilterParamName(column.id);
+          this.filter[column.id] = urlParams[key(this.id, paramName)];
+          this.params[paramName] = this.filter[column.id];
+        }
+      }, this);
     };
 
-    var storeParams = function(id, params, newValues) {
-      newValues &amp;&amp; angular.extend(params, newValues);
+    var storeParams = function(id, params) {
       // Save the parameters in the URL in order to have a bookmarkable state.
       for (var param in params) {
         $location.search(key(id, param), params[param]);
@@ -220,41 +240,58 @@
       },
       templateUrl: new XWiki.Document('LiveTable', 'FileManagerCode').getURL('get'),
       link: function(scope, element, attrs) {
-        var fetchRows = function(newParamValues) {
-          newParamValues &amp;&amp; angular.extend(scope.params, newParamValues);
-          scope.rows = scope.source.get(scope.params, function(rows) {
-            storeParams(scope.id, scope.params);
-            scope.$broadcast('pagination:pageLoaded', scope.id, rows);
-          });
-        }
-
-        scope.$on('pagination:pageLoading', function(event, sourceId, page) {
-          if (sourceId == scope.id) {
-            fetchRows({offset: page.offset, limit: page.limit});
-          }
-        });
-
-        scope.sort = function(column) {
-          if (column.sortable) {
-            var order = (column.id == scope.params.sort &amp;&amp; scope.params.order != 'desc') ? 'desc' : null;
-            fetchRows({sort: column.id, order: order});
-          }
-        };
-
         // This can be made configurable.
         scope.liveTableCellTemplate = new XWiki.Document('LiveTableCell', 'FileManagerCode').getURL('get');
 
-        scope.params = {};
+        // Initialize the live table parameters and filters.
+        initParams.call(scope);
+        scope.$on('$locationChangeSuccess', angular.bind(scope, initParams));
 
         scope.$watch('source', function(newValue, oldValue) {
           // Reset the selected rows.
           if (scope.selection) {
             scope.selection = {};
           }
-          // Read the parameters from the URL when the source is initialized.
-          // Reset the pagination whenever the source is changed afterwards.
-          fetchRows(newValue === oldValue ? readParams(scope.id, scope.columns) : {offset: null});
+          // Reset the pagination.
+          delete scope.params.offset;
         });
+
+        // Update the live table whenever the parameters are modified.
+        scope.$watch('params', function(newValue, oldValue) {
+          // Setting the offset to undefined is a way to force an update.
+          if (scope.params.offset === undefined) {
+            scope.params.offset = 0;
+          } else {
+            scope.rows = scope.source.get(scope.params, function(rows) {
+              storeParams(scope.id, scope.params);
+            });
+          }
+        }, true);
+
+        scope.sort = function(column) {
+          if (column.sortable) {
+            scope.params.order = (column.id == scope.params.sort &amp;&amp; scope.params.order != 'desc') ? 'desc' : null;
+            scope.params.sort = column.id;
+          }
+        };
+
+        // The live table filters should not trigger an update immediately, but after a delay. We achieve this by
+        // deferring the update when the filters are changed and by cancelling the pending update whenever a new change
+        // is detected.
+        var deferredUpdate = null;
+        scope.$watch('filter', function(newValue, oldValue) {
+          $timeout.cancel(deferredUpdate);
+          deferredUpdate = $timeout(function() {
+            // We trigger a live table update by adding the filters to the live table parameters.
+            for(var filterName in scope.filter) {
+              var filterValue = scope.filter[filterName];
+              if (filterValue !== undefined &amp;&amp; filterValue !== null &amp;&amp; filterValue !== '') {
+                // Make sure the filter name doesn't collide with the default live table parameter names.
+                scope.params[getFilterParamName(filterName)] = scope.filter[filterName];
+              }
+            }
+          }, 500);
+        }, true);
       }
     };
   }]);

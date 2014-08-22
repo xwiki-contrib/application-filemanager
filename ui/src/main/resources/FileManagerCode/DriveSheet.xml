@@ -173,7 +173,8 @@
       'id': 'name',
       'title': $services.localization.render('Name'),
       'type': 'file',
-      'sortable': true
+      'sortable': true,
+      'filterable': true
     }, {
       'id': 'size',
       'title': $services.localization.render('Size'),
@@ -187,12 +188,14 @@
       'id': 'date',
       'title': $services.localization.render('Modified'),
       'type': 'date',
-      'sortable': true
+      'sortable': true,
+      'filterable': true
     }, {
       'id': 'author',
       'title': $services.localization.render('Author'),
       'type': 'user',
-      'sortable': true
+      'sortable': true,
+      'filterable': true
     }
   ])
   {{ selectedFiles = getSelectedFiles(selection) | hide }}
@@ -2643,10 +2646,6 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 #files img.avatar, #files img.icon {
   height: 16px;
   vertical-align: bottom;
-}
-/* Overwrite the bottom border because we don't display the filters */
-#files table.xwiki-livetable table.xwiki-livetable-display thead.xwiki-livetable-display-header {
-  border-bottom-color: $theme.pageContentBackgroundColor;
 }
 
 /**
