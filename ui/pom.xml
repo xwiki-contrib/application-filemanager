@@ -55,7 +55,13 @@
     <dependency>
       <groupId>org.webjars</groupId>
       <artifactId>angularjs</artifactId>
-      <version>1.2.22</version>
+      <version>1.2.23</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.webjars</groupId>
+      <artifactId>angular-ui-bootstrap</artifactId>
+      <version>0.11.0</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -102,6 +108,21 @@
       <version>${commons.version}</version>
       <scope>runtime</scope>
       <type>xar</type>
+    </dependency>
+    <dependency>
+      <!-- We use XWiki.SuggestSolrMacros to implement the user filter for the files live table. -->
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-search-solr-ui</artifactId>
+      <version>${commons.version}</version>
+      <scope>runtime</scope>
+      <type>xar</type>
+    </dependency>
+    <dependency>
+      <!-- Required for advanced date filtering on the files live table. -->
+      <groupId>org.xwiki.platform</groupId>
+      <artifactId>xwiki-platform-jodatime</artifactId>
+      <version>${commons.version}</version>
+      <scope>runtime</scope>
     </dependency>
     <!-- Embedded file viewers/players -->
     <dependency>

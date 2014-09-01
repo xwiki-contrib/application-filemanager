@@ -67,7 +67,7 @@
             &lt;tr class="xwiki-livetable-display-filters"&gt;
               &lt;td ng-if="selection" class="xwiki-livetable-display-header-filter"&gt;&lt;/td&gt;
               &lt;td ng-repeat="column in columns" class="xwiki-livetable-display-header-filter"&gt;
-                &lt;input type="text" ng-if="column.filterable" ng-model="filter[column.id]" /&gt;
+                &lt;div ng-if="column.filterable" ng-include="liveTableFilterTemplate"&gt;&lt;/div&gt;
               &lt;/td&gt;
             &lt;/tr&gt;
           &lt;/thead&gt;
@@ -168,8 +168,8 @@
       <cache>long</cache>
     </property>
     <property>
-      <code>define(['angular', 'pagination'], function(angular) {
-  var liveTable = angular.module('liveTable', ['pagination']);
+      <code>define(['angular', 'liveTableFilters', 'pagination'], function(angular) {
+  var liveTable = angular.module('liveTable', ['liveTableFilters', 'pagination']);
 
   liveTable.directive('livetable',  ['$location', '$timeout', function($location, $timeout) {
     var key = function(id, name) {
@@ -241,10 +241,10 @@
       templateUrl: new XWiki.Document('LiveTable', 'FileManagerCode').getURL('get'),
       link: function(scope, element, attrs) {
         // This can be made configurable.
+        scope.liveTableFilterTemplate = new XWiki.Document('LiveTableFilter', 'FileManagerCode').getURL('get');
         scope.liveTableCellTemplate = new XWiki.Document('LiveTableCell', 'FileManagerCode').getURL('get');
 
-        // Initialize the live table parameters and filters.
-        initParams.call(scope);
+        // Re-initialize the parameters whenever the URL changes.
         scope.$on('$locationChangeSuccess', angular.bind(scope, initParams));
 
         scope.$watch('source', function(newValue, oldValue) {
@@ -252,8 +252,14 @@
           if (scope.selection) {
             scope.selection = {};
           }
-          // Reset the pagination.
-          delete scope.params.offset;
+          if (newValue === oldValue) {
+            // Initialize the live table parameters and filters only after the source is initialized.
+            // The live table id is not defined otherwise and thus we can't read the URL parameters.
+            initParams.call(scope);
+          } else {
+            // Reset the pagination.
+            delete scope.params.offset;
+          }
         });
 
         // Update the live table whenever the parameters are modified.
@@ -285,10 +291,11 @@
             // We trigger a live table update by adding the filters to the live table parameters.
             for(var filterName in scope.filter) {
               var filterValue = scope.filter[filterName];
-              if (filterValue !== undefined &amp;&amp; filterValue !== null &amp;&amp; filterValue !== '') {
-                // Make sure the filter name doesn't collide with the default live table parameter names.
-                scope.params[getFilterParamName(filterName)] = scope.filter[filterName];
+              if (filterValue === '') {
+                filterValue = undefined;
               }
+              // Make sure the filter name doesn't collide with the default live table parameter names.
+              scope.params[getFilterParamName(filterName)] = filterValue;
             }
           }, 500);
         }, true);

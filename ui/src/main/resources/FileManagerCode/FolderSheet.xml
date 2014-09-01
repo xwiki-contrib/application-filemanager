@@ -130,8 +130,12 @@
 #end
 
 #macro (getChildFiles $parentDoc $return)
-  #getFilesStatement('doc.space = :space and :tag member of doc.object(XWiki.TagClass).tags' $statement)
-  #getFiles($statement {'space': $parentDoc.space, 'tag': $parentDoc.name} $_return)
+  #set ($parameters = {'space': $parentDoc.space, 'tag': $parentDoc.name})
+  #set ($fromTags = 'BaseObject as tagObj, DBStringListProperty as tagsProp')
+  #set ($joinTags = "tagObj.className = 'XWiki.TagClass' and tagObj.name = doc.fullName and tagObj.id = tagsProp.id.id and tagsProp.id.name = 'tags'")
+  #getFilesStatement($fromTags "doc.space = :space and $joinTags and :tag in elements(tagsProp.list)"
+    $parameters $statement)
+  #getFiles($statement $parameters $_return)
   #set ($return = $NULL)
   #setVariable("$return" $_return)
 #end
@@ -140,8 +144,8 @@
   #set ($discard = $xwiki.ssx.use('FileManagerCode.FolderSheet'))
   #getFolder($doc $folder)
   (% class="listing" %)(((
-  #if ($folder.parent)
-    #set ($reference = $services.model.createDocumentReference($doc.wiki, $doc.space, $folder.parent.id))
+  #if ($folder.path.size() &gt; 0)
+    #set ($reference = $services.model.createDocumentReference($doc.wiki, $doc.space, $folder.path.get(0)))
     * [[image:icon:folder||class="icon"]] [[..&gt;&gt;$reference]]
   #end
   ## List the child folders.

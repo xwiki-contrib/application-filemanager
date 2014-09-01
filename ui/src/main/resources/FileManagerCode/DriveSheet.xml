@@ -115,16 +115,19 @@
 #end
 
 #macro (getAllFiles)
-  #getFilesStatement('doc.space = :space' $statement)
-  #getFiles($statement {'space': $doc.space} $data)
+  #set ($parameters = {'space': $doc.space})
+  #getFilesStatement('' 'doc.space = :space' $parameters $statement)
+  #getFiles($statement $parameters $data)
 #end
 
 #macro (getOrphanFiles)
   ## A file can have multiple parent folders, which are declared using tags, and one of these parent folders, usually
   ## the first, is set as wiki page parent so that a tree widget (such as the XWiki explorer tree) can still display the
   ## hierarchy nicely.
-  #getFilesStatement("doc.space = :space and (doc.parent = '' or doc.parent not in ($selectAllFoldersFromDriveHQL))" $statement)
-  #getFiles($statement {'space': $doc.space} $data)
+  #set ($parameters = {'space': $doc.space})
+  #getFilesStatement('' "doc.space = :space and (doc.parent = '' or doc.parent not in ($selectAllFoldersFromDriveHQL))"
+    $parameters $statement)
+  #getFiles($statement $parameters $data)
 #end
 
 #macro (getDrive)
@@ -141,9 +144,10 @@
 
 #macro (displayDrive)
   {{html clean="false"}}
+  #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
+  #set ($discard = $xwiki.ssx.use('FileManagerCode.LiveTableFilter'))
   #set ($discard = $xwiki.ssx.use('FileManagerCode.DriveSheet'))
   #set ($discard = $xwiki.jsx.use('FileManagerCode.DriveSheet'))
-  #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
   &lt;div id="drive" ng-controller="DriveCtrl"&gt;
     &lt;table class="pane-splitter"&gt;
       &lt;tr&gt;
@@ -429,8 +433,9 @@
     </property>
     <property>
       <code>/*
-#set ($angularVersion = '1.2.22')
+#set ($angularVersion = '1.2.23')
 #set ($angularFileUploadVersion = '1.6.1')
+#set ($angularUIBootstrapVersion = '0.11.0')
 #set ($jstreeVersion = '3.0.3')
 */
 require.config({
@@ -443,11 +448,9 @@ require.config({
       '//ajax.googleapis.com/ajax/libs/angularjs/$angularVersion/angular-resource.min',
       '$!services.webjars.url("angularjs/$angularVersion/angular-resource.min.js")'
     ],
-    liveTable: '$xwiki.getURL("FileManagerCode.LiveTable", "jsx", "language=$xcontext.language")',
-    pagination: '$xwiki.getURL("FileManagerCode.Pagination", "jsx", "language=$xcontext.language")',
-    jsTree: [
-      '//cdnjs.cloudflare.com/ajax/libs/jstree/$jstreeVersion/jstree.min',
-      '$!services.webjars.url("jstree/$jstreeVersion/jstree.min.js")'
+    'angular-ui-bootstrap': [
+      '//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/$angularUIBootstrapVersion/ui-bootstrap-tpls.min',
+      '$!services.webjars.url("angular-ui-bootstrap/$angularUIBootstrapVersion/ui-bootstrap-tpls.min.js")'
     ],
     fileUploadHTML5Shim: [
       '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/$angularFileUploadVersion/angular-file-upload-html5-shim.min',
@@ -456,7 +459,14 @@ require.config({
     fileUpload: [
       '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/$angularFileUploadVersion/angular-file-upload.min',
       '$!services.webjars.url("angular-file-upload/$angularFileUploadVersion/angular-file-upload.min.js")'
-    ]
+    ],
+    jsTree: [
+      '//cdnjs.cloudflare.com/ajax/libs/jstree/$jstreeVersion/jstree.min',
+      '$!services.webjars.url("jstree/$jstreeVersion/jstree.min.js")'
+    ],
+    pagination: '$xwiki.getURL("FileManagerCode.Pagination", "jsx", "language=$xcontext.language")',
+    liveTable: '$xwiki.getURL("FileManagerCode.LiveTable", "jsx", "language=$xcontext.language")',
+    liveTableFilters: '$xwiki.getURL("FileManagerCode.LiveTableFilter", "jsx", "language=$xcontext.language")',
   },
   shim: {
     angular: {
@@ -467,11 +477,14 @@ require.config({
       deps: ['angular'],
       exports: 'angular'
     },
-    jsTree: {
-      deps: ['jquery']
+    'angular-ui-bootstrap': {
+      deps: ['angular']
     },
     fileUpload: {
       deps: ['angular']
+    },
+    jsTree: {
+      deps: ['jquery']
     }
   }
 });
@@ -649,10 +662,145 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
   }]);
 
   driveServices.factory('User', ['$resource', function($resource) {
+    var documentURLTemplate = '$xwiki.getURL($services.model.createDocumentReference("__wiki__", "__space__", "__page__"))';
+    var getDocumentURL = function(wiki, space, page) {
+      var url = documentURLTemplate.replace('__wiki__', encodeURIComponent(wiki));
+      url = url.replace('__space__', encodeURIComponent(space));
+      return url.replace('__page__', encodeURIComponent(page));
+    };
+
+    var attachmentURLTemplate = '$xwiki.getAttachmentURL("__wiki__:__space__.__page__", "__file__")';
+    var getAttachmentURL = function(docRef, file) {
+      var url = attachmentURLTemplate.replace('__wiki__', encodeURIComponent(docRef.wiki));
+      url = url.replace('__space__', encodeURIComponent(docRef.space));
+      url = url.replace('__page__', encodeURIComponent(docRef.page));
+      return url.replace('__file__', encodeURIComponent(file));
+    };
+
+    var getAvatarURL = function(user) {
+      if (user.avatar) {
+        var avatarURL = getAttachmentURL(user.reference, user.avatar);
+        // Resize the avatar image on the server (use the medium avatar size as it may have been already cached on the
+        // server since it is used for comments).
+        return avatarURL + '?width=50';
+      } else {
+        return '$xwiki.getSkinFile("/icons/xwiki/noavatar.png")';
+      }
+    };
+
+    var getName = function(user) {
+      var firstName = user.first_name || '';
+      var lastName = user.last_name || '';
+      var name = (firstName + ' ' + lastName).trim();
+      if (name == '') {
+        name = user.alias;
+        if (user.reference.wiki != XWiki.currentWiki) {
+          name += ' (' + user.reference.wiki + ')';
+        }
+      }
+      return name;
+    };
+
+    var fromSolrDoc = function(solrDoc) {
+      var reference = new XWiki.DocumentReference(solrDoc.wiki, solrDoc.space, solrDoc.name);
+      reference = reference.relativeTo(new XWiki.WikiReference(XWiki.currentWiki));
+      var user = {
+        reference: {
+          wiki: solrDoc.wiki,
+          space: solrDoc.space,
+          page: solrDoc.name
+        },
+        id: XWiki.Model.serialize(reference),
+        alias: solrDoc.name,
+        url: getDocumentURL(solrDoc.wiki, solrDoc.space, solrDoc.name)
+      };
+      var prefix = 'property.XWiki.XWikiUsers.';
+      for (var key in solrDoc) {
+        if (key.substr(0, prefix.length) == prefix) {
+          var property = key.substr(prefix.length);
+          if (property.substr(-2) == '__') {
+            property = property.substr(0, property.length - 2);
+          } else {
+            var suffixPos = property.lastIndexOf('_');
+            if (suffixPos &gt; 0) {
+              property = property.substr(0, suffixPos);
+            }
+          }
+          var values = solrDoc[key];
+          user[property] = (angular.isArray(values) &amp;&amp; values.length == 1) ? values[0] : values;
+        }
+      }
+      user.name = getName(user);
+      user.avatarURL = getAvatarURL(user);
+      return user;
+    };
+
+    var fromRest = function(result) {
+      var reference = new XWiki.DocumentReference(result.wiki, result.space, result.pageName);
+      reference = reference.relativeTo(new XWiki.WikiReference(XWiki.currentWiki));
+      var user = {
+        reference: {
+          wiki: result.wiki,
+          space: result.space,
+          page: result.pageName
+        },
+        id: XWiki.Model.serialize(reference),
+        alias: result.pageName,
+        url: getDocumentURL(result.wiki, result.space, result.pageName)
+      };
+      angular.forEach(result.properties, function(property) {
+        user[property.name] = property.value;
+      })
+      user.name = getName(user);
+      user.avatarURL = getAvatarURL(user);
+      return user;
+    };
+
     var url = new XWiki.Document(':page', ':space', ':wiki').getRestURL('objects/XWiki.XWikiUsers/0');
-    return $resource(url, {}, {
-      get: {cache: true}
+    var resource = $resource(url, {}, {
+      get: {
+        cache: true,
+        transformResponse: function(response, headersGetter) {
+          return fromRest(angular.fromJson(response));
+        }
+      },
+      query: {
+        params: {
+          outputSyntax: 'plain',
+          query: ['q=*__INPUT__*', 'fq=type:DOCUMENT', 'fq=class:XWiki.XWikiUsers',
+            'qf=property.XWiki.XWikiUsers.last_name^10 property.XWiki.XWikiUsers.first_name^5 name^2.5'].join('\n')
+        },
+        url: new XWiki.Document('SolrService', 'FileManagerCode').getURL('get'),
+        isArray: true,
+        transformResponse: function(results, headersGetter) {
+          var users = [];
+          angular.forEach(angular.fromJson(results), function(result) {
+            users.push(fromSolrDoc(result));
+          });
+          return users;
+        }
+      }
     });
+
+    resource.fromId = function(id) {
+      var reference = XWiki.Model.resolve(id, XWiki.EntityType.DOCUMENT);
+      return fromSolrDoc({
+        wiki: reference.extractReferenceValue(XWiki.EntityType.WIKI) || XWiki.currentWiki,
+        space: reference.extractReferenceValue(XWiki.EntityType.SPACE) || XWiki.currentSpace,
+        name: reference.name
+      });
+    };
+
+    resource.getById = function(id, success, error) {
+      var reference = XWiki.Model.resolve(id, XWiki.EntityType.DOCUMENT);
+      return this.get({
+        wiki: reference.extractReferenceValue(XWiki.EntityType.WIKI) || XWiki.currentWiki,
+        space: reference.extractReferenceValue(XWiki.EntityType.SPACE) || XWiki.currentSpace,
+        page: reference.name
+      }, success, error);
+    };
+
+    return resource;
   }]);
 
   driveServices.factory('FileTree', function() {
@@ -1258,75 +1406,14 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
   });
 
   driveDirectives.directive('user',  ['User', function(User) {
-    var documentURLTemplate = '$xwiki.getURL($services.model.createDocumentReference("__wiki__", "__space__", "__page__"))';
-    var getDocumentURL = function(wiki, space, page) {
-      var url = documentURLTemplate.replace('__wiki__', encodeURIComponent(wiki));
-      url = url.replace('__space__', encodeURIComponent(space));
-      return url.replace('__page__', encodeURIComponent(page));
-    };
-
-    var attachmentURLTemplate = '$xwiki.getAttachmentURL("__wiki__:__space__.__page__", "__file__")';
-    var getAttachmentURL = function(wiki, space, page, file) {
-      var url = attachmentURLTemplate.replace('__wiki__', encodeURIComponent(wiki));
-      url = url.replace('__space__', encodeURIComponent(space));
-      url = url.replace('__page__', encodeURIComponent(page));
-      return url.replace('__file__', encodeURIComponent(file));
-    };
-
-    var getPropertyValue = function(user, name) {
-      for (var i = 0; i &lt; user.properties.length; i++) {
-        var property = user.properties[i];
-        if (property.name == name) {
-          return property.value;
-        }
-      }
-      return null;
-    };
-
-    var noAvatar = '$xwiki.getSkinFile("/icons/xwiki/noavatar.png", true)';
-    var getAvatar = function(user) {
-      var avatar = getPropertyValue(user, 'avatar') || '';
-      if (avatar != '') {
-        var avatarURL = getAttachmentURL(user.wiki, user.space, user.pageName, avatar);
-        // Resize the avatar image on the server (use the medium avatar size as it may have been already cached on the
-        // server since it is used for comments).
-        return avatarURL + '?width=50';
-      } else {
-        return noAvatar;
-      }
-    };
-
-    var getName = function(user) {
-      var firstName = getPropertyValue(user, 'first_name') || '';
-      var lastName = getPropertyValue(user, 'last_name') || '';
-      var name = (firstName + ' ' + lastName).trim();
-      if (name == '') {
-        name = user.pageName;
-        if (user.wiki != XWiki.currentWiki) {
-          name += ' (' + user.wiki + ')';
-        }
-      }
-      return name;
-    };
-
     return {
       restrict: 'A',
       scope: {},
-      template: '&lt;img ng-src="{{avatar}}" alt="Avatar" class="avatar" /&gt; &lt;a href="{{url}}"&gt;{{name}}&lt;/a&gt;',
+      template: '&lt;img ng-src="{{user.avatarURL}}" alt="Avatar" class="avatar" /&gt; &lt;a href="{{user.url}}" title="{{user.alias}}"&gt;{{user.name}}&lt;/a&gt;',
       link: function(scope, element, attrs) {
-        var reference = XWiki.Model.resolve(attrs.user, XWiki.EntityType.DOCUMENT);
-        var params = {
-          wiki: reference.extractReferenceValue(XWiki.EntityType.WIKI) || XWiki.currentWiki,
-          space: reference.extractReferenceValue(XWiki.EntityType.SPACE) || XWiki.currentSpace,
-          page: reference.name
-        };
-        scope.url = getDocumentURL(params.wiki, params.space, params.page);
-        // Default value for avatar and name, in case the user doesn't exist.
-        scope.name = reference.name;
-        scope.avatar = noAvatar;
-        User.get(params, function(user) {
-          scope.avatar = getAvatar(user);
-          scope.name = getName(user);
+        scope.user = User.fromId(attrs.user);
+        User.get(scope.user.reference, function(user) {
+          scope.user = user;
         });
       }
     }
@@ -2646,6 +2733,10 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 #files img.avatar, #files img.icon {
   height: 16px;
   vertical-align: bottom;
+}
+#files thead.xwiki-livetable-display-header td.xwiki-livetable-display-header-filter input {
+  /* Overwrite the default padding. */
+  padding: 2px;
 }
 
 /**

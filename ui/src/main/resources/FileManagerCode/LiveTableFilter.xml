@@ -1,0 +1,917 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.1">
+  <web>FileManagerCode</web>
+  <name>LiveTableFilter</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1409129632000</creationDate>
+  <parent>FileManagerCode.LiveTable</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1409549801000</date>
+  <contentUpdateDate>1409398222000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity output="false"}}
+#macro (displayLiveTableFilter)
+  &lt;div ng-switch="column.type"&gt;
+    &lt;div ng-switch-when="user" user-filter="filter[column.id]"&gt;&lt;/div&gt;
+    &lt;div ng-switch-when="date" date-filter="filter[column.id]"&gt;&lt;/div&gt;
+    &lt;div ng-switch-default&gt;
+      &lt;input type="text" ng-model="filter[column.id]" /&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+#end
+
+#macro (userFilterTemplate)
+  &lt;input type="text" ng-model="userName" class="user-filter" ng-class="{loading: loading}"
+    typeahead="user as user.name for user in getUsers($viewValue)"
+    typeahead-template-url="$doc.getURL('get', 'template=userSuggestItem')"
+    typeahead-on-select="setValue($item, $model, $label)"
+    typeahead-loading="loading"
+    typeahead-wait-ms="500" /&gt;
+#end
+
+#macro (userSuggestItemTemplate)
+  &lt;a&gt;
+    &lt;img ng-src="{{match.model.avatarURL}}" alt="Avatar" class="avatar" /&gt;
+    &lt;span&gt;{{match.model.name}}&lt;/span&gt;
+  &lt;/a&gt;
+#end
+
+#macro (dateFilterTemplate)
+  &lt;input type="text" ng-model="date" class="date-filter"
+    typeahead="option as option.label for option in getOptions($viewValue) | dateSuggestFilter:$viewValue | limitTo:8"
+    typeahead-on-select="setValue($item, $model, $label)"
+    typeahead-wait-ms="500" /&gt;
+#end
+{{/velocity}}
+
+{{velocity}}
+#if ($xcontext.action == 'get')
+  {{html clean="false"}}
+  #if ($request.template == 'userFilter')
+    #userFilterTemplate
+  #elseif ($request.template == 'userSuggestItem')
+    #userSuggestItemTemplate
+  #elseif ($request.template == 'dateFilter')
+    #dateFilterTemplate
+  #else
+    #displayLiveTableFilter
+  #end
+  {{/html}}
+#end
+{{/velocity}}</content>
+  <object>
+    <name>FileManagerCode.LiveTableFilter</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>5df8c7f9-ff60-43f8-9381-bc4e052816c1</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>define(['angular', 'angular-ui-bootstrap'], function(angular) {
+  var liveTableFilters = angular.module('liveTableFilters', ['ui.bootstrap.typeahead',
+    'template/typeahead/typeahead-match.html', 'template/typeahead/typeahead-popup.html',
+    'driveServices']);
+
+  liveTableFilters.factory('DateSuggest', function() {
+    var tokenSeparator = /[\s.,\-\/:]+/;
+    var getTokens = function(input) {
+      // Split the input text into tokens.
+      var tokens = input.toLowerCase().split(tokenSeparator);
+      // Filter the tokens.
+      for (var i = 0; i &lt; tokens.length;) {
+        var token = tokens[i];
+        if (token === '') {
+          tokens.splice(i, 1);
+        } else {
+          // Remove leading 0s.
+          var number = parseInt(token);
+          if (!isNaN(number)) {
+            tokens[i] = number + '';
+          }
+          i++;
+        }
+      }
+      return tokens;
+    };
+
+    var numberSeparator = /\D+/;
+    var numberLimit = new Date().getFullYear() + 30;
+    var getNumbers = function(input) {
+      var parts = input.split(numberSeparator);
+      var numbers = [];
+      angular.forEach(parts, function(part) {
+        var number = parseInt(part);
+        if (number &gt; 0 &amp;&amp; number &lt; numberLimit) {
+          numbers.push(number);
+        }
+      });
+      return numbers;
+    };
+
+    var getDatePattern = function(day, month, year) {
+      return [day || '*', month || '*', year || '*'].join('.');
+    };
+
+    var staticOptions = [
+      {label: 'Today', value: '-0d'},
+      {label: 'Yesterday', value: '-1d'},
+      {label: 'This week', value: '-0w'},
+      {label: 'This month', value: '-0m'},
+      {label: 'This year', value: '-0y'},
+      {label: 'Last week', value: '-1w'},
+      {label: 'Last month', value: '-1m'},
+      {label: 'Last year', value: '-1y'}
+    ];
+
+    /*
+    #set ($months = [])
+    #foreach ($month in [1..12])
+      #set ($date = $datetool.toDate('MM', "$month"))
+      #set ($discard = $months.add($datetool.format('MMMM', $date, $services.localization.currentLocale)))
+    #end
+    */
+    var months = $jsontool.serialize($months);
+    var monthOptions = [];
+    angular.forEach(months, function(month, index) {
+      monthOptions.push({
+        label: month,
+        hiddenLabel: index + 1,
+        value: getDatePattern(null, index + 1, null)
+      });
+    });
+
+    var replace = function(str, params) {
+      angular.forEach(params, function(param, index) {
+        str = str.replace('{' + index + '}', param);
+      });
+      return str;
+    };
+
+    var getMatchingMonths = function(input) {
+      var tokens = getTokens(input);
+      var matchingMonths = [];
+      angular.forEach(tokens, function(token) {
+        angular.forEach(months, function(month, index) {
+          if (month.substr(0, token.length).toLowerCase() == token) {
+            matchingMonths.push(index + 1);
+          }
+        });
+      });
+      if (matchingMonths.length == 0) {
+        // Suggest the current month.
+        matchingMonths.push(new Date().getMonth() + 1);
+      }
+      return matchingMonths;
+    };
+
+    var formats = {
+      year: 'year {0}',
+      dayMonth: '{0} {1}',
+      monthYear: '{0} {1}',
+      dayMonthYear: '{0} {1} {2}',
+      lastDays: 'Last {0} days',
+      lastWeeks: 'Last {0} weeks',
+      lastMonths: 'Last {0} months',
+      lastYears: 'Last {0} years'
+    };
+
+    var minYear = 1000;
+
+    var dayMonthYear = function(day, month, year, hiddenLabel) {
+      return {
+        label: replace(formats.dayMonthYear, [day, months[month - 1], year]),
+        hiddenLabel: hiddenLabel || month,
+        value: getDatePattern(day, month, year)
+      };
+    };
+
+    var dayMonth = function(day, month) {
+      return {
+        label: replace(formats.dayMonth, [day, months[month - 1]]),
+        hiddenLabel: month,
+        value: getDatePattern(day, month, null)
+      };
+    };
+
+    var monthYear = function(month, year, hiddenLabel) {
+      return {
+        label: replace(formats.monthYear, [months[month - 1], year]),
+        hiddenLabel: hiddenLabel || month,
+        value: getDatePattern(null, month, year)
+      };
+    };
+
+    var year = function(year, hiddenLabel) {
+      return {
+        label: replace(formats.year, [year]),
+        hiddenLabel: hiddenLabel,
+        value: getDatePattern(null, null, year)
+      };
+    };
+
+    var lastDays = function(days) {
+      return {
+        label: replace(formats.lastDays, [days]),
+        value: '-' + days + 'd'
+      };
+    };
+
+    var lastWeeks = function(weeks) {
+      return {
+        label: replace(formats.lastWeeks, [weeks]),
+        value: '-' + weeks + 'w'
+      };
+    };
+
+    var lastMonths = function(months) {
+      return {
+        label: replace(formats.lastMonths, [months]),
+        value: '-' + months + 'm'
+      };
+    };
+
+    var lastYears = function(years) {
+      return {
+        label: replace(formats.lastYears, [years]),
+        value: '-' + years + 'y'
+      };
+    };
+
+    //
+    // 0 numbers
+    //
+    var queryWithoutNumbers = function(input) {
+      var options = staticOptions.concat(monthOptions);
+      // We use the first token as a hidden label to force some options to be shown.
+      var firstToken = getTokens(input)[0];
+      var now = new Date();
+      options.push(
+        lastDays(7),
+        lastWeeks(2),
+        lastMonths(3),
+        lastYears(2),
+        dayMonthYear(now.getDate(), now.getMonth() + 1, now.getFullYear(), firstToken),
+        monthYear(now.getMonth() + 1, now.getFullYear(), firstToken),
+        year(now.getFullYear(), firstToken)
+      );
+      return options;
+    };
+
+    var asc = function(alice, bob) {
+      return alice - bob;
+    };
+
+    //
+    // 1 number
+    //
+    var queryWithOneNumber = function(input, numbers) {
+      var number = numbers[0];
+      var now = new Date();
+      var options = [];
+      if (number &lt;= 12) {
+        // Month
+        options.push(
+          monthOptions[number - 1],
+          monthYear(number, now.getFullYear())
+        );
+      }
+      if (number &lt;= 31) {
+        // Day
+        angular.forEach(getMatchingMonths(input), function(month) {
+          options.push(
+            dayMonthYear(number, month, now.getFullYear()),
+            dayMonth(number, month)
+          );
+        });
+      }
+      if (number &gt;= minYear) {
+        // Year
+        options.push(year(number));
+        angular.forEach(getMatchingMonths(input), function(month) {
+          options.push(
+            dayMonthYear(now.getDate(), month, number),
+            monthYear(month, number)
+          );
+        });
+      }
+      if (number &gt; 1) {
+        options.push(lastDays(number));
+        number &lt;= 52 &amp;&amp; options.push(lastWeeks(number));
+        number &lt;= 48 &amp;&amp; options.push(lastMonths(number));
+        number &lt;= 5 &amp;&amp; options.push(lastYears(number));
+      }
+      return options;
+    };
+
+    //
+    // 2 numbers
+    //
+    var queryWithTwoNumbers = function(input, numbers) {
+      var options = [];
+      var now = new Date();
+      numbers.sort(asc);
+      if (numbers[0] &lt;= 31 &amp;&amp; numbers[1] &gt;= minYear) {
+        // Day/Month &amp; Year
+        var matchingMonths = getMatchingMonths(input);
+        angular.forEach(matchingMonths, function(month) {
+          options.push(dayMonthYear(numbers[0], month, numbers[1]));
+        });
+        if (numbers[0] &lt;= 12 &amp;&amp; matchingMonths.indexOf(numbers[0]) &lt; 0) {
+          options.push(monthYear(numbers[0], numbers[1]));
+        }
+      } else if (numbers[0] &lt;= 12 &amp;&amp; numbers[1] &lt;= 31) {
+        // Day &amp; Month
+        options.push(dayMonth(numbers[1], numbers[0]));
+        options.push(dayMonthYear(numbers[1], numbers[0], now.getFullYear()));
+        if (numbers[1] &lt;= 12 &amp;&amp; numbers[0] != numbers[1]) {
+          options.push(dayMonth(numbers[0], numbers[1]));
+          options.push(dayMonthYear(numbers[0], numbers[1], now.getFullYear()));
+        }
+      }
+      return options;
+    };
+
+    //
+    // 3 numbers
+    //
+    var queryWithThreeNumbers = function(input, numbers) {
+      var options = [];
+      numbers.sort(asc);
+      if (numbers[0] &lt;= 12 &amp;&amp; numbers[1] &lt;= 31 &amp;&amp; numbers[2] &gt;= minYear) {
+        options.push(dayMonthYear(numbers[1], numbers[0], numbers[2]));
+        if (numbers[1] &lt;= 12 &amp;&amp; numbers[0] != numbers[1]) {
+          options.push(dayMonthYear.apply(this, numbers));
+        }
+      }
+      return options;
+    };
+
+    var cases = [queryWithoutNumbers, queryWithOneNumber, queryWithTwoNumbers, queryWithThreeNumbers];
+
+    return {
+      query: function(input) {
+        var numbers = getNumbers(input);
+        return numbers.length &lt; 4 ? cases[numbers.length](input, numbers) : [];
+      },
+
+      getTokens: getTokens
+    };
+  });</code>
+    </property>
+    <property>
+      <name>Services: DateSuggest</name>
+    </property>
+    <property>
+      <parse>1</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <name>FileManagerCode.LiveTableFilter</name>
+    <number>1</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>e86090a8-7069-4496-aa5f-824da80df711</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>  liveTableFilters.filter('dateSuggestFilter', ['DateSuggest', function(DateSuggest) {
+    return function(items, input) {
+      var tokens = DateSuggest.getTokens(input);
+      var resultsWithScore = [];
+      angular.forEach(items, function(item) {
+        var score = 0;
+        var label = item.label.toLowerCase();
+        var hiddenLabel = ((item.hiddenLabel || '') + '').toLowerCase();
+        angular.forEach(tokens, function(token, index) {
+          if (label.indexOf(token) &gt;= 0 || hiddenLabel.indexOf(token) &gt;= 0) {
+            // A lower token index generates a bigger bonus.
+            var indexBonus = (tokens.length - index) / tokens.length;
+            score += 1 + indexBonus;
+          }
+        });
+        if (score &gt; 0) {
+          resultsWithScore.push({
+            item: item,
+            score: score
+          });
+        }
+      });
+
+      // Sort by score, descending.
+      resultsWithScore.sort(function(alice, bob) {
+        return bob.score - alice.score;
+      });
+
+      var results = [];
+      angular.forEach(resultsWithScore, function(result) {
+        results.push(result.item);
+      });
+      return results;
+    }
+  }]);</code>
+    </property>
+    <property>
+      <name>Filters: dateSuggestFilter</name>
+    </property>
+    <property>
+      <parse>1</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <name>FileManagerCode.LiveTableFilter</name>
+    <number>2</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>cb7ce789-2b09-4780-afc2-a49ebd2a4fa0</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>  liveTableFilters.directive('userFilter',  ['User', function(User) {
+    return {
+      restrict: 'A',
+      scope: {
+        'value': '=userFilter'
+      },
+      templateUrl: "$doc.getURL('get', 'template=userFilter')",
+      link: function(scope, element, attrs) {
+        // Retrieve the users that match the given input.
+        scope.getUsers = function(input) {
+          return User.query({input: input, nb: 5}).$promise;
+        };
+
+        // We need to keep the selected user id in order to determine when the filter value is modified from outside,
+        // e.g. when the Back/Forward buttons are used to navigate the browser history.
+        var selectedUser;
+        // Update the filter value whenever a user is selected from the list of suggestions.
+        scope.setValue = function(item, model, label) {
+          scope.value = selectedUser = model.id;
+          element.find('input').css('background-image', 'url("' + model.avatarURL + '")');
+        };
+
+        // Reset the filter value when the input text is deleted.
+        scope.$watch('userName', function(newValue, oldValue) {
+          if (newValue === '') {
+            scope.value = selectedUser = '';
+            element.find('input').css('background-image', '');
+          }
+        });
+
+        // Observe when the filter value is modified from outside (e.g. Back/Forward buttons).
+        scope.$watch('value', function(newValue, oldValue) {
+          if (newValue != selectedUser) {
+            // The filter value was modified from outside.
+            selectedUser = newValue;
+            if (newValue) {
+              // Fill the filter input with the user name.
+              scope.loading = true;
+              User.getById(newValue, function(user) {
+                scope.loading = false;
+                scope.userName = user.name;
+                element.find('input').css('background-image', 'url("' + user.avatarURL + '")');
+              }, function(error) {
+                scope.loading = false;
+                scope.userName = newValue;
+                element.find('input').css('background-image', '');
+              });
+            } else {
+              // Reset the filter input.
+              scope.userName = '';
+            }
+          }
+        });
+      }
+    };
+  }]);
+
+  liveTableFilters.directive('dateFilter', ['DateSuggest', function(DateSuggest) {
+    return {
+      restrict: 'A',
+      scope: {
+        'value': '=dateFilter'
+      },
+      templateUrl: "$doc.getURL('get', 'template=dateFilter')",
+      link: function(scope, element, attrs) {
+        // Retrieve the date suggestions that match the text input.
+        scope.getOptions = function(input) {
+          return DateSuggest.query(input);
+        };
+
+        // Update the filter value whenever an option is selected from the list of suggestions.
+        scope.setValue = function(item, model, label) {
+          scope.value = model.value;
+        };
+
+        // Reset the filter value when the input text is deleted.
+        scope.$watch('date', function(newValue, oldValue) {
+          if (newValue === '') {
+            scope.value = '';
+          }
+        });
+      }
+    }
+  }]);
+});</code>
+    </property>
+    <property>
+      <name>Directives: user-filter, date-filter</name>
+    </property>
+    <property>
+      <parse>1</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <name>FileManagerCode.LiveTableFilter</name>
+    <number>0</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>3735a891-b300-41e6-9467-46853882fd24</guid>
+    <class>
+      <name>XWiki.StyleSheetExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>#template('colorThemeInit.vm')
+
+/**
+ * User Filter
+ */
+input.user-filter {
+  padding-left: 20px !important;
+  background: transparent url('$xwiki.getSkinFile("/icons/xwiki/noavatar.png")') no-repeat 2px center;
+  background-size: 16px;
+}
+
+/**
+ * Typeahead
+ */
+typeahead {
+  z-index: 1051;
+  margin-top: 2px;
+  border-radius: 4px;
+}
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: none;
+  float: left;
+  min-width: 160px;
+  padding: 5px 0;
+  margin: 2px 0 0;
+  list-style: none outside none;
+  background-color: $theme.pageContentBackgroundColor;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  background-clip: padding-box;
+}
+.dropdown-menu &gt; li &gt; a {
+  display: block;
+  padding: 3px 20px;
+  clear: both;
+  font-weight: normal;
+  color: $theme.textColor;
+  white-space: nowrap;
+}
+.dropdown-menu &gt; .active &gt; a,
+.dropdown-menu &gt; .active &gt; a:hover,
+.dropdown-menu &gt; .active &gt; a:focus {
+  text-decoration: none;
+  background-color: $theme.highlightColor;
+  outline: 0 none;
+}</code>
+    </property>
+    <property>
+      <name>Style</name>
+    </property>
+    <property>
+      <parse>1</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+</xwikidoc>

@@ -114,38 +114,122 @@
   })))
 #end
 
-#macro (getFilesStatement $where $return)
-  #set ($from = 'from doc.object(FileManagerCode.FileClass) as file')
-  #set ($orderBy = '')
-  #set ($sortMap = {
+#macro (filterByDate)
+  #set ($results = $regextool.find($filterValue, '^(\*|\d+).(\*|\d+).(\*|\d+)$'))
+  #if ($results.size() == 4)
+    #foreach ($field in ['day', 'month', 'year'])
+      #set ($value = $results.get($foreach.count).group)
+      #if ($value != '*')
+        #set ($paramName = "$entry.key$stringtool.capitalize($field)")
+        #set ($where = "$where and :$paramName in (${field}($entry.value))")
+        #set ($discard = $parameters.put($paramName, $value))
+      #end
+    #end
+  #else
+    #set ($results = $regextool.find($filterValue, '^-(\d+)([dwmy])$'))
+    #if ($results.size() == 3)
+      #set ($amount = $mathtool.toInteger($results.get(1).group))
+      #set ($unit = $results.get(2).group)
+      #set ($now = $xwiki.jodatime.dateTime)
+      #if ($unit == 'd')
+        ## If $amount &gt; 1 then the range starts at 12:00:00 AM $amount days before the current day and continues up to
+        ## the current second. This means the range includes today! We handle $amount == 0 (Today) and $amount == 1
+        ## (Yesterday) differently.Yesterday
+        #set ($start = $now.minusDays($amount).withTimeAtStartOfDay())
+        #if ($amount &gt; 1)
+          #set ($end = $now)
+        #else
+          ## For Today and Yesterday the period is just one day.
+          #set ($end = $start.plusDays(1))
+        #end
+      #elseif ($unit == 'w')
+        ## If $amount &gt; 0 then the range starts at 12:00:00 AM on the first day of the week that started $amount weeks
+        ## before the current week, and continues up to 11:59 PM on the last day of the week before the current week. So
+        ## the current week is not included for $amount &gt; 0. We handle $amount == 0 (This week) differently.
+        #set ($start = $now.minusWeeks($amount).withDayOfWeek(1).withTimeAtStartOfDay())
+        ## We add at least 1 week in order to handle the case when $amount == 0 (this week).
+        #set ($end = $start.plusWeeks($mathtool.max($amount, 1)))
+      #elseif ($unit == 'm')
+        ## If $amount &gt; 0 then the range starts at 12:00:00 AM on the first day of the month that started $amount months
+        ## before the current month and continues up to 11:59 PM on the last day of the month before the current month.
+        ## So the current month is not included for $amount &gt; 0. We handle $amount == 0 (This month) differently.
+        #set ($start = $now.minusMonths($amount).withDayOfMonth(1).withTimeAtStartOfDay())
+        ## We add at least 1 month in order to handle the case when $amount == 0 (this month).
+        #set ($end = $start.plusMonths($mathtool.max($amount, 1)))
+      #elseif ($unit == 'y')
+        ## If $amount &gt; 0 then the range starts at 12:00:00 AM on January 1st, $amount years ago. The range ends on
+        ## December 31 of the year before the current year. So the current year is not included for $amount &gt; 0. We
+        ## handle $amount == 0 (This year) differently.
+        #set ($start = $now.minusYears($amount).withDayOfYear(1).withTimeAtStartOfDay())
+        ## We add at least 1 year in order to handle the case when $amount == 0 (this year).
+        #set ($end = $start.plusYears($mathtool.max($amount, 1)))
+      #end
+      #set ($where = "$where and $entry.value &gt;= :${entry.key}Start and $entry.value &lt; :${entry.key}End")
+      #set ($discard = $parameters.put("${entry.key}Start", $datetool.toDate($start.millis)))
+      #set ($discard = $parameters.put("${entry.key}End", $datetool.toDate($end.millis)))
+    #end
+  #end
+#end
+
+#macro (getFilesStatement $from $where $parameters $return)
+  #set ($from = ", BaseObject as fileObj#if (""$!from"" != ''), $!from#end")
+  #set ($joinFiles = "fileObj.className = 'FileManagerCode.FileClass' and fileObj.name = doc.fullName")
+  #set ($where = "$joinFiles#if (""$!where"" != '') and $!where#end")
+  #set ($joinAttachments = false)
+  #set ($storedColumns = {
     'name': 'attach.filename',
     'size': 'attach.filesize',
     'date': 'doc.date',
     'author': 'doc.author'
   })
-  #set ($sort = $sortMap.get($request.sort))
-  #if ($sort)
-    #if ($sort.startsWith('attach.'))
-      ## We need to join with the Attachments table.
-      #set ($from = "$from, XWikiAttachment attach")
-      #set ($where = "$!where and attach.docId = doc.id")
+  #foreach ($entry in $storedColumns.entrySet())
+    #set ($filterValue = $request.getParameter(".$entry.key"))
+    #if ("$!filterValue" != '')
+      #set ($joinAttachments = $joinAttachments || $entry.value.startsWith('attach.'))
+      #if ($entry.key == 'name')
+        #set ($where = "$where and lower($entry.value) like :$entry.key")
+        #set ($discard = $parameters.put($entry.key, "%$filterValue.toLowerCase()%"))
+      #elseif ($entry.key == 'author')
+        #set ($userReference = $services.model.resolveDocument($filterValue))
+        #if ($filterValue == $services.model.serialize($userReference, 'compact', $userReference))
+          ## Only the user alias is specified. Do partial matching.
+          #set ($where = "$where and lower($entry.value) like :$entry.key")
+          #set ($discard = $parameters.put($entry.key, "%$filterValue.toLowerCase()%"))
+        #else
+          ## The user reference is specified. Match the exact reference.
+          #set ($where = "$where and $entry.value = :$entry.key")
+          #set ($discard = $parameters.put($entry.key, $filterValue))
+        #end
+      #elseif ($entry.key == 'date')
+        #filterByDate()
+      #end
     #end
+  #end
+  #set ($orderBy = '')
+  #set ($sort = $storedColumns.get($request.sort))
+  #if ($sort)
+    #set ($joinAttachments = $joinAttachments || $sort.startsWith('attach.'))
     #set ($order = $request.order)
     #if ($order != 'desc')
       #set ($order = '')
     #end
     #set ($orderBy = "order by $sort $order")
   #end
+  #if ($joinAttachments)
+    ## We need to join with the Attachments table.
+    #set ($from = "$from, XWikiAttachment attach")
+    #set ($where = "$!where and attach.docId = doc.id")
+  #end
   #if ("$!where" != '')
-    #set ($where = "where $stringtool.removeStart($where.trim(), 'and')")
+    #set ($where = "where $stringtool.removeStart($where.trim(), 'and ')")
   #end
   #set ($return = $NULL)
   #setVariable("$return" "$from $!where $orderBy")
 #end
 
 #macro (getFiles $statement $parameters $return)
-  #set ($query = $services.query.xwql($statement))
-  #set ($countQuery = $services.query.xwql($statement).addFilter('count'))
+  #set ($query = $services.query.hql($statement))
+  #set ($countQuery = $services.query.hql($statement).addFilter('count'))
   #foreach ($entry in $parameters.entrySet())
     #set ($discard = $query.bindValue($entry.key, $entry.value))
     #set ($discard = $countQuery.bindValue($entry.key, $entry.value))
