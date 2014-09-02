@@ -34,7 +34,7 @@
   <packaging>jar</packaging>
   <description>APIs to manage files and folders.</description>
   <properties>
-    <xwiki.jacoco.instructionRatio>0.67</xwiki.jacoco.instructionRatio>
+    <xwiki.jacoco.instructionRatio>0.69</xwiki.jacoco.instructionRatio>
   </properties>
   <dependencies>
     <dependency>
@@ -61,6 +61,18 @@
       <groupId>org.xwiki.platform</groupId>
       <artifactId>xwiki-platform-oldcore</artifactId>
       <version>${commons.version}</version>
+    </dependency>
+    <dependency>
+      <!-- Required for packing files and folders into ZIP archives -->
+      <!-- To be replaced with java.util.zip after we move to Java 7 -->
+      <!-- http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4244499 -->
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+    </dependency>
+    <dependency>
+      <!-- Required for IOUtils -->
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
     </dependency>
     <!-- Test dependencies -->
     <dependency>

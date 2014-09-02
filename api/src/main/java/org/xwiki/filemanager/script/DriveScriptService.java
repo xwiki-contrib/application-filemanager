@@ -37,6 +37,7 @@ import org.xwiki.filemanager.job.BatchPathRequest;
 import org.xwiki.filemanager.job.FileManager;
 import org.xwiki.job.JobException;
 import org.xwiki.job.event.status.JobStatus;
+import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
 import org.xwiki.script.service.ScriptService;
@@ -139,7 +140,34 @@ public class DriveScriptService implements ScriptService
             setError(e);
             return null;
         }
+    }
 
+    /**
+     * Schedules a job to pack the specified files and folders into a single ZIP archive.
+     * <p>
+     * The {@link org.xwiki.model.reference.DocumentReference} part of the given {@link AttachmentReference} represents
+     * the document that is going to be used to access the output ZIP file. This means that only users with view right
+     * on this document can access the output file. The {@code name} property of the given {@link AttachmentReference}
+     * will be used as the name of the output ZIP file.
+     * <p>
+     * The output file is a temporary file (deleted automatically when the server is stopped) that can be accessed
+     * through the 'temp' action, e.g.: {@code /xwiki/temp/Space/Page/filemanager/file.zip} .
+     * 
+     * @param paths the files and folders to be packed
+     * @param outputFileReference the reference to the output ZIP file
+     * @return the id of the pack job that has been scheduled
+     * @since 2.0M2
+     */
+    public String pack(Collection<String> paths, AttachmentReference outputFileReference)
+    {
+        setError(null);
+
+        try {
+            return fileManager.pack(asPath(paths), outputFileReference);
+        } catch (JobException e) {
+            setError(e);
+            return null;
+        }
     }
 
     /**

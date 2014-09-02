@@ -37,9 +37,11 @@ import org.xwiki.filemanager.Path;
 import org.xwiki.filemanager.job.BatchPathRequest;
 import org.xwiki.filemanager.job.FileManager;
 import org.xwiki.filemanager.job.MoveRequest;
+import org.xwiki.filemanager.job.PackRequest;
 import org.xwiki.job.JobException;
 import org.xwiki.job.JobManager;
 import org.xwiki.job.event.status.JobStatus;
+import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.observation.EventListener;
 
 /**
@@ -108,6 +110,16 @@ public class DefaultFileManager implements FileManager
 
         this.jobManager.addJob(DeleteJob.JOB_TYPE, deleteRequest);
         return addToQueue(deleteRequest);
+    }
+
+    @Override
+    public String pack(Collection<Path> paths, AttachmentReference outputFileReference) throws JobException
+    {
+        PackRequest packRequest = initBatchPathRequest(new PackRequest(), paths, PackJob.JOB_TYPE);
+        packRequest.setOutputFileReference(outputFileReference);
+
+        this.jobManager.addJob(PackJob.JOB_TYPE, packRequest);
+        return addToQueue(packRequest);
     }
 
     @Override

@@ -37,7 +37,9 @@ import org.xwiki.filemanager.Path;
 import org.xwiki.filemanager.job.BatchPathRequest;
 import org.xwiki.filemanager.job.FileManager;
 import org.xwiki.filemanager.job.MoveRequest;
+import org.xwiki.filemanager.job.PackRequest;
 import org.xwiki.job.JobManager;
+import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.observation.EventListener;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
@@ -125,6 +127,26 @@ public class DefaultFileManagerTest
         assertArrayEquals(paths.toArray(), request.getValue().getPaths().toArray());
         assertEquals(currentUserReference, request.getValue().getProperty("user.reference"));
         assertEquals(DeleteJob.JOB_TYPE, request.getValue().getProperty("job.type"));
+        assertFalse(request.getValue().isInteractive());
+
+        verify(activeJobQueue).offer(jobId);
+    }
+
+    @Test
+    public void pack() throws Exception
+    {
+        Collection<Path> paths = Collections.singleton(new Path(null));
+        AttachmentReference outputFileReference =
+            new AttachmentReference("Folder.zip", new DocumentReference("wiki", "Drive", "Folder"));
+        String jobId = mocker.getComponentUnderTest().pack(paths, outputFileReference);
+
+        ArgumentCaptor<PackRequest> request = ArgumentCaptor.forClass(PackRequest.class);
+        verify(jobManager).addJob(eq(PackJob.JOB_TYPE), request.capture());
+        assertEquals(Arrays.asList(FileManager.JOB_ID_PREFIX, jobId), request.getValue().getId());
+        assertArrayEquals(paths.toArray(), request.getValue().getPaths().toArray());
+        assertEquals(outputFileReference, request.getValue().getOutputFileReference());
+        assertEquals(currentUserReference, request.getValue().getProperty("user.reference"));
+        assertEquals(PackJob.JOB_TYPE, request.getValue().getProperty("job.type"));
         assertFalse(request.getValue().isInteractive());
 
         verify(activeJobQueue).offer(jobId);

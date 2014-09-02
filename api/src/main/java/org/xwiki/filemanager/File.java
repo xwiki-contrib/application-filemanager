@@ -19,6 +19,7 @@
  */
 package org.xwiki.filemanager;
 
+import java.io.InputStream;
 import java.util.Collection;
 
 import org.xwiki.component.annotation.Role;
@@ -39,4 +40,10 @@ public interface File extends Document
      * @return the collection of references to the parent folders
      */
     Collection<DocumentReference> getParentReferences();
+
+    /**
+     * @return the file content input stream
+     * @since 2.0M2
+     */
+    InputStream getContent();
 }

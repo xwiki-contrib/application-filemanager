@@ -26,6 +26,7 @@ import org.xwiki.component.annotation.Role;
 import org.xwiki.filemanager.Path;
 import org.xwiki.job.JobException;
 import org.xwiki.job.event.status.JobStatus;
+import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -71,6 +72,25 @@ public interface FileManager
      * @throws JobException if scheduling the delete job fails
      */
     String delete(Collection<Path> paths) throws JobException;
+
+    /**
+     * Packs the specified files and folders in a single ZIP archive that is written in the specified output file.
+     * <p>
+     * The {@link org.xwiki.model.reference.DocumentReference} part of the given {@link AttachmentReference} represents
+     * the document that is going to be used to access the output ZIP file. This means that only users with view right
+     * on this document can access the output file. The {@code name} property of the given {@link AttachmentReference}
+     * will be used as the name of the output ZIP file.
+     * <p>
+     * The output file is a temporary file (deleted automatically when the server is stopped) that can be accessed
+     * through the 'temp' action, e.g.: {@code /xwiki/temp/Space/Page/filemanager/file.zip} .
+     * 
+     * @param paths the files and folders to be packed
+     * @param outputFileReference the reference to the temporary output file
+     * @return the id of the pack job that has been scheduled
+     * @throws JobException if scheduling the pack job fails
+     * @since 2.0M2
+     */
+    String pack(Collection<Path> paths, AttachmentReference outputFileReference) throws JobException;
 
     /**
      * @param jobId the job whose status to return

@@ -19,6 +19,8 @@
  */
 package org.xwiki.filemanager.internal;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -138,5 +140,24 @@ public class DefaultFile extends AbstractDocument implements File
             }
         }
         return references;
+    }
+
+    @Override
+    public InputStream getContent()
+    {
+        List<XWikiAttachment> attachments = getDocument().getAttachmentList();
+        if (attachments.size() > 0) {
+            try {
+                return attachments.get(0).getContentInputStream(getContext());
+            } catch (XWikiException e) {
+                logger.warn("Failed to get the file content input stream for [{}]. Returning empty content instead.",
+                    getReference(), e);
+                // Fail-safe.
+                return new ByteArrayInputStream(new byte[] {});
+            }
+        } else {
+            // No attachment found. Fail-safe pretending to have an empty attachment.
+            return new ByteArrayInputStream(new byte[] {});
+        }
     }
 }

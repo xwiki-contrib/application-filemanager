@@ -23,9 +23,11 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,6 +37,7 @@ import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
 
 import com.xpn.xwiki.XWikiContext;
+import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiAttachment;
 import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
@@ -119,5 +122,35 @@ public class DefaultFileTest
 
         assertEquals(Arrays.asList(new DocumentReference("tech", "FileSystem", "Concerto"), new DocumentReference(
             "tech", "FileSystem", "Resilience")), file.getParentReferences());
+    }
+
+    @Test
+    public void getContent() throws Exception
+    {
+        ByteArrayInputStream content = new ByteArrayInputStream(new byte[] {});
+
+        XWikiAttachment attachment = mock(XWikiAttachment.class);
+        when(attachment.getContentInputStream(any(XWikiContext.class))).thenReturn(content);
+        when(file.getDocument().getAttachmentList()).thenReturn(Collections.singletonList(attachment));
+
+        assertSame(content, file.getContent());
+    }
+
+    @Test
+    public void getContentWithoutAttachment() throws Exception
+    {
+        when(file.getDocument().getAttachmentList()).thenReturn(Collections.<XWikiAttachment> emptyList());
+
+        assertTrue(IOUtils.contentEquals(file.getContent(), new ByteArrayInputStream(new byte[] {})));
+    }
+
+    @Test
+    public void getContentWithNoAttachmentContent() throws Exception
+    {
+        XWikiAttachment attachment = mock(XWikiAttachment.class);
+        when(attachment.getContentInputStream(any(XWikiContext.class))).thenThrow(XWikiException.class);
+        when(file.getDocument().getAttachmentList()).thenReturn(Collections.singletonList(attachment));
+
+        assertTrue(IOUtils.contentEquals(file.getContent(), new ByteArrayInputStream(new byte[] {})));
     }
 }
