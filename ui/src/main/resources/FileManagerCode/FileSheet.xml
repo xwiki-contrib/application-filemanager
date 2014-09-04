@@ -53,6 +53,8 @@
         #copyFile
       #elseif ($request.action == 'delete')
         #deleteFile
+      #elseif ($request.action == 'download')
+        #downloadFile
       #end
     #elseif ($isAjaxRequest)
       $response.sendError(403, 'The CSRF token is missing.')
@@ -66,7 +68,7 @@
       #set ($discard = $response.setContentType('application/json'))
       $jsontool.serialize($data)
     #else
-      $response.sendError(404);
+      $response.sendError(404)
     #end
   #end
 #end
@@ -88,6 +90,15 @@
 #macro (deleteFile)
   #set ($jobId = $services.drive.delete(["$!request.fromParent/$doc.name"]))
   #handleJobStartFailure($jobId)
+#end
+
+#macro (downloadFile)
+  #set ($attachments = $doc.attachmentList)
+  #if ($attachments.size() &gt; 0)
+    $response.sendRedirect($doc.getAttachmentURL($attachments.get(0).filename, 'download', 'force-download=1'))
+  #else
+    $response.sendError(404)
+  #end
 #end
 
 #macro (openFile)

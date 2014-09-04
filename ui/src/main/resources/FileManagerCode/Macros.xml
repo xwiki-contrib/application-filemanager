@@ -420,6 +420,15 @@
         'child': $jobStatus.request.destination.fileReference.name
       })
     #end
+    #if ($jobStatus.request.outputFileReference)
+      #set ($jobStatusAsJSON.bytesWritten = $jobStatus.bytesWritten)
+      #set ($jobStatusAsJSON.outputFileSize = $jobStatus.outputFileSize)
+      #set ($jobStatusAsJSON.request.outputFile = {
+        'id': $jobStatus.request.outputFileReference.parent.name,
+        'name': $jobStatus.request.outputFileReference.name,
+        'url': $xwiki.getURL($jobStatus.request.outputFileReference.parent, 'get')
+      })
+    #end
     #set ($return = $NULL)
     #setVariable("$return" $jobStatusAsJSON)
   #end

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.1">
+  <web>FileManagerCode</web>
+  <name>DownloadSheet</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1409669727000</creationDate>
+  <parent>FileManagerCode.DownloadClass</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1409752737000</date>
+  <contentUpdateDate>1409752737000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity}}
+#set ($message = $NULL)
+#set ($jobId = $doc.getValue('jobId'))
+#if ("$!jobId" != '')
+  #set ($jobStatus = $services.drive.getJobStatus($jobId))
+  #if ($jobStatus)
+    #set ($fileName = $jobStatus.request.outputFileReference.name)
+    #if ("$!fileName" != '')
+      #if ($jobStatus.state != 'FINISHED')
+        #set ($message = "The package is not ready for download ($jobStatus.state / $jobStatus.progress.offset).")
+      #end
+    #else
+      #set ($message = 'Invalid job type.')
+    #end
+  #else
+    #set ($message = "There's no job with the specified id: $jobId")
+  #end
+#else
+  #set ($message = 'The job id is not specified.')
+#end
+#if ($message)
+  #if ($xcontext.action == 'get')
+    $response.sendError(404, $message)
+  #else
+    {{info}}$message{{/info}}
+  #end
+#else
+  #set ($downloadURL = "$doc.getAttachmentURL('filemanager', 'temp')/$escapetool.url($fileName)")
+  #if ($xcontext.action == 'get')
+    $response.sendRedirect($downloadURL)
+  #else
+    [[Download $fileName&gt;&gt;path:$downloadURL]]
+  #end
+#end
+{{/velocity}}</content>
+</xwikidoc>

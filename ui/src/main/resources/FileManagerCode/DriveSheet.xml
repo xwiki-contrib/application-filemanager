@@ -56,6 +56,8 @@
         #batchCopy
       #elseif ($request.action == 'delete')
         #batchDelete
+      #elseif ($request.action == 'download')
+        #batchDownload
       #end
     #elseif ($isAjaxRequest)
       $response.sendError(403, 'The CSRF token is missing.')
@@ -89,14 +91,14 @@
 #end
 
 #macro (batchMove)
-    #set ($paths = $request.getParameterValues('path'))
+  #set ($paths = $request.getParameterValues('path'))
   #set ($paths = $paths.subList(0, $paths.size()))
   #set ($jobId = $services.drive.move($paths, $request.destination))
   #handleJobStartFailure($jobId)
 #end
 
 #macro (batchCopy)
-    #set ($paths = $request.getParameterValues('path'))
+  #set ($paths = $request.getParameterValues('path'))
   #set ($paths = $paths.subList(0, $paths.size()))
   #set ($jobId = $services.drive.copy($paths, $request.destination))
   #handleJobStartFailure($jobId)
@@ -107,6 +109,47 @@
   #set ($paths = $paths.subList(0, $paths.size()))
   #set ($jobId = $services.drive.delete($paths))
   #handleJobStartFailure($jobId)
+#end
+
+#macro (batchDownload)
+  #set ($paths = $request.getParameterValues('path'))
+  #set ($paths = $paths.subList(0, $paths.size()))
+  #set ($packName = $request.name)
+  #if ("$!packName" != '')
+    #set ($packId = $stringtool.removeEnd($packName, '.zip'))
+    #set ($packName = "${packId}.zip")
+  #elseif ($paths.size() == 1)
+    #set ($packId = $paths.get(0))
+    #set ($packName = "$!{xwiki.getDocument($packId).plainTitle}.zip")
+  #else
+    #set ($packId = $util.generateRandomString(4))
+    #set ($packName = "${packId}.zip")
+  #end
+  #getDownloadDocument($packId $packName $downloadDoc)
+  #set ($packReference = $services.model.createAttachmentReference($downloadDoc.documentReference, $packName))
+  #set ($jobId = $services.drive.pack($paths, $packReference))
+  #if ($jobId)
+    #set ($discard = $downloadDoc.set('jobId', $jobId))
+    #set ($discard = $downloadDoc.save())
+  #end
+  #handleJobStartFailure($jobId)
+#end
+
+#macro (getDownloadDocument $name $title $return)
+  #set ($downloadId = "Download-${xcontext.userReference.name}-$name")
+  #set ($downloadDocRef = $services.model.createDocumentReference($doc.wiki, $doc.space, $downloadId))
+  #set ($downloadDoc = $xwiki.getDocument($downloadDocRef))
+  #set ($discard = $downloadDoc.setHidden(true))
+  #set ($discard = $downloadDoc.setTitle($title))
+  #set ($discard = $downloadDoc.setParent($doc.fullName))
+  #set ($discard = $downloadDoc.getObject('FileManagerCode.DownloadClass', true))
+  ## Limit view and edit rights to the current user.
+  #set ($rightsObj = $downloadDoc.getObject('XWiki.XWikiRights', true))
+  #set ($discard = $rightsObj.set('allow', 1))
+  #set ($discard = $rightsObj.set('levels', 'view,edit'))
+  #set ($discard = $rightsObj.set('users', $services.model.serialize($xcontext.userReference, 'compactwiki')))
+  #set ($return = $NULL)
+  #setVariable("$return" $downloadDoc)
 #end
 
 #macro (getOrphanFolders)
@@ -222,6 +265,17 @@
           ng-if="drive.location.type == 'folder'" ng-disabled="!clipboard" ng-click="paste()"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_paste.png')" alt="Paste" class="icon" /&gt;Paste
       &lt;/button&gt;
+    &lt;/div&gt;&lt;div class="btn-group" dropdown&gt;
+      &lt;button type="button" class="btn btn-default" title="Download selected files"
+          ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="download(selectedFiles)"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_put.png')" alt="Download" class="icon" /&gt;Download
+      &lt;/button&gt;
+      &lt;button type="button" class="btn btn-default dropdown-toggle"&gt;
+        &lt;span class="caret"&gt;&lt;/span&gt;
+      &lt;/button&gt;
+      &lt;ul class="dropdown-menu" role="menu"&gt;
+        &lt;li&gt;&lt;a href="#" ng-click="drive.viewer = 'downloads'; $event.preventDefault()"&gt;Recent Downloads&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
     &lt;/div&gt;&lt;div class="btn-group"&gt;
       &lt;button type="button" class="btn btn-default" title="Rename selected file"
           ng-disabled="drive.readOnly || selectedFiles.length != 1" ng-click="rename(selectedFiles[0])"&gt;
@@ -236,6 +290,7 @@
   &lt;livetable ng-show="drive.viewer == 'files'" id="{{id}}" source="source" selection="selection"
     columns="$escapetool.xml($jsontool.serialize($columns))"&gt;&lt;/livetable&gt;
   &lt;file-upload ng-show="drive.viewer == 'upload'" drive="drive" back="backToList()"&gt;&lt;/file-upload&gt;
+  #downloads
 #end
 
 #macro (fileUploadTemplate)
@@ -290,6 +345,45 @@
       &lt;/span&gt;
       {{ upload.loaded | bytes }} of {{ upload.total | bytes }}
     &lt;/div&gt;
+  &lt;/div&gt;
+#end
+
+#macro (downloads)
+  &lt;div ng-show="drive.viewer == 'downloads'" ng-controller="DownloadCtrl"&gt;
+    &lt;div class="btn-toolbar" role="toolbar"&gt;
+      &lt;div class="btn-group"&gt;
+        &lt;button type="button" class="btn btn-default" title="Back to the file list"
+            ng-click="drive.viewer = 'files'"&gt;
+          &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')" alt="Back" class="icon" /&gt;Back
+        &lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;h3&gt;Recent Downloads&lt;/h3&gt;
+    &lt;ul class="downloads"&gt;
+      &lt;li class="download" ng-repeat="download in downloadsInProgress = (drive.jobs | filter:isDownloadReady(false))"&gt;
+        &lt;div&gt;
+          &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_zip.png')" alt="zip" class="icon" /&gt;
+          {{download.request.outputFile.name}}
+          &lt;span class="download-info"&gt;
+            ({{ download.bytesWritten | bytes }}) {{ download.startDate | timeAgo }}
+          &lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class="progress-container"&gt;
+          &lt;xprogress value="{{download.progress.offset}}" max="1"&gt;&lt;/xprogress&gt;
+          &lt;div class="progress-info"&gt;
+            Building package...
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/li&gt;
+      &lt;li class="download" ng-repeat="download in downloadsReady = (drive.jobs | filter:isDownloadReady(true))"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_zip.png')" alt="zip" class="icon" /&gt;
+        &lt;a href="{{download.request.outputFile.url}}"&gt;{{download.request.outputFile.name}}&lt;/a&gt;
+        &lt;span class="download-info"&gt;
+          ({{ download.outputFileSize | bytes }}) {{ download.endDate | timeAgo }}
+        &lt;/span&gt;
+      &lt;/li&gt;
+      &lt;li class="download" ng-show="downloadsInProgress.length == 0 &amp;&amp; downloadsReady.length == 0"&gt;No recent downloads&lt;/li&gt;
+    &lt;/ul&gt;
   &lt;/div&gt;
 #end
 
@@ -498,7 +592,7 @@ require.config({
 // We load the CSS only from CDN due to XWIKI-10674 (Cannot load CSS files from webjars).
 })('//cdnjs.cloudflare.com/ajax/libs/jstree/$jstreeVersion/themes/default/style.min.css');
 
-require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUpload'], function($, angular) {</code>
+require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveTable', 'jsTree', 'fileUpload'], function($, angular) {</code>
     </property>
     <property>
       <name>Require Start &amp; Configuration</name>
@@ -641,7 +735,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 
   driveServices.factory('Drive', ['$resource', function($resource) {
     var data = ['folders', 'allFiles', 'orphanFolders', 'orphanFiles', 'activeJobs', 'jobStatus'];
-    var actions = ['createFolder', 'move', 'copy', 'delete'];
+    var actions = ['createFolder', 'move', 'copy', 'delete', 'download'];
     var api = createAPI(data, actions);
     api.getActiveJobs.isArray = true;
     return $resource(url, defaultParams, api);
@@ -658,7 +752,11 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
     var data = [];
     var actions = ['label', 'move', 'copy', 'delete'];
     var api = createAPI(data, actions);
-    return $resource(url, defaultParams, api);
+    var resource = $resource(url, defaultParams, api);
+    resource.getDownloadURL = function(fileId) {
+      return new XWiki.Document(fileId).getURL('get', 'action=download&amp;form_token=' + formToken);
+    };
+    return resource;
   }]);
 
   driveServices.factory('User', ['$resource', function($resource) {
@@ -1309,7 +1407,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
       <cache>long</cache>
     </property>
     <property>
-      <code>  var driveDirectives = angular.module('driveDirectives', ['driveServices', 'liveTable', 'angularFileUpload']);
+      <code>  var driveDirectives = angular.module('driveDirectives', ['driveServices', 'liveTable', 'angularFileUpload', 'ui.bootstrap.dropdown']);
 
   driveDirectives.directive('file', function() {
     var categories = {
@@ -1472,7 +1570,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
     };
   });
 
-  driveDirectives.directive('files', function() {
+  driveDirectives.directive('files', ['File', function(File) {
     return {
       restrict: 'E',
       scope: {
@@ -1533,6 +1631,14 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
           });
           if (scope.clipboard.action == 'move') {
             delete scope.clipboard;
+          }
+        };
+
+        scope.download = function(files) {
+          if (files.length == 1) {
+            window.location = File.getDownloadURL(files[0]);
+          } else {
+            scope.drive.download(getPaths(files));
           }
         };
 
@@ -1609,7 +1715,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         };
       }
     };
-  });
+  }]);
 
   driveDirectives.directive('xprogress', function() {
     return {
@@ -2062,32 +2168,6 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         var isReadOnly = function() {return scope.drive.readOnly;};
 
         var folderMenu = {
-          open: {
-            label: 'Open',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              window.location = new XWiki.Document(node.id).getURL();
-            }
-          },
-          openInNewTab: {
-            label: 'Open in New Tab',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              window.open(new XWiki.Document(node.id).getURL());
-            }
-          },
-          refresh: {
-            separator_after: true,
-            label: 'Refresh',
-            icon: '$xwiki.getSkinFile("icons/silk/arrow_refresh.png")',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              tree.refresh_node(node);
-            }
-          },
           createFolder: {
             label: 'New Folder',
             icon: '$xwiki.getSkinFile("icons/silk/folder_add.png")',
@@ -2116,6 +2196,44 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
               }, 0);
             },
             __disabled: isReadOnly
+          },
+          open: {
+            separator_before: true,
+            label: 'Open',
+            icon: '$xwiki.getSkinFile("icons/silk/application_view_list.png")',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+              window.location = new XWiki.Document(node.id).getURL();
+            }
+          },
+          openInNewTab: {
+            label: 'Open in New Tab',
+            icon: '$xwiki.getSkinFile("icons/silk/application_double.png")',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+              window.open(new XWiki.Document(node.id).getURL());
+            }
+          },
+          refresh: {
+            label: 'Refresh',
+            icon: '$xwiki.getSkinFile("icons/silk/arrow_refresh.png")',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+              tree.refresh_node(node);
+            }
+          },
+          download: {
+            separator_before: true,
+            label: 'Download',
+            icon: '$xwiki.getSkinFile("icons/silk/page_white_put.png")',
+            action: function(data) {
+              var tree = $.jstree.reference(data.reference);
+              var node = tree.get_node(data.reference);
+              scope.drive.download(node.id);
+            }
           },
           cut: {
             separator_before: true,
@@ -2178,8 +2296,8 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
         };
 
         var driveMenu = {
-          refresh: folderMenu.refresh,
           createFolder: folderMenu.createFolder,
+          refresh: folderMenu.refresh,
           paste: angular.copy(folderMenu.paste)
         };
         driveMenu.paste.label = 'Paste';
@@ -2443,11 +2561,126 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
       <cache>long</cache>
     </property>
     <property>
-      <code>  var drive = angular.module('drive', ['driveServices', 'driveFilters', 'driveDirectives']);
+      <code>  var driveControllers = angular.module('driveControllers', []);
+
+  driveControllers.controller('DownloadCtrl', ['$scope', function ($scope) {
+    $scope.isDownloadReady = function(ready) {
+      return function(job) {
+        return job.request.type == 'pack' &amp;&amp; ((ready &amp;&amp; job.state == 'FINISHED')
+          || (!ready &amp;&amp; job.state != 'FINISHED'));
+      };
+    }
+  }]);</code>
+    </property>
+    <property>
+      <name>Controllers: download</name>
+    </property>
+    <property>
+      <parse>1</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <name>FileManagerCode.DriveSheet</name>
+    <number>6</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>daa1291c-94eb-40ab-967b-d3b1c9c766ad</guid>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>  var drive = angular.module('drive', ['driveServices', 'driveFilters', 'driveDirectives', 'driveControllers']);
 
   drive.controller('DriveCtrl', ['$scope', 'Drive', 'Folder', function ($scope, Drive, Folder) {
     var asSource = function(service) {
       return {get: service};
+    };
+
+    var updateJob = function(job) {
+      var jobs = $scope.drive.jobs;
+      for (var i = 0; i &lt; jobs.length; i++) {
+        if (jobs[i].id == job.id) {
+          jobs[i] = job;
+          return;
+        }
+      }
+      jobs.unshift(job);
+      if (jobs.length &gt; 100) {
+        jobs.splice(-1, 1);
+      }
     };
 
     var runJob = function(type, data, callback) {
@@ -2455,12 +2688,14 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 
       var onJobUpdate = function(job) {
         if (job &amp;&amp; job.id) {
+          updateJob(job);
           if (job.state == 'FINISHED') {
             $scope.drive.readOnly = false;
             callback &amp;&amp; typeof callback.finished == 'function' &amp;&amp; callback.finished(job);
           } else if (job.state == 'WAITING') {
             callback &amp;&amp; typeof callback.waiting == 'function' &amp;&amp; callback.waiting(job);
           } else {
+            callback &amp;&amp; typeof callback.running == 'function' &amp;&amp; callback.running(job);
             // The job is still running. Wait 1s before asking for a job status update.
             setTimeout(function() {
               Drive.getJobStatus({id: job.id}, onJobUpdate, onError);
@@ -2489,7 +2724,7 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 
       viewer: null,
 
-      jobs: Drive.getActiveJobs(),
+      jobs: [],
 
       uploads: {
         pending: [],
@@ -2533,6 +2768,15 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
 
       'delete': function(paths, callback) {
         runJob('delete', {path: paths}, callback);
+      },
+
+      download: function(paths, outputFileName) {
+        this.viewer = 'downloads';
+        runJob('download', {path: paths, name: outputFileName}, {
+          finished: function(job) {
+            window.location = job.request.outputFile.url;
+          }
+        });
       }
     };
   }]);
@@ -2551,9 +2795,9 @@ require(['jquery', 'angular', 'angular-resource', 'liveTable', 'jsTree', 'fileUp
   </object>
   <object>
     <name>FileManagerCode.DriveSheet</name>
-    <number>6</number>
+    <number>7</number>
     <className>XWiki.JavaScriptExtension</className>
-    <guid>daa1291c-94eb-40ab-967b-d3b1c9c766ad</guid>
+    <guid>53d2dd15-02dc-44f1-971c-4ddf4f4e1539</guid>
     <class>
       <name>XWiki.JavaScriptExtension</name>
       <customClass/>
@@ -2801,6 +3045,7 @@ table.pane-splitter .pane-content {
  */
 .btn-group {
   display: inline-block;
+  position: relative;
   vertical-align: middle;
 }
 .btn {
@@ -2885,11 +3130,57 @@ table.pane-splitter .pane-content {
 .btn-toolbar .btn-group:first-of-type {
   margin-left: 0;
 }
+.btn-group &gt; .btn + .dropdown-toggle {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.btn .caret {
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid;
+  display: inline-block;
+  height: 0;
+  margin-left: 0;
+  vertical-align: middle;
+  width: 0;
+}
+ul.dropdown-menu {
+  background-clip: padding-box;
+  background-color: $theme.pageContentBackgroundColor;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.176);
+  display: none;
+  float: left;
+  left: 0;
+  list-style: none outside none;
+  margin: 2px 0 0;
+  min-width: 160px;
+  padding: 5px 0;
+  position: absolute;
+  top: 100%;
+  z-index: 1000;
+}
+.open &gt; .dropdown-menu {
+  display: block;
+}
+.dropdown-menu &gt; li &gt; a {
+  color: $theme.textColor;
+  display: block;
+  padding: 3px 20px;
+  white-space: nowrap;
+}
+.dropdown-menu &gt; li &gt; a:hover,
+.dropdown-menu &gt; li &gt; a:focus {
+  background-color: $theme.highlightColor;
+  text-decoration: none;
+}
 
 /**
- * Uploads
+ * Uploads &amp; Downloads
  */
-ul.uploads {
+ul.uploads,
+ul.downloads {
   list-style-type: none;
   margin: 1em 0 .5em 0;
 }
@@ -2901,17 +3192,20 @@ ul.uploads li.uploads-pending.loading {
   background-position: 3px center;
   padding-left: 24px;
 }
-ul.uploads li.upload {
+ul.uploads li.upload,
+ul.downloads li.download {
   padding: .5em 0;
 }
-ul.uploads li.upload:hover {
+ul.uploads li.upload:hover,
+ul.downloads li.download:hover {
   background-color: $theme.highlightColor;
 }
 li.upload .progress-container {
   margin-right: 20px;
   position: relative;
 }
-li.upload progress {
+li.upload progress,
+li.download progress {
   width: 100%;
 }
 li.upload .progress-container.Aborted .progress-bar {
@@ -2924,12 +3218,15 @@ li.upload .progress-container .cancel.icon {
   top: -1px;
 }
 li.upload .progress-info,
-li.upload .upload-file-path {
+li.upload .upload-file-path,
+li.download .progress-info,
+li.download .download-info {
   color: $theme.textSecondaryColor;
   font-size: smaller;
 }
 li.upload .upload-file,
-li.upload .progress-info {
+li.upload .progress-info,
+li.download .progress-info {
   opacity: 1;
   padding-left: 3px;
 }
@@ -2953,6 +3250,13 @@ li.upload .upload-file .icon {
 }
 .pane-content label input {
   vertical-align: middle;
+}
+li.download .progress-container {
+  margin-top: 2px;
+}
+li.download img.icon {
+  padding-left: 3px;
+  vertical-align: bottom;
 }
 
 /**
