@@ -102,7 +102,7 @@ public class PackJobTest extends AbstractJobTest
         request.setOutputFileReference(new AttachmentReference("out.zip",
             new DocumentReference("wiki", "Space", "Page")));
 
-        execute(request);
+        PackJob job = (PackJob) execute(request);
 
         ZipFile zip = new ZipFile(new java.io.File(testFolder.getRoot(), "temp/filemanager/wiki/Space/Page/out.zip"));
         List<String> folders = new ArrayList<String>();
@@ -124,6 +124,8 @@ public class PackJobTest extends AbstractJobTest
         assertEquals(2, files.size());
         assertEquals("blah", files.get(readme.getName()));
         assertEquals("foo", files.get(projects.getName() + "/Concerto/" + pom.getName()));
+        assertEquals(("blah" + "foo").getBytes().length, job.getStatus().getBytesWritten());
+        assertTrue(job.getStatus().getOutputFileSize() > 0);
     }
 
     private void setFileContent(File file, String content)

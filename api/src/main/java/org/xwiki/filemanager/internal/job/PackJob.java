@@ -36,9 +36,9 @@ import org.xwiki.environment.Environment;
 import org.xwiki.filemanager.FileSystem;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
+import org.xwiki.filemanager.job.PackJobStatus;
 import org.xwiki.filemanager.job.PackRequest;
 import org.xwiki.job.internal.AbstractJob;
-import org.xwiki.job.internal.DefaultJobStatus;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
 
@@ -50,7 +50,7 @@ import org.xwiki.model.reference.DocumentReference;
  */
 @Component
 @Named(PackJob.JOB_TYPE)
-public class PackJob extends AbstractJob<PackRequest, DefaultJobStatus<PackRequest>>
+public class PackJob extends AbstractJob<PackRequest, PackJobStatus>
 {
     /**
      * The id of the job.
@@ -86,6 +86,12 @@ public class PackJob extends AbstractJob<PackRequest, DefaultJobStatus<PackReque
     }
 
     @Override
+    protected PackJobStatus createNewStatus(PackRequest request)
+    {
+        return new PackJobStatus(request, this.observationManager, this.loggerManager);
+    }
+
+    @Override
     protected void runInternal() throws Exception
     {
         Collection<Path> paths = getRequest().getPaths();
@@ -108,6 +114,7 @@ public class PackJob extends AbstractJob<PackRequest, DefaultJobStatus<PackReque
             }
         } finally {
             IOUtils.closeQuietly(zip);
+            getStatus().setOutputFileSize(outputFile.length());
             notifyPopLevelProgress();
         }
     }
@@ -170,9 +177,12 @@ public class PackJob extends AbstractJob<PackRequest, DefaultJobStatus<PackReque
         org.xwiki.filemanager.File file = fileSystem.getFile(fileReference);
         if (file != null && fileSystem.canView(fileReference)) {
             try {
-                zip.putArchiveEntry(new ZipArchiveEntry(pathPrefix + file.getName()));
+                String path = pathPrefix + file.getName();
+                this.logger.info("Packing file [{}]", path);
+                zip.putArchiveEntry(new ZipArchiveEntry(path));
                 IOUtils.copy(file.getContent(), zip);
                 zip.closeArchiveEntry();
+                getStatus().setBytesWritten(zip.getBytesWritten());
             } catch (IOException e) {
                 this.logger.warn("Failed to pack file [{}].", fileReference, e);
             }
@@ -196,6 +206,7 @@ public class PackJob extends AbstractJob<PackRequest, DefaultJobStatus<PackReque
 
             try {
                 String path = pathPrefix + folder.getName() + '/';
+                this.logger.info("Packing folder [{}]", path);
                 zip.putArchiveEntry(new ZipArchiveEntry(path));
                 zip.closeArchiveEntry();
                 notifyStepPropress();

@@ -260,10 +260,11 @@ public abstract class AbstractJobTest
         return new UpdateChildFolders(folder, ref(Arrays.asList(folderIds)));
     }
 
-    protected void execute(Request request) throws Exception
+    protected Job execute(Request request) throws Exception
     {
         Job job = getMocker().getComponentUnderTest();
         job.initialize(request);
         job.run();
+        return job;
     }
 }
