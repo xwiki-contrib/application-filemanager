@@ -1451,13 +1451,13 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
       Document: {
         page_red: 'ps',
         page_white_acrobat: 'pdf',
-        page_white_word: ['odt', 'odf', 'doc', 'sxw', 'stw']
+        page_white_word: ['odt', 'odf', 'doc', 'docx', 'sxw', 'stw']
       },
       Presentation: {
-        page_white_powerpoint: ['odp', 'ppt']
+        page_white_powerpoint: ['odp', 'ppt', 'pptx']
       },
       Spreadsheet: {
-        page_white_excel: ['ods', 'xls']
+        page_white_excel: ['ods', 'xls', 'xlsx']
       },
       Archive: {
         cup: 'jar',
