@@ -799,6 +799,17 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
       return name;
     };
 
+    /*
+    #set ($wikiFilterQuery = $xcontext.database)
+    #set ($userScope = "$!services.wiki.user.userScope")
+    #if ($userScope == 'LOCAL_AND_GLOBAL')
+      #set ($wikiFilterQuery = "($xcontext.database OR $xcontext.mainWikiName)")
+    #elseif ($userScope == 'GLOBAL_ONLY')
+      #set ($wikiFilterQuery = $xcontext.mainWikiName)
+    #end
+    */
+    var wikiFilterQuery = 'fq=wiki:$wikiFilterQuery';
+
     var fromSolrDoc = function(solrDoc) {
       var reference = new XWiki.DocumentReference(solrDoc.wiki, solrDoc.space, solrDoc.name);
       reference = reference.relativeTo(new XWiki.WikiReference(XWiki.currentWiki));
@@ -865,7 +876,7 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
       query: {
         params: {
           outputSyntax: 'plain',
-          query: ['q=*__INPUT__*', 'fq=type:DOCUMENT', 'fq=class:XWiki.XWikiUsers',
+          query: ['q=*__INPUT__*', 'fq=type:DOCUMENT', 'fq=class:XWiki.XWikiUsers', wikiFilterQuery,
             'qf=property.XWiki.XWikiUsers.last_name^10 property.XWiki.XWikiUsers.first_name^5 name^2.5'].join('\n')
         },
         url: new XWiki.Document('SolrService', 'FileManagerCode').getURL('get'),
