@@ -194,7 +194,7 @@
     };
 
     // 'this' should be the directive scope.
-    var initParams = function() {
+    var updateParamsFromURL = function() {
       // Read the parameter values from the URL.
       var urlParams = $location.search();
 
@@ -244,9 +244,7 @@
         scope.liveTableFilterTemplate = new XWiki.Document('LiveTableFilter', 'FileManagerCode').getURL('get');
         scope.liveTableCellTemplate = new XWiki.Document('LiveTableCell', 'FileManagerCode').getURL('get');
 
-        // Re-initialize the parameters whenever the URL changes.
-        scope.$on('$locationChangeSuccess', angular.bind(scope, initParams));
-
+        // Update the live table whenever the source changes.
         scope.$watch('source', function(newValue, oldValue) {
           // Reset the selected rows.
           if (scope.selection) {
@@ -255,24 +253,25 @@
           if (newValue === oldValue) {
             // Initialize the live table parameters and filters only after the source is initialized.
             // The live table id is not defined otherwise and thus we can't read the URL parameters.
-            initParams.call(scope);
+            // The parameter changes will trigger a live table update.
+            updateParamsFromURL.call(scope);
+          } else if (scope.params.offset !== 0) {
+            // Reset the pagination. This will trigger a live table update.
+            scope.params.offset = 0;
           } else {
-            // Reset the pagination.
-            delete scope.params.offset;
+            // Force a live table update preserving the current parameters.
+            scope.rows = scope.source.get(scope.params);
           }
         });
 
         // Update the live table whenever the parameters are modified.
         scope.$watch('params', function(newValue, oldValue) {
-          // Setting the offset to undefined is a way to force an update.
-          if (scope.params.offset === undefined) {
-            scope.params.offset = 0;
-          } else {
-            scope.rows = scope.source.get(scope.params, function(rows) {
-              storeParams(scope.id, scope.params);
-            });
-          }
+          storeParams(scope.id, newValue);
+          scope.rows = scope.source.get(newValue);
         }, true);
+
+        // Update the parameters whenever the URL changes.
+        scope.$on('$locationChangeSuccess', angular.bind(scope, updateParamsFromURL));
 
         scope.sort = function(column) {
           if (column.sortable) {
