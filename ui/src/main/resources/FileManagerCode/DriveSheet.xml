@@ -1770,11 +1770,10 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
       upload.start = new Date().getTime();
       var parentFolder = upload.path[upload.path.length - 1];
       upload.request = ${escapetool.d}upload.upload({
-        url: new XWiki.Document(parentFolder).getURL('get'),
-        data: {
-          form_token: formToken,
-          action: 'createFile'
-        },
+        // We need to put the parameters in the URL because if the size of the uploaded file is greater than the
+        // configured maximum upload size then an exception is thrown before the parameters are read from the body of
+        // the multi-part request, preventing us from detecting and handling the error on the server.
+        url: new XWiki.Document(parentFolder).getURL('get', 'action=createFile&amp;form_token=' + formToken),
         file: upload.file,
         fileFormDataName: 'filepath'
       }).progress(function(event) {

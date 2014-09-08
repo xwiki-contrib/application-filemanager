@@ -80,7 +80,6 @@
 #end
 
 #macro (createFile)
-  #set ($discard = $xwiki.fileupload.loadFileList())
   #set ($fileName = $xwiki.fileupload.getFileName('filepath'))
   #if ("$!fileName" != '')
     #getUniquePageName($fileName $fileId)
@@ -109,9 +108,8 @@
     #end
   #else
     ## Bad Request
-    $response.sendError(400, "'filepath' request parameter missing.")
+    $response.sendError(400, "The 'filepath' request parameter is missing. Either you didn't submit any file or the size of the submitted file exceeds the configured maximum upload size.")
   #end
-  #set ($discard = $xwiki.fileupload.cleanFileList())
 #end
 
 #macro (moveFolder)
