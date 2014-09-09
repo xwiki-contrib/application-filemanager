@@ -205,7 +205,7 @@
         &lt;td class="pane right"&gt;
           &lt;div class="pane-content"&gt;
             &lt;files ng-if="drive.location.type == 'folder' || drive.location.type == 'files'" drive="drive"&gt;&lt;/files&gt;
-            #maybeDisplayActiveJobs
+            #maybeDisplayJobs
           &lt;/div&gt;
         &lt;/td&gt;
       &lt;/tr&gt;
@@ -387,32 +387,44 @@
   &lt;/div&gt;
 #end
 
-#macro (maybeDisplayActiveJobs)
-  &lt;ul ng-cloak ng-if="drive.location.type == 'jobs'" ng-repeat="job in drive.jobs" class="jobs"&gt;
-    &lt;li class="job"&gt;
-      &lt;dl&gt;
-        &lt;dt&gt;Job Type&lt;/dt&gt;
-        &lt;dd ng-bind="job.request.type"&gt;&lt;/dd&gt;
-        &lt;dt&gt;Paths&lt;/dt&gt;
-        &lt;dd&gt;
-          &lt;ul ng-repeat="path in job.request.paths"&gt;
-            &lt;li&gt;{{path.parent}}/{{path.child}}&lt;/li&gt;
-          &lt;/ul&gt;
-        &lt;/dd&gt;
-        &lt;dt ng-if="job.request.destination"&gt;Destination&lt;/dt&gt;
-        &lt;dd ng-if="job.request.destination"&gt;
-          {{job.request.destination.parent}}/{{job.request.destination.child}}
-        &lt;/dd&gt;
-        &lt;dt&gt;Started&lt;/dt&gt;
-        #set ($dateFormat = $xwiki.getXWikiPreference('dateformat', 'yyyy/MM/dd HH:mm'))
-        &lt;dd title="{{ job.startDate | date : '$dateFormat' }}"&gt;{{ job.startDate | timeAgo : '$dateFormat' }}&lt;/dd&gt;
-        &lt;dt&gt;By&lt;/dt&gt;
-        &lt;dd user="{{job.request.user}}"&gt;&lt;/dd&gt;
-        &lt;dt&gt;Progress&lt;/dt&gt;
-        &lt;dd ng-bind="job.progress.offset"&gt;&lt;/dd&gt;
-      &lt;/dl&gt;
+#macro (maybeDisplayJobs)
+  &lt;ul ng-cloak ng-if="drive.location.type == 'jobs'" class="jobs"&gt;
+    &lt;li ng-if="drive.jobs.length == 0"&gt;No recent tasks&lt;/li&gt;
+    &lt;li class="job" ng-repeat="job in drive.jobs | filter:{state: '!FINISHED'}:true"&gt;
+      #displayJob
+    &lt;/li&gt;
+    &lt;li class="job" ng-repeat="job in drive.jobs | filter:{state: 'FINISHED'}:true"&gt;
+      #displayJob
     &lt;/li&gt;
   &lt;/ul&gt;
+#end
+
+#macro (displayJob)
+  &lt;dl&gt;
+    &lt;dt&gt;Task Type&lt;/dt&gt;
+    &lt;dd ng-bind="job.request.type"&gt;&lt;/dd&gt;
+    &lt;dt&gt;Paths&lt;/dt&gt;
+    &lt;dd&gt;
+      &lt;ul ng-repeat="path in job.request.paths"&gt;
+        &lt;li&gt;{{path.parent}}/{{path.child}}&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/dd&gt;
+    &lt;dt ng-if="job.request.destination"&gt;Destination&lt;/dt&gt;
+    &lt;dd ng-if="job.request.destination"&gt;
+      {{job.request.destination.parent}}/{{job.request.destination.child}}
+    &lt;/dd&gt;
+    &lt;dt&gt;Started&lt;/dt&gt;
+    #set ($dateFormat = $xwiki.getXWikiPreference('dateformat', 'yyyy/MM/dd HH:mm'))
+    &lt;dd title="{{ job.startDate | date : '$dateFormat' }}"&gt;{{ job.startDate | timeAgo : '$dateFormat' }}&lt;/dd&gt;
+    &lt;dt ng-if="job.state == 'FINISHED'"&gt;Duration&lt;/dt&gt;
+    &lt;dd ng-if="job.state == 'FINISHED'"&gt;{{ job.endDate - job.startDate | duration}}&lt;/dd&gt;
+    &lt;dt&gt;By&lt;/dt&gt;
+    &lt;dd user="{{job.request.user}}"&gt;&lt;/dd&gt;
+    &lt;dt ng-if="job.state != 'FINISHED'"&gt;Progress&lt;/dt&gt;
+    &lt;dd ng-if="job.state != 'FINISHED'" class="progress-container"&gt;
+      &lt;xprogress value="{{job.progress.offset}}" max="1"&gt;&lt;/xprogress&gt;
+    &lt;/dd&gt;
+  &lt;/dl&gt;
 #end
 {{/velocity}}
 
@@ -2056,8 +2068,8 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
           }
         },
         {
-          id: '/activeJobs',
-          text: 'Active Jobs',
+          id: '/tasks',
+          text: 'Tasks',
           icon: '$xwiki.getSkinFile("icons/silk/clock.png")',
           state: {
             selected: false
@@ -2984,7 +2996,9 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
 /**
  * File Live Table
  */
-#files img.avatar, #files img.icon {
+#files img.avatar,
+#files img.icon,
+.jobs img.avatar {
   height: 16px;
   vertical-align: bottom;
 }
@@ -3286,6 +3300,21 @@ li.download img.icon {
   background-color: $theme.titleColor;
   box-shadow: 0px -1px 0px rgba(0, 0, 0, 0.15) inset;
   transition: width 0.6s ease 0s;
+}
+
+/**
+ * Jobs
+ */
+ul.jobs {
+  list-style-type: none;
+  margin: 0;
+}
+ul.jobs li.job + li.job {
+  border-top: 1px dashed $theme.borderColor;
+  margin-top: .5em;
+}
+ul.jobs li.job &gt; dl {
+  margin: 0 .5em;
 }</code>
     </property>
     <property>
