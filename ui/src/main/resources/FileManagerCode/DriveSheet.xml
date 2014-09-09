@@ -44,12 +44,15 @@
 {{velocity output="false"}}
 ## We need to use HQL because XWQL doesn't support nested queries.
 #set ($selectAllFoldersFromDriveHQL = "select folderDoc.fullName from XWikiDocument folderDoc, BaseObject folderObj where folderDoc.space = :space and folderObj.name = folderDoc.fullName and folderObj.className = 'FileManagerCode.FolderClass'")
+#set ($hasNoParent = "(doc.parent = '' or (doc.parent &lt;&gt; :parent and doc.parent not in ($selectAllFoldersFromDriveHQL)))")
 
 #macro (handleDriveWebServiceRequest)
   #if ($request.action)
     #if ($services.csrf.isTokenValid($request.form_token))
       #if ($request.action == 'createFolder')
         #createFolder($request.name $request.parent)
+      #elseif ($request.action == 'createFile')
+        #createFile
       #elseif ($request.action == 'move')
         #batchMove
       #elseif ($request.action == 'copy')
@@ -58,6 +61,8 @@
         #batchDelete
       #elseif ($request.action == 'download')
         #batchDownload
+      #else
+        $response.sendError(400, 'The specified action is not supported.')
       #end
     #elseif ($isAjaxRequest)
       $response.sendError(403, 'The CSRF token is missing.')
@@ -66,7 +71,9 @@
     #end
   #else
     #set ($data = $NULL)
-    #if ($request.data == 'folders')
+    #if ($request.data == 'files')
+      #getChildFiles($doc $data)
+    #elseif ($request.data == 'folders')
       #getChildFolders($doc $data)
     #elseif ($request.data == 'allFiles')
       #getAllFiles
@@ -153,7 +160,7 @@
 #end
 
 #macro (getOrphanFolders)
-  #set ($statement = "from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and (doc.parent = '' or (doc.parent &lt;&gt; :parent and doc.parent not in ($selectAllFoldersFromDriveHQL)))")
+  #set ($statement = "from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and $hasNoParent")
   #getFolders($statement {'space': $doc.space, 'parent': $doc.fullName} $data)
 #end
 
@@ -167,9 +174,8 @@
   ## A file can have multiple parent folders, which are declared using tags, and one of these parent folders, usually
   ## the first, is set as wiki page parent so that a tree widget (such as the XWiki explorer tree) can still display the
   ## hierarchy nicely.
-  #set ($parameters = {'space': $doc.space})
-  #getFilesStatement('' "doc.space = :space and (doc.parent = '' or doc.parent not in ($selectAllFoldersFromDriveHQL))"
-    $parameters $statement)
+  #set ($parameters = {'space': $doc.space, 'parent': $doc.fullName})
+  #getFilesStatement('' "doc.space = :space and $hasNoParent" $parameters $statement)
   #getFiles($statement $parameters $data)
 #end
 
@@ -305,7 +311,7 @@
         ng-if="drive.uploads.finished.length &gt; 0" ng-click="clearUploads()"&gt;Clear&lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-  &lt;h3&gt;Upload files to {{drive.location.id}} folder&lt;/h3&gt;
+  &lt;h3&gt;Upload files to {{drive.location.name}} folder&lt;/h3&gt;
   &lt;input type="file" on-file-select="uploadFiles($files)" multiple
     folder-selection-enabled="folderSelectionEnabled" /&gt;
   &lt;label ng-show="folderSelectionSupported"&gt;
@@ -2012,16 +2018,26 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
       <code>  var driveDirectives = angular.module('driveDirectives');
 
   driveDirectives.directive('driveTree', ['$location', 'Drive', 'Folder', function($location, Drive, Folder) {
+    var isDrive = function(node) {
+      return node.id == XWiki.currentPage;
+    };
+
+    var isFolder = function(node) {
+      return !!node.data &amp;&amp; node.data.type == 'folder';
+    };
+
     var getChildren = function(node, callback) {
       callback = $.proxy(callback, this);
       if (node.id == '#') {
         getRootNode(callback);
-      } else if (node.id == XWiki.currentPage) {
+      } else if (isDrive(node)) {
         getDriveChildNodes(callback);
       } else if (node.id == '/orphanFolders') {
         Drive.getOrphanFolders({}, getChildrenCallback(callback));
-      } else {
+      } else if (isFolder(node)) {
         Folder.getFolders({page: node.id}, getChildrenCallback(callback));
+      } else {
+        callback([]);
       }
     };
 
@@ -2093,7 +2109,7 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
           },
           children: true,
           data: {
-            type: 'drive'
+            type: 'folder'
           }
         });
       });
@@ -2165,16 +2181,8 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
       }
     };
 
-    var isFolder = function(node) {
-      return !!(node.data &amp;&amp; node.data.type == 'folder');
-    };
-
-    var isDrive = function(node) {
-      return !!(node.data &amp;&amp; node.data.type == 'drive');
-    };
-
     var defaultViewerByNodeType = {
-      drive: null,
+      drive: 'files',
       folder: 'files',
       folders: null,
       files: 'files',
@@ -2319,10 +2327,14 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
 
         var driveMenu = {
           createFolder: folderMenu.createFolder,
+          createFile: folderMenu.createFile,
           refresh: folderMenu.refresh,
+          download: angular.copy(folderMenu.download),
           paste: angular.copy(folderMenu.paste)
         };
+        driveMenu.refresh.separator_before = true;
         driveMenu.paste.label = 'Paste';
+        driveMenu.paste.separator_before = true;
 
         $(element).jstree({
           core: {
@@ -2342,10 +2354,10 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
               var menu;
               if (!node.data) {
                 // No context menu.
-              } else if (isFolder(node)) {
-                menu = folderMenu;
               } else if (isDrive(node)) {
                 menu = driveMenu;
+              } else if (isFolder(node)) {
+                menu = folderMenu;
               }
               if (menu) {
                 for (var item in menu) {
@@ -2399,6 +2411,7 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
                   scope.drive.viewer = defaultViewerByNodeType[data.node.data.type];
                   scope.drive.location = {
                     id: selectedNode,
+                    name: data.node.text,
                     type: data.node.data.type
                   };
                 }

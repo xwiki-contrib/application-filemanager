@@ -55,6 +55,8 @@
         #copyFolder
       #elseif ($request.action == 'delete')
         #deleteFolder
+      #else
+        $response.sendError(400, 'The specified action is not supported.')
       #end
     #elseif ($isAjaxRequest)
       $response.sendError(403, 'The CSRF token is missing.')
@@ -79,39 +81,6 @@
   #end
 #end
 
-#macro (createFile)
-  #set ($fileName = $xwiki.fileupload.getFileName('filepath'))
-  #if ("$!fileName" != '')
-    #getUniquePageName($fileName $fileId)
-    #set ($fileReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $fileId))
-    #set ($fileDoc = $xwiki.getDocument($fileReference))
-    #if ($fileDoc &amp;&amp; $fileDoc.hasAccessLevel('edit'))
-      ## Set the parent folder.
-      #set ($discard = $fileDoc.setParent($doc.fullName))
-      #set ($discard = $fileDoc.newObject('XWiki.TagClass').set('tags', [$doc.name]))
-      ## Add the file object.
-      #set ($discard = $fileDoc.newObject('FileManagerCode.FileClass').set('description', "$!request.description"))
-      ## Add the attachment.
-      ## FIXME: Get the file content as an input stream instead of a byte array, but for this we need to expose
-      ## getFileItemInputStream in the public API of the fileupload plugin (or use a script service).
-      #set ($bytes = $xwiki.fileupload.getFileItemData('filepath'))
-      #if (!$bytes)
-        ## Empty file (unfortunately getFileItemData returns null instead of an empty byte array).
-        #set ($bytes = [])
-      #end
-      #set ($discard = $fileDoc.addAttachment($fileName, $bytes))
-      #set ($discard = $fileDoc.save('File created'))
-      #set ($discard = $response.sendRedirect($fileDoc.getURL('get', 'outputSyntax=plain')))
-    #else
-      ## Forbidden
-      #set ($discard = $response.sendError(403, 'You are not allowed to perform this action.'))
-    #end
-  #else
-    ## Bad Request
-    $response.sendError(400, "The 'filepath' request parameter is missing. Either you didn't submit any file or the size of the submitted file exceeds the configured maximum upload size.")
-  #end
-#end
-
 #macro (moveFolder)
   #set ($jobId = $services.drive.move([$doc.name], "$!request.parent/$!request.name"))
   #handleJobStartFailure($jobId)
@@ -125,17 +94,6 @@
 #macro (deleteFolder)
   #set ($jobId = $services.drive.delete([$doc.name]))
   #handleJobStartFailure($jobId)
-#end
-
-#macro (getChildFiles $parentDoc $return)
-  #set ($parameters = {'space': $parentDoc.space, 'tag': $parentDoc.name})
-  #set ($fromTags = 'BaseObject as tagObj, DBStringListProperty as tagsProp')
-  #set ($joinTags = "tagObj.className = 'XWiki.TagClass' and tagObj.name = doc.fullName and tagObj.id = tagsProp.id.id and tagsProp.id.name = 'tags'")
-  #getFilesStatement($fromTags "doc.space = :space and $joinTags and :tag in elements(tagsProp.list)"
-    $parameters $statement)
-  #getFiles($statement $parameters $_return)
-  #set ($return = $NULL)
-  #setVariable("$return" $_return)
 #end
 
 #macro (displayFolder)

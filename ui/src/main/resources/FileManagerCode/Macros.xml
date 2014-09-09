@@ -227,6 +227,17 @@
   #setVariable("$return" "$from $!where $orderBy")
 #end
 
+#macro (getChildFiles $parentDoc $return)
+  #set ($parameters = {'space': $parentDoc.space, 'tag': $parentDoc.name})
+  #set ($fromTags = 'BaseObject as tagObj, DBStringListProperty as tagsProp')
+  #set ($joinTags = "tagObj.className = 'XWiki.TagClass' and tagObj.name = doc.fullName and tagObj.id = tagsProp.id.id and tagsProp.id.name = 'tags'")
+  #getFilesStatement($fromTags "doc.space = :space and $joinTags and :tag in elements(tagsProp.list)"
+    $parameters $statement)
+  #getFiles($statement $parameters $_return)
+  #set ($return = $NULL)
+  #setVariable("$return" $_return)
+#end
+
 #macro (getFiles $statement $parameters $return)
   #set ($query = $services.query.hql($statement))
   #set ($countQuery = $services.query.hql($statement).addFilter('count'))
@@ -288,17 +299,16 @@
   #set ($tags = $fileDoc.getObject('XWiki.TagClass').getProperty('tags').value)
   #set ($_paths = [])
   #if ($tags &amp;&amp; $tags.size() &gt; 0)
-    #set ($docNameInTags = [])
-    #foreach ($tag in $tags)
-      #set ($discard = $docNameInTags.add("doc.name = ?$foreach.count"))
-    #end
-    #set ($docNameInTags = $stringtool.join($docNameInTags, ' or '))
-    #set ($statement = "from doc.object(FileManagerCode.FolderClass) as folder where $docNameInTags")
-    #foreach ($folderId in $services.query.xwql($statement).bindValues($tags).execute())
-      #set ($folderReference = $services.model.resolveDocument($folderId, 'explicit', $fileDoc.documentReference))
-      #set ($folderDoc = $xwiki.getDocument($folderReference))
+    #set ($docNameInTags = "doc.name in ($stringtool.repeat('?', ', ', $tags.size()))")
+    #set ($isFolderOrDrive = "doc.fullName = obj.name and obj.className in ('FileManagerCode.FolderClass', 'FileManagerCode.DriveClass')")
+    #set ($statement = ", BaseObject obj where doc.space = ? and $isFolderOrDrive and $docNameInTags")
+    ## Add the space parameter (we can't use both positional and named query parameters).
+    #set ($discard = $tags.add(0, $doc.space))
+    #foreach ($parentId in $services.query.hql($statement).bindValues($tags).execute())
+      #set ($parentReference = $services.model.resolveDocument($parentId, 'explicit', $fileDoc.documentReference))
+      #set ($parentDoc = $xwiki.getDocument($parentReference))
       #set ($path = [])
-      #getPath($folderDoc $path)
+      #getPath($parentDoc $path)
       #if (!$path.isEmpty())
         #set ($discard = $_paths.add($path))
       #end
@@ -308,18 +318,52 @@
   #setVariable("$return" $_paths)
 #end
 
-#macro (getPath $folderDoc $path)
-  ## Prevent cycles. Also make sure the given document is a folder.
-  #if ($folderDoc &amp;&amp; !$folderDoc.isNew() &amp;&amp; !$path.contains($folderDoc.name)
-      &amp;&amp; $folderDoc.getObject('FileManagerCode.FolderClass'))
-    #set ($discard = $path.add($folderDoc.name))
-    #if ("$!folderDoc.parent" != '')
-      #set ($parentReference = $services.model.resolveDocument($folderDoc.parent, 'explicit', $folderDoc.documentReference))
+#macro (getPath $nodeDoc $path)
+  ## Prevent cycles. Also make sure the given document is either a folder or a drive.
+  #set ($isFolder = $nodeDoc.getObject('FileManagerCode.FolderClass'))
+  #set ($isDrive = $nodeDoc.getObject('FileManagerCode.DriveClass'))
+  #if ($nodeDoc &amp;&amp; !$nodeDoc.isNew() &amp;&amp; !$path.contains($nodeDoc.name) &amp;&amp; ($isFolder || $isDrive))
+    #set ($discard = $path.add($nodeDoc.name))
+    #if ($isFolder &amp;&amp; "$!nodeDoc.parent" != '')
+      #set ($parentReference = $services.model.resolveDocument($nodeDoc.parent, 'explicit', $nodeDoc.documentReference))
       ## The parent must be on the same drive (space).
-      #if ($folderDoc.documentReference.parent.equals($parentReference.parent))
+      #if ($nodeDoc.documentReference.parent.equals($parentReference.parent))
         #getPath($xwiki.getDocument($parentReference) $path)
       #end
     #end
+  #end
+#end
+
+#macro (createFile)
+  #set ($fileName = $xwiki.fileupload.getFileName('filepath'))
+  #if ("$!fileName" != '')
+    #getUniquePageName($fileName $fileId)
+    #set ($fileReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $fileId))
+    #set ($fileDoc = $xwiki.getDocument($fileReference))
+    #if ($fileDoc &amp;&amp; $fileDoc.hasAccessLevel('edit'))
+      ## Set the parent folder.
+      #set ($discard = $fileDoc.setParent($doc.fullName))
+      #set ($discard = $fileDoc.newObject('XWiki.TagClass').set('tags', [$doc.name]))
+      ## Add the file object.
+      #set ($discard = $fileDoc.newObject('FileManagerCode.FileClass').set('description', "$!request.description"))
+      ## Add the attachment.
+      ## FIXME: Get the file content as an input stream instead of a byte array, but for this we need to expose
+      ## getFileItemInputStream in the public API of the fileupload plugin (or use a script service).
+      #set ($bytes = $xwiki.fileupload.getFileItemData('filepath'))
+      #if (!$bytes)
+        ## Empty file (unfortunately getFileItemData returns null instead of an empty byte array).
+        #set ($bytes = [])
+      #end
+      #set ($discard = $fileDoc.addAttachment($fileName, $bytes))
+      #set ($discard = $fileDoc.save('File created'))
+      #set ($discard = $response.sendRedirect($fileDoc.getURL('get', 'outputSyntax=plain')))
+    #else
+      ## Forbidden
+      #set ($discard = $response.sendError(403, 'You are not allowed to perform this action.'))
+    #end
+  #else
+    ## Bad Request
+    $response.sendError(400, "The 'filepath' request parameter is missing. Either you didn't submit any file or the size of the submitted file exceeds the configured maximum upload size.")
   #end
 #end
 
