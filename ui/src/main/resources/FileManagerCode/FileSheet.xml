@@ -55,6 +55,8 @@
         #deleteFile
       #elseif ($request.action == 'download')
         #downloadFile
+      #else
+        $response.sendError(400, 'The specified action is not supported.')
       #end
     #elseif ($isAjaxRequest)
       $response.sendError(403, 'The CSRF token is missing.')
@@ -98,6 +100,28 @@
     $response.sendRedirect($doc.getAttachmentURL($attachments.get(0).filename, 'download', 'force-download=1'))
   #else
     $response.sendError(404)
+  #end
+#end
+
+#macro (linkToFileManager)
+  #set ($driveReference = $services.model.resolveDocument('', 'default', $doc.documentReference.lastSpaceReference))
+  #set ($driveDoc = $xwiki.getDocument($driveReference))
+  #if (!$driveDoc.getObject('FileManagerCode.DriveClass'))
+    ## TODO
+    #set ($driveDoc = $NULL)
+  #end
+  #if ($driveDoc)
+    #set ($driveNode = '/orphanFiles')
+    #if ("$!doc.parent" != '')
+      #set ($parentReference = $services.model.resolveDocument($doc.parent, 'explicit', $doc.documentReference))
+      ## The parent must be on the same drive (space).
+      #if ($doc.documentReference.parent.equals($parentReference.parent))
+        #set ($driveNode = $parentReference.name)
+      #end
+    #end
+    ## We append the anchor at the end of the URL instead of passing it as a parameter (or link attribute) because the
+    ## URL factory encodes the anchor badly, messing the ? and = characters.
+    [[View in File Manager&gt;&gt;path:$xwiki.getURL($driveReference)#?driveNode=$escapetool.url($driveNode)]]
   #end
 #end
 
@@ -206,6 +230,7 @@
 
 {{velocity}}
 #if ($xcontext.action != 'get')
+  #linkToFileManager
   #openFile
 #end
 {{/velocity}}</content>
