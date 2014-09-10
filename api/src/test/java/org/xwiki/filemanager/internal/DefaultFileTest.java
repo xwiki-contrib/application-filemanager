@@ -25,6 +25,7 @@ import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.commons.io.IOUtils;
@@ -33,6 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.xwiki.filemanager.File;
 import org.xwiki.model.reference.DocumentReference;
+import org.xwiki.model.reference.EntityReference;
 import org.xwiki.rendering.syntax.Syntax;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
 
@@ -122,6 +124,42 @@ public class DefaultFileTest
 
         assertEquals(Arrays.asList(new DocumentReference("tech", "FileSystem", "Concerto"), new DocumentReference(
             "tech", "FileSystem", "Resilience")), file.getParentReferences());
+    }
+
+    @Test
+    public void updateParentReferences()
+    {
+        BaseObject tagObject = mock(BaseObject.class);
+        when(file.getDocument().getXObject(DefaultFile.TAG_CLASS_REFERENCE)).thenReturn(null, tagObject);
+
+        when(file.getDocument().getDocumentReference()).thenReturn(
+            new DocumentReference("chess", "FileSystem", "Carol"));
+        DocumentReference firstParent = new DocumentReference("chess", "FileSystem", "Alice");
+        DocumentReference secondParent = new DocumentReference("math", "FileSystem", "Bob");
+        Collection<DocumentReference> parentReferences = file.getParentReferences();
+        parentReferences.add(firstParent);
+        parentReferences.add(secondParent);
+
+        file.updateParentReferences();
+
+        verify(tagObject).setStringListValue(DefaultFile.PROPERTY_TAGS,
+            Arrays.asList(firstParent.getName(), secondParent.getName()));
+        verify(file.getDocument()).setParentReference(firstParent.removeParent(firstParent.getWikiReference()));
+    }
+
+    @Test
+    public void clearParentReferences()
+    {
+        BaseObject tagObject = mock(BaseObject.class);
+        when(file.getDocument().getXObject(DefaultFile.TAG_CLASS_REFERENCE)).thenReturn(null, tagObject);
+
+        // Initialize the parent references. Should be empty.
+        Collection<DocumentReference> parentReferences = file.getParentReferences();
+
+        file.updateParentReferences();
+
+        verify(tagObject).setStringListValue(DefaultFile.PROPERTY_TAGS, Collections.emptyList());
+        verify(file.getDocument()).setParentReference((EntityReference) null);
     }
 
     @Test

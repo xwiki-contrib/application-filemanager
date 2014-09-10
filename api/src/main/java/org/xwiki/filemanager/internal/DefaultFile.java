@@ -57,7 +57,7 @@ public class DefaultFile extends AbstractDocument implements File
     /**
      * The 'tags' property of {@link #TAG_CLASS_REFERENCE}.
      */
-    private static final String PROPERTY_TAGS = "tags";
+    static final String PROPERTY_TAGS = "tags";
 
     /**
      * The cached collection of references to parent folders.
@@ -104,6 +104,8 @@ public class DefaultFile extends AbstractDocument implements File
             return;
         }
 
+        // A file can have multiple parent folders, which are declared using tags because the underlying document can
+        // have only one real parent.
         BaseObject tagObject = getDocument().getXObject(TAG_CLASS_REFERENCE);
         if (tagObject == null) {
             tagObject = new BaseObject();
@@ -116,6 +118,19 @@ public class DefaultFile extends AbstractDocument implements File
             tags.add(parentReference.getName());
         }
         tagObject.setStringListValue(PROPERTY_TAGS, tags);
+
+        // We set the first parent folder as the parent of the underlying document to ensure the document hierarchy is
+        // still displayed nicely outside of the file manager. This also helps us detect orphan files more easily.
+        if (parentReferences.isEmpty()) {
+            getDocument().setParentReference((EntityReference) null);
+        } else {
+            DocumentReference parentReference = parentReferences.iterator().next();
+            if (parentReference.getWikiReference().equals(getReference().getWikiReference())) {
+                getDocument().setParentReference(parentReference.removeParent(parentReference.getWikiReference()));
+            } else {
+                getDocument().setParentReference(parentReference.extractReference(EntityType.DOCUMENT));
+            }
+        }
 
         parentReferences = null;
     }
