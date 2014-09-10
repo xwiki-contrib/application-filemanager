@@ -258,6 +258,17 @@
           title="Upload a new file to the current folder" type="button"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_add.png')" alt="New File" class="icon" /&gt;New File
       &lt;/button&gt;
+    &lt;/div&gt;&lt;div class="btn-group" dropdown&gt;
+      &lt;button type="button" class="btn btn-default" title="Download selected files"
+          ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="download(selectedFiles)"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_put.png')" alt="Download" class="icon" /&gt;Download
+      &lt;/button&gt;
+      &lt;button type="button" class="btn btn-default dropdown-toggle"&gt;
+        &lt;span class="caret"&gt;&lt;/span&gt;
+      &lt;/button&gt;
+      &lt;ul class="dropdown-menu" role="menu"&gt;
+        &lt;li&gt;&lt;a href="#" ng-click="drive.viewer = 'downloads'; $event.preventDefault()"&gt;Recent Downloads&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
     &lt;/div&gt;&lt;div class="btn-group"&gt;
       &lt;button type="button" class="btn btn-default" title="Cut selected files"
           ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="cut(selectedFiles)"&gt;
@@ -271,17 +282,6 @@
           ng-if="drive.location.type == 'folder'" ng-disabled="!clipboard" ng-click="paste()"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_paste.png')" alt="Paste" class="icon" /&gt;Paste
       &lt;/button&gt;
-    &lt;/div&gt;&lt;div class="btn-group" dropdown&gt;
-      &lt;button type="button" class="btn btn-default" title="Download selected files"
-          ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="download(selectedFiles)"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_put.png')" alt="Download" class="icon" /&gt;Download
-      &lt;/button&gt;
-      &lt;button type="button" class="btn btn-default dropdown-toggle"&gt;
-        &lt;span class="caret"&gt;&lt;/span&gt;
-      &lt;/button&gt;
-      &lt;ul class="dropdown-menu" role="menu"&gt;
-        &lt;li&gt;&lt;a href="#" ng-click="drive.viewer = 'downloads'; $event.preventDefault()"&gt;Recent Downloads&lt;/a&gt;&lt;/li&gt;
-      &lt;/ul&gt;
     &lt;/div&gt;&lt;div class="btn-group"&gt;
       &lt;button type="button" class="btn btn-default" title="Rename selected file"
           ng-disabled="drive.readOnly || selectedFiles.length != 1" ng-click="rename(selectedFiles[0])"&gt;
