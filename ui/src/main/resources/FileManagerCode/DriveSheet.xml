@@ -2354,11 +2354,12 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
         $(element).jstree({
           core: {
             data: getChildren,
-            'check_callback' : function (operation, node, node_parent, node_position, more) {
-              // Allow operations on folders. The target parent must be either a folder or the drive itself, unless the
-              // operation is delete in which case we only care that the deleted node is a folder.
-              return !scope.drive.readOnly &amp;&amp; isFolder(node) &amp;&amp; (operation == 'delete_node' || isFolder(node_parent)
-                || isDrive(node_parent));
+            'check_callback' : function (operation, node, parent, position, more) {
+              // Allow operations only on regular folders (drive node excluded). The target parent must be a folder or
+              // the drive itself (which acts like a folder), unless the operation is delete in which case we only care
+              // that the deleted node is a regular folder (not the drive).
+              return (!scope.drive.readOnly &amp;&amp; isFolder(node) &amp;&amp; !isDrive(node)
+                &amp;&amp; (operation == 'delete_node' || isFolder(parent)));
             },
             multiple: false
           },
@@ -2393,7 +2394,7 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
                 // Only folder nodes can be dragged.
                 for (var i = 0; i &lt; nodes.length; i++) {
                   var node = nodes[i];
-                  if (!isFolder(node)) {
+                  if (!isFolder(node) || isDrive(node)) {
                     return false;
                   }
                 }
@@ -2406,7 +2407,7 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
         // 'ready.jstree' event but it is fired before the drive child nodes are fetched. As a workaround we listen once
         // to the 'after_open.jstree' event, knowing that the drive node is the first tree node that will be opened.
         }).one('after_open.jstree', function(event, data) {
-          if (data.node.id == XWiki.currentPage) {
+          if (isDrive(data.node)) {
             // The drive node has been opened.
             selectNode(data.instance, $location.search()['driveNode'] || '/allFiles');
           }
@@ -2514,8 +2515,10 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
         });
 
         scope.$on('$locationChangeSuccess', function(event) {
-          // Update the selected tree node when the location changes.
-          selectNode($(element).jstree(true), $location.search()['driveNode'] || '/allFiles');
+          // Update the selected tree node when the location changes (if the tree is loaded).
+          var tree = $(element).jstree(true);
+          var nodeId = $location.search()['driveNode'] || '/allFiles';
+          tree &amp;&amp; tree.get_node('/allFiles') &amp;&amp; selectNode(tree, nodeId);
         });
       }
     };
