@@ -2153,7 +2153,7 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
         state: {
           selected: false
         },
-        children: !!folder.id,
+        children: !!folder.id &amp;&amp; folder.hasFolders !== false,
         data: folder
       }
     };

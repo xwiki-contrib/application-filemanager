@@ -86,12 +86,22 @@
   #if (!$path.isEmpty())
     #set ($path = $path.subList(1, $path.size()))
   #end
+  #checkIfHasFolders($folderDoc $hasFolders)
   #set ($return = $NULL)
   #setVariable("$return" {
     'id': $folderDoc.name,
     'name': $folderDoc.plainTitle,
-    'path': $path
+    'path': $path,
+    'hasFolders': $hasFolders
   })
+#end
+
+#macro (checkIfHasFolders $folderDoc $return)
+  #set ($query = $services.query.xwql($selectChildFolders))
+  #set ($query = $query.bindValue('space', $folderDoc.space).bindValue('parent', $folderDoc.fullName))
+  #set ($results = $query.setLimit(1).execute())
+  #set ($return = $NULL)
+  #setVariable("$return" $results.size().equals(1))
 #end
 
 #macro (createFolder $name $parent)
