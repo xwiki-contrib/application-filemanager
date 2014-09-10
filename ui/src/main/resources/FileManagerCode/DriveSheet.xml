@@ -2027,7 +2027,8 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
     };
 
     var getChildren = function(node, callback) {
-      callback = $.proxy(callback, this);
+      // 'this' is the tree instance.
+      callback = angular.bind(this, callback);
       if (node.id == '#') {
         getRootNode(callback);
       } else if (isDrive(node)) {
@@ -2050,32 +2051,9 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
     var getMetaNodes = function() {
       return [
         {
-          id: '/orphanFolders',
-          text: 'Orphan Folders',
-          icon: '$xwiki.getSkinFile("icons/silk/folder_error.png")',
-          state: {
-            selected: false
-          },
-          children: true,
-          data: {
-            type: 'folders'
-          }
-        },
-        {
           id: '/allFiles',
           text: 'All Files',
           icon: '$xwiki.getSkinFile("icons/silk/page_white_stack.png")',
-          state: {
-            selected: false
-          },
-          data: {
-            type: 'files'
-          }
-        },
-        {
-          id: '/orphanFiles',
-          text: 'Orphan Files',
-          icon: '$xwiki.getSkinFile("icons/silk/page_white_error.png")',
           state: {
             selected: false
           },
@@ -2092,6 +2070,29 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
           },
           data: {
             type: 'jobs'
+          }
+        },
+        {
+          id: '/orphanFolders',
+          text: 'Orphan Folders',
+          icon: '$xwiki.getSkinFile("icons/silk/folder_error.png")',
+          state: {
+            selected: false
+          },
+          children: true,
+          data: {
+            type: 'folders'
+          }
+        },
+        {
+          id: '/orphanFiles',
+          text: 'Orphan Files',
+          icon: '$xwiki.getSkinFile("icons/silk/page_white_error.png")',
+          state: {
+            selected: false
+          },
+          data: {
+            type: 'files'
           }
         }
       ];
@@ -2116,9 +2117,23 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
     };
 
     var getDriveChildNodes = function(callback) {
-      Drive.getFolders({}, function(folders) {
-        callback(asFolderNodes(folders.list).concat(getMetaNodes()));
-      });
+      var childNodes, metaNodes = getMetaNodes();
+      Drive.getFolders({}).$promise
+        .then(function(folders) {
+          // Add only the 'All Files' and 'Tasks' nodes for now.
+          childNodes = asFolderNodes(folders.list).concat(metaNodes.slice(0, 2));
+          return Drive.getOrphanFolders({limit: 1}).$promise;
+        })
+        .then(function(orphanFolders) {
+          // Add the 'Orphan Folders' node if needed.
+          orphanFolders.totalCount &gt; 0 &amp;&amp; childNodes.splice(-2, 0, metaNodes[2]);
+          return Drive.getOrphanFiles({limit: 1}).$promise;
+        })
+        .then(function(orphanFiles) {
+          // Add the 'Orphan Files' node if needed.
+          orphanFiles.totalCount &gt; 0 &amp;&amp; childNodes.splice(-1, 0, metaNodes[3]);
+          callback(childNodes);
+        });
     };
 
     var asFolderNodes = function(folders) {
