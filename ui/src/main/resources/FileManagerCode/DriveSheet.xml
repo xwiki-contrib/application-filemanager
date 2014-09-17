@@ -545,10 +545,10 @@
     </property>
     <property>
       <code>/*
-#set ($angularVersion = '1.2.23')
+#set ($angularVersion = '1.2.25')
 #set ($angularFileUploadVersion = '1.6.1')
 #set ($angularUIBootstrapVersion = '0.11.0')
-#set ($jstreeVersion = '3.0.3')
+#set ($jstreeVersion = '3.0.4')
 */
 require.config({
   paths: {
