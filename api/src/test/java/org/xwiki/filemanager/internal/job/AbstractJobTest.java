@@ -19,9 +19,6 @@
  */
 package org.xwiki.filemanager.internal.job;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,13 +32,18 @@ import org.xwiki.filemanager.Document;
 import org.xwiki.filemanager.File;
 import org.xwiki.filemanager.FileSystem;
 import org.xwiki.filemanager.Folder;
+import org.xwiki.filemanager.internal.reference.DocumentNameSequence;
 import org.xwiki.filemanager.job.OverwriteQuestion;
+import org.xwiki.filemanager.reference.UniqueDocumentReferenceGenerator;
 import org.xwiki.job.Job;
 import org.xwiki.job.Request;
 import org.xwiki.job.event.status.JobStatus;
 import org.xwiki.job.event.status.JobStatus.State;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
+
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Base class for file manager job tests.
@@ -124,7 +126,7 @@ public abstract class AbstractJobTest
                     mockFile(destination, file.getName(), new ArrayList<DocumentReference>(file.getParentReferences()));
                 } else if (folder != null) {
                     mockFolder(destination, folder.getName(), folder.getParentReference(),
-                        Collections.<DocumentReference> emptyList(), Collections.<DocumentReference> emptyList());
+                        Collections.<DocumentReference>emptyList(), Collections.<DocumentReference>emptyList());
                 }
                 return null;
             }
@@ -141,7 +143,7 @@ public abstract class AbstractJobTest
 
     protected Folder mockFolder(String name, String parentName)
     {
-        return mockFolder(name, parentName, Collections.<String> emptyList(), Collections.<String> emptyList());
+        return mockFolder(name, parentName, Collections.<String>emptyList(), Collections.<String>emptyList());
     }
 
     protected Folder mockFolder(String name, String parentId, List<String> childFolders, List<String> childFiles)
@@ -266,5 +268,12 @@ public abstract class AbstractJobTest
         job.initialize(request);
         job.run();
         return job;
+    }
+
+    protected void generateReference(DocumentReference base, DocumentReference result) throws Exception
+    {
+        UniqueDocumentReferenceGenerator generator = getMocker().getInstance(UniqueDocumentReferenceGenerator.class);
+        when(generator.generate(base.getLastSpaceReference(), new DocumentNameSequence(base.getName()))).thenReturn(
+            result);
     }
 }

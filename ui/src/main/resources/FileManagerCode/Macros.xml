@@ -108,8 +108,7 @@
   #if ("$!name" == '')
     #set ($name = 'Untitled Folder')
   #end
-  #getUniquePageName($name $id)
-  #set ($folderReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $id))
+  #set ($folderReference = $services.drive.getUniqueReference($name))
   #if ("$!parent" == '')
     #set ($parent = $doc.name)
   #end
@@ -347,8 +346,7 @@
 #macro (createFile)
   #set ($fileName = $xwiki.fileupload.getFileName('filepath'))
   #if ("$!fileName" != '')
-    #getUniquePageName($fileName $fileId)
-    #set ($fileReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $fileId))
+    #set ($fileReference = $services.drive.getUniqueReference($fileName))
     #set ($fileDoc = $xwiki.getDocument($fileReference))
     #if ($fileDoc &amp;&amp; $fileDoc.hasAccessLevel('edit'))
       ## Set the parent folder.
@@ -375,29 +373,6 @@
     ## Bad Request
     $response.sendError(400, "The 'filepath' request parameter is missing. Either you didn't submit any file or the size of the submitted file exceeds the configured maximum upload size.")
   #end
-#end
-
-## TODO: Use the script service to avoid duplicated code!
-#macro (getUniquePageName $name $return)
-  #set ($documentReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $name))
-  #if (!$xwiki.exists($documentReference))
-    #set ($uniqueName = $name)
-  #else
-    #set ($found = false)
-    #foreach ($counter in [1..99])
-      #set ($uniqueName = "$name$counter")
-      #set ($documentReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $uniqueName))
-      #if (!$xwiki.exists($documentReference))
-        #set ($found = true)
-        #break
-      #end
-    #end
-    #if (!$found)
-      #set ($uniqueName = "$name$mathtool.random(100, 1000)")
-    #end
-  #end
-  #set ($return = $NULL)
-  #setVariable("$return" $uniqueName)
 #end
 
 #macro (getDriveReference $return)

@@ -26,14 +26,15 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.jgroups.util.UUID;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.filemanager.File;
 import org.xwiki.filemanager.FileSystem;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
+import org.xwiki.filemanager.internal.reference.DocumentNameSequence;
 import org.xwiki.filemanager.job.MoveRequest;
 import org.xwiki.filemanager.job.OverwriteQuestion;
+import org.xwiki.filemanager.reference.UniqueDocumentReferenceGenerator;
 import org.xwiki.job.internal.AbstractJob;
 import org.xwiki.job.internal.DefaultJobStatus;
 import org.xwiki.model.reference.DocumentReference;
@@ -64,6 +65,12 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
      */
     @Inject
     protected FileSystem fileSystem;
+
+    /**
+     * Used to generate unique document references.
+     */
+    @Inject
+    private UniqueDocumentReferenceGenerator uniqueDocRefGenerator;
 
     /**
      * Specifies whether all files with the same name are to be overwritten on not. When {@code true} all files with the
@@ -531,30 +538,7 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
      */
     protected DocumentReference getUniqueReference(DocumentReference documentReference)
     {
-        if (!fileSystem.exists(documentReference)) {
-            return documentReference;
-        }
-
-        for (int i = 1; i < 100; i++) {
-            String uniqueName = documentReference.getName() + i;
-            DocumentReference uniqueReference =
-                new DocumentReference(uniqueName, documentReference.getSpaceReferences().get(0));
-            if (!fileSystem.exists(uniqueReference)) {
-                return uniqueReference;
-            }
-        }
-
-        for (int i = 0; i < 5; i++) {
-            int counter = 100 + (int) (Math.random() * 100000);
-            String uniqueName = documentReference.getName() + counter;
-            DocumentReference uniqueReference =
-                new DocumentReference(uniqueName, documentReference.getSpaceReferences().get(0));
-            if (!fileSystem.exists(uniqueReference)) {
-                return uniqueReference;
-            }
-        }
-
-        String uniqueName = documentReference.getName() + UUID.randomUUID().toString();
-        return new DocumentReference(uniqueName, documentReference.getLastSpaceReference());
+        return this.uniqueDocRefGenerator.generate(documentReference.getLastSpaceReference(), new DocumentNameSequence(
+            documentReference.getName()));
     }
 }

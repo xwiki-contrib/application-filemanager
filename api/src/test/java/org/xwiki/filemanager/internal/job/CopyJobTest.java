@@ -19,10 +19,6 @@
  */
 package org.xwiki.filemanager.internal.job;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -35,6 +31,10 @@ import org.xwiki.filemanager.job.MoveRequest;
 import org.xwiki.job.Job;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link CopyJob}.
@@ -61,13 +61,21 @@ public class CopyJobTest extends AbstractJobTest
         Folder concerto = mockFolder("Concerto1", "Concerto", null, Arrays.asList("Specs"), Arrays.asList("pom.xml"));
         Folder projects = mockFolder("Projects");
 
+        DocumentReference concertoCopyRef = ref("Concerto");
+        generateReference(concertoCopyRef, concertoCopyRef);
+
+        DocumentReference pomCopyRef = ref("pom.xml1");
+        generateReference(pom.getReference(), pomCopyRef);
+
+        DocumentReference specsCopyRef = ref("Specs1");
+        generateReference(specs.getReference(), specsCopyRef);
+
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(concerto.getReference())));
         request.setDestination(new Path(projects.getReference()));
 
         execute(request);
 
-        DocumentReference concertoCopyRef = ref("Concerto");
         verify(fileSystem).copy(concerto.getReference(), concertoCopyRef);
 
         Folder concertoCopy = fileSystem.getFolder(concertoCopyRef);
@@ -75,7 +83,6 @@ public class CopyJobTest extends AbstractJobTest
         verify(concertoCopy).setParentReference(projects.getReference());
         verify(fileSystem).save(concertoCopy);
 
-        DocumentReference pomCopyRef = ref("pom.xml1");
         verify(fileSystem).copy(pom.getReference(), pomCopyRef);
 
         File pomCopy = fileSystem.getFile(pomCopyRef);
@@ -83,7 +90,6 @@ public class CopyJobTest extends AbstractJobTest
         verify(fileSystem).save(pomCopy);
         assertEquals(Arrays.asList("Concerto"), getParents(pomCopy));
 
-        DocumentReference specsCopyRef = ref("Specs1");
         verify(fileSystem).copy(specs.getReference(), specsCopyRef);
 
         Folder specsCopy = fileSystem.getFolder(specsCopyRef);
@@ -97,7 +103,9 @@ public class CopyJobTest extends AbstractJobTest
     {
         Folder projects = mockFolder("Projects");
         Folder concerto = mockFolder("Concerto", "Projects");
+
         DocumentReference concertoCopyRef = ref("Concerto Copy");
+        generateReference(concertoCopyRef, concertoCopyRef);
 
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(concerto.getReference())));
@@ -156,11 +164,14 @@ public class CopyJobTest extends AbstractJobTest
         Folder specs = mockFolder("Specs", "Concerto");
         Folder concerto = mockFolder("Concerto", null, Arrays.asList("Specs"), Arrays.asList("pom.xml"));
 
-        mockFolder("Specs1", "Specs", "Resilience", Collections.<String> emptyList(), Collections.<String> emptyList());
-        Folder resilience = mockFolder("Resilience", null, Arrays.asList("Specs1"), Collections.<String> emptyList());
+        mockFolder("Specs1", "Specs", "Resilience", Collections.<String>emptyList(), Collections.<String>emptyList());
+        Folder resilience = mockFolder("Resilience", null, Arrays.asList("Specs1"), Collections.<String>emptyList());
 
         Folder projects =
-            mockFolder("Projects", null, Arrays.asList("Concerto", "Resilience"), Collections.<String> emptyList());
+            mockFolder("Projects", null, Arrays.asList("Concerto", "Resilience"), Collections.<String>emptyList());
+
+        DocumentReference pomCopyRef = ref("pom.xml1");
+        generateReference(pom.getReference(), pomCopyRef);
 
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(concerto.getReference())));
@@ -170,8 +181,6 @@ public class CopyJobTest extends AbstractJobTest
 
         verify(fileSystem, never()).copy(eq(concerto.getReference()), any(DocumentReference.class));
         verify(fileSystem, never()).copy(eq(specs.getReference()), any(DocumentReference.class));
-
-        DocumentReference pomCopyRef = ref("pom.xml1");
         verify(fileSystem).copy(pom.getReference(), pomCopyRef);
 
         File pomCopy = fileSystem.getFile(pomCopyRef);
@@ -187,13 +196,15 @@ public class CopyJobTest extends AbstractJobTest
         Folder concerto = mockFolder("Concerto", "Projects");
         mockFolder("Projects", null, Arrays.asList("Concerto"), Arrays.asList("README"));
 
+        DocumentReference readmeCopyRef = ref("README1");
+        generateReference(readme.getReference(), readmeCopyRef);
+
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(null, readme.getReference())));
         request.setDestination(new Path(concerto.getReference()));
 
         execute(request);
 
-        DocumentReference readmeCopyRef = ref("README1");
         verify(fileSystem).copy(readme.getReference(), readmeCopyRef);
 
         File readmeCopy = fileSystem.getFile(readmeCopyRef);
@@ -206,9 +217,10 @@ public class CopyJobTest extends AbstractJobTest
     public void copyFileAs() throws Exception
     {
         File readme = mockFile("README", "Projects");
-        Folder projects = mockFolder("Projects", null, Collections.<String> emptyList(), Arrays.asList("README"));
+        Folder projects = mockFolder("Projects", null, Collections.<String>emptyList(), Arrays.asList("README"));
 
         DocumentReference readmeCopyRef = ref("readme.txt");
+        generateReference(readmeCopyRef, readmeCopyRef);
 
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(null, readme.getReference())));
@@ -246,8 +258,11 @@ public class CopyJobTest extends AbstractJobTest
     public void overwriteFile() throws Exception
     {
         File pom = mockFile("pom.xml", "Resilience");
-        Folder resilience = mockFolder("Resilience", null, Collections.<String> emptyList(), Arrays.asList("pom.xml"));
-        File otherPom = mockFile("pom.xml1", "pom.xml", Collections.<String> emptyList());
+        Folder resilience = mockFolder("Resilience", null, Collections.<String>emptyList(), Arrays.asList("pom.xml"));
+        File otherPom = mockFile("pom.xml1", "pom.xml", Collections.<String>emptyList());
+
+        DocumentReference otherPomCopyRef = ref("pom.xml2");
+        generateReference(pom.getReference(), otherPomCopyRef);
 
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(null, otherPom.getReference())));
@@ -261,8 +276,6 @@ public class CopyJobTest extends AbstractJobTest
         job.run();
 
         verify(fileSystem).delete(pom.getReference());
-
-        DocumentReference otherPomCopyRef = ref("pom.xml2");
         verify(fileSystem).copy(otherPom.getReference(), otherPomCopyRef);
 
         File otherPomCopy = fileSystem.getFile(otherPomCopyRef);
@@ -275,8 +288,8 @@ public class CopyJobTest extends AbstractJobTest
     public void overwriteProtectedFile() throws Exception
     {
         File pom = mockFile("pom.xml", "Resilience");
-        Folder resilience = mockFolder("Resilience", null, Collections.<String> emptyList(), Arrays.asList("pom.xml"));
-        File otherPom = mockFile("pom.xml1", "pom.xml", Collections.<String> emptyList());
+        Folder resilience = mockFolder("Resilience", null, Collections.<String>emptyList(), Arrays.asList("pom.xml"));
+        File otherPom = mockFile("pom.xml1", "pom.xml", Collections.<String>emptyList());
 
         when(fileSystem.canDelete(pom.getReference())).thenReturn(false);
 

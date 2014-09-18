@@ -19,9 +19,6 @@
  */
 package org.xwiki.filemanager.internal.job;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -34,6 +31,9 @@ import org.xwiki.filemanager.job.MoveRequest;
 import org.xwiki.job.Job;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link MoveJob}.
@@ -110,16 +110,16 @@ public class MoveJobTest extends AbstractJobTest
         mockFolder("Tests", "Concerto");
         mockFolder("Specs", "Concerto");
         Folder concerto =
-            mockFolder("Concerto", "Projects", Arrays.asList("Specs", "Tests"), Collections.<String> emptyList());
-        Folder projects = mockFolder("Projects", null, Arrays.asList("Concerto"), Collections.<String> emptyList());
+            mockFolder("Concerto", "Projects", Arrays.asList("Specs", "Tests"), Collections.<String>emptyList());
+        Folder projects = mockFolder("Projects", null, Arrays.asList("Concerto"), Collections.<String>emptyList());
 
         final File testFile = mockFile("test.in", "TestsNew");
         final Folder testsNew =
-            mockFolder("TestsNew", "Tests", "ConcertoNew", Collections.<String> emptyList(), Arrays.asList("test.in"));
+            mockFolder("TestsNew", "Tests", "ConcertoNew", Collections.<String>emptyList(), Arrays.asList("test.in"));
         final Folder src = mockFolder("src", "ConcertoNew");
         final Folder concertoNew =
             mockFolder("ConcertoNew", "Concerto", null, Arrays.asList("src", "TestsNew"),
-                Collections.<String> emptyList());
+                Collections.<String>emptyList());
 
         // Assume that testFile is saved after the parent is updated (we verify this at the end).
         doAnswer(updateChildFiles(testsNew)).when(fileSystem).save(testFile);
@@ -183,10 +183,10 @@ public class MoveJobTest extends AbstractJobTest
     public void overwriteFile() throws Exception
     {
         File pom = mockFile("pom.xml", "api");
-        Folder api = mockFolder("api", null, Collections.<String> emptyList(), Arrays.asList("pom.xml"));
+        Folder api = mockFolder("api", null, Collections.<String>emptyList(), Arrays.asList("pom.xml"));
 
         File otherPom = mockFile("pom.xml1", "pom.xml", Arrays.asList("root"));
-        Folder root = mockFolder("root", null, Collections.<String> emptyList(), Arrays.asList("pom.xml1"));
+        Folder root = mockFolder("root", null, Collections.<String>emptyList(), Arrays.asList("pom.xml1"));
 
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(root.getReference(), otherPom.getReference())));
@@ -207,10 +207,10 @@ public class MoveJobTest extends AbstractJobTest
     {
         File pom = mockFile("pom.xml", "api");
         when(fileSystem.canDelete(pom.getReference())).thenReturn(false);
-        Folder api = mockFolder("api", null, Collections.<String> emptyList(), Arrays.asList("pom.xml"));
+        Folder api = mockFolder("api", null, Collections.<String>emptyList(), Arrays.asList("pom.xml"));
 
         File otherPom = mockFile("pom.xml1", "pom.xml", Arrays.asList("root"));
-        Folder root = mockFolder("root", null, Collections.<String> emptyList(), Arrays.asList("pom.xml1"));
+        Folder root = mockFolder("root", null, Collections.<String>emptyList(), Arrays.asList("pom.xml1"));
 
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(root.getReference(), otherPom.getReference())));
@@ -239,6 +239,7 @@ public class MoveJobTest extends AbstractJobTest
         // Test the unique ID counter.
         Folder otherFolder = mockFolder("Resilience");
         DocumentReference newReference = ref("Resilience1");
+        generateReference(otherFolder.getReference(), newReference);
 
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(folder.getReference())));
@@ -259,7 +260,7 @@ public class MoveJobTest extends AbstractJobTest
     @Test
     public void renameProtectedFolder() throws Exception
     {
-        mockFolder("Projects", null, Arrays.asList("Concerto"), Collections.<String> emptyList());
+        mockFolder("Projects", null, Arrays.asList("Concerto"), Collections.<String>emptyList());
         Folder folder = mockFolder("Concerto", "Projects", Arrays.asList("Specs"), Arrays.asList("readme.txt"));
         Folder childFolder = mockFolder("Specs", "Concerto");
         File childFile = mockFile("readme.txt", "Concerto");
@@ -284,7 +285,7 @@ public class MoveJobTest extends AbstractJobTest
     public void renameFolderUsingExistingName() throws Exception
     {
         Folder projects =
-            mockFolder("Projects", null, Arrays.asList("Concerto", "Resilience"), Collections.<String> emptyList());
+            mockFolder("Projects", null, Arrays.asList("Concerto", "Resilience"), Collections.<String>emptyList());
         Folder concerto = mockFolder("Concerto", "Projects");
         Folder resilience = mockFolder("Resilience", "Projects");
 
@@ -307,6 +308,7 @@ public class MoveJobTest extends AbstractJobTest
         File file = mockFile("readme.txt", "Concerto", "Resilience");
 
         DocumentReference newReference = ref("README");
+        generateReference(newReference, newReference);
 
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(null, file.getReference())));
@@ -342,7 +344,7 @@ public class MoveJobTest extends AbstractJobTest
         File file = mockFile("readme.txt", "Concerto");
         File readme = mockFile("README", "Concerto");
         Folder folder =
-            mockFolder("Concerto", null, Collections.<String> emptyList(), Arrays.asList("readme.txt", "README"));
+            mockFolder("Concerto", null, Collections.<String>emptyList(), Arrays.asList("readme.txt", "README"));
 
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(null, file.getReference())));
@@ -361,10 +363,13 @@ public class MoveJobTest extends AbstractJobTest
         File readme = mockFile("README", "Concerto");
         File file = mockFile("readme.txt", "Concerto", "Resilience");
         Folder concerto =
-            mockFolder("Concerto", "Projects", Collections.<String> emptyList(), Arrays.asList("readme.txt", "README"));
-        mockFolder("Resilience", "Projects", Collections.<String> emptyList(), Arrays.asList("readme.txt"));
+            mockFolder("Concerto", "Projects", Collections.<String>emptyList(), Arrays.asList("readme.txt", "README"));
+        mockFolder("Resilience", "Projects", Collections.<String>emptyList(), Arrays.asList("readme.txt"));
         Folder projects =
-            mockFolder("Projects", null, Arrays.asList("Concerto", "Resilience"), Collections.<String> emptyList());
+            mockFolder("Projects", null, Arrays.asList("Concerto", "Resilience"), Collections.<String>emptyList());
+
+        DocumentReference actualDestinationReference = ref("README1");
+        generateReference(readme.getReference(), actualDestinationReference);
 
         MoveRequest request = new MoveRequest();
         request.setPaths(Collections.singleton(new Path(concerto.getReference(), file.getReference())));
@@ -375,7 +380,7 @@ public class MoveJobTest extends AbstractJobTest
         assertEquals(Arrays.asList("Resilience", "Projects"), getParents(file));
 
         verify(file).setName(readme.getName());
-        verify(fileSystem).rename(file, ref("README1"));
+        verify(fileSystem).rename(file, actualDestinationReference);
         assertEquals(Arrays.asList("Resilience", "Projects"), getParents(file));
     }
 }

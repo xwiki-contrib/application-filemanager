@@ -33,8 +33,10 @@ import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.context.Execution;
 import org.xwiki.filemanager.Path;
+import org.xwiki.filemanager.internal.reference.DocumentNameSequence;
 import org.xwiki.filemanager.job.BatchPathRequest;
 import org.xwiki.filemanager.job.FileManager;
+import org.xwiki.filemanager.reference.UniqueDocumentReferenceGenerator;
 import org.xwiki.job.JobException;
 import org.xwiki.job.event.status.JobStatus;
 import org.xwiki.model.reference.AttachmentReference;
@@ -85,6 +87,12 @@ public class DriveScriptService implements ScriptService
      */
     @Inject
     private DocumentAccessBridge documentAccessBridge;
+
+    /**
+     * Used to generate unique file and folder references.
+     */
+    @Inject
+    private UniqueDocumentReferenceGenerator uniqueDocRefGenerator;
 
     /**
      * Schedules a job to move the specified files and folders to the given destination.
@@ -194,6 +202,18 @@ public class DriveScriptService implements ScriptService
     }
 
     /**
+     * Generates a unique reference for a file or folder with the specified name.
+     * 
+     * @param name the name of the file or folder for which to generate a reference
+     * @return a unique file or folder reference
+     * @since 2.0RC1
+     */
+    public DocumentReference getUniqueReference(String name)
+    {
+        return this.uniqueDocRefGenerator.generate(getCurrentDriveReference(), new DocumentNameSequence(name));
+    }
+
+    /**
      * Get the error generated while performing the previously called action.
      * 
      * @return an eventual exception or {@code null} if no exception was thrown
@@ -277,7 +297,7 @@ public class DriveScriptService implements ScriptService
         SpaceReference currentDriveReference = getCurrentDriveReference();
         if (jobStatus != null) {
             Collection<Path> paths = ((BatchPathRequest) jobStatus.getRequest()).getPaths();
-            if (paths.size() > 0) {
+            if (paths != null && paths.size() > 0) {
                 Path firstPath = paths.iterator().next();
                 DocumentReference reference =
                     firstPath.getFileReference() != null ? firstPath.getFileReference() : firstPath
