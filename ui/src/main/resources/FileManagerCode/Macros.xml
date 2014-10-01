@@ -294,7 +294,9 @@
   #setVariable("$return" {
     'id': $fileDoc.name,
     'name': $attach.filename,
+    'creationDate': $fileDoc.creationDate,
     'date': $fileDoc.date,
+    'creator': $fileDoc.creator,
     'author': $fileDoc.author,
     'size': $attach.filesize,
     'mediaType': $attach.mimeType,
