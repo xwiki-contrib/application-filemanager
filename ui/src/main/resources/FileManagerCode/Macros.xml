@@ -87,10 +87,11 @@
     #set ($path = $path.subList(1, $path.size()))
   #end
   #checkIfHasFolders($folderDoc $hasFolders)
+  #getCountChildFiles($folderDoc $countFiles)
   #set ($return = $NULL)
   #setVariable("$return" {
     'id': $folderDoc.name,
-    'name': $folderDoc.plainTitle,
+    'name': "$folderDoc.plainTitle ($countFiles)" ,
     'path': $path,
     'hasFolders': $hasFolders
   })
@@ -247,6 +248,11 @@
   #setVariable("$return" $_return)
 #end
 
+#macro (getCountChildFiles $parentDoc $return)
+  #getChildFiles($parentDoc $_return)
+  #setVariable("$return" $_return.totalCount)
+#end
+
 #macro (getFiles $statement $parameters $return)
   #set ($query = $services.query.hql($statement))
   #set ($countQuery = $services.query.hql($statement).addFilter('count'))
@@ -294,7 +300,9 @@
   #setVariable("$return" {
     'id': $fileDoc.name,
     'name': $attach.filename,
+    'creationDate': $fileDoc.creationDate,
     'date': $fileDoc.date,
+    'creator': $fileDoc.creator,
     'author': $fileDoc.author,
     'size': $attach.filesize,
     'mediaType': $attach.mimeType,
