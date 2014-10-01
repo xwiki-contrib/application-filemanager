@@ -65,7 +65,7 @@
               &lt;/th&gt;
             &lt;/tr&gt;
             &lt;tr class="xwiki-livetable-display-filters"&gt;
-              &lt;td ng-if="selection" class="xwiki-livetable-display-header-filter"&gt;&lt;/td&gt;
+              &lt;td ng-if="selection" class="xwiki-livetable-display-header-filter"&gt;&lt;input type="checkbox" ng-change="checkAll(checked)" ng-model="checked" /&gt;&lt;/td&gt;
               &lt;td ng-repeat="column in columns" class="xwiki-livetable-display-header-filter"&gt;
                 &lt;div ng-if="column.filterable" ng-include="liveTableFilterTemplate"&gt;&lt;/div&gt;
               &lt;/td&gt;
@@ -278,6 +278,12 @@
             scope.params.order = (column.id == scope.params.sort &amp;&amp; scope.params.order != 'desc') ? 'desc' : null;
             scope.params.sort = column.id;
           }
+        };
+
+        scope.checkAll = function(checked) {
+          angular.forEach(scope.rows.list, function(rowItem) {
+            scope.selection[rowItem.id] = checked;
+          });
         };
 
         // The live table filters should not trigger an update immediately, but after a delay. We achieve this by
