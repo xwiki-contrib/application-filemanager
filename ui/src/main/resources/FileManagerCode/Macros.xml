@@ -87,10 +87,11 @@
     #set ($path = $path.subList(1, $path.size()))
   #end
   #checkIfHasFolders($folderDoc $hasFolders)
+  #getCountChildFiles($folderDoc $countFiles)
   #set ($return = $NULL)
   #setVariable("$return" {
     'id': $folderDoc.name,
-    'name': $folderDoc.plainTitle,
+    'name': "$folderDoc.plainTitle ($countFiles)" ,
     'path': $path,
     'hasFolders': $hasFolders
   })
@@ -245,6 +246,11 @@
   #getFiles($statement $parameters $_return)
   #set ($return = $NULL)
   #setVariable("$return" $_return)
+#end
+
+#macro (getCountChildFiles $parentDoc $return)
+  #getChildFiles($parentDoc $_return)
+  #setVariable("$return" $_return.totalCount)
 #end
 
 #macro (getFiles $statement $parameters $return)
