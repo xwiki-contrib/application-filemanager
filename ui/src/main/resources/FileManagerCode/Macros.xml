@@ -87,12 +87,14 @@
     #set ($path = $path.subList(1, $path.size()))
   #end
   #checkIfHasFolders($folderDoc $hasFolders)
+  #getChildFilesCount($folderDoc $filesCount)
   #set ($return = $NULL)
   #setVariable("$return" {
     'id': $folderDoc.name,
     'name': $folderDoc.plainTitle,
     'path': $path,
-    'hasFolders': $hasFolders
+    'hasFolders': $hasFolders,
+    'filesCount': $filesCount
   })
 #end
 
@@ -245,6 +247,13 @@
   #getFiles($statement $parameters $_return)
   #set ($return = $NULL)
   #setVariable("$return" $_return)
+#end
+
+#macro (getChildFilesCount $parentDoc $return)
+ #set ($query = $services.query.hql(", BaseObject as fileObj, BaseObject as tagObj, DBStringListProperty as tagsProp where fileObj.className = 'FileManagerCode.FileClass' and fileObj.name = doc.fullName and doc.space = :space and tagObj.className = 'XWiki.TagClass' and tagObj.name = doc.fullName and tagObj.id = tagsProp.id.id and tagsProp.id.name = 'tags' and :tag in elements(tagsProp.list) "))
+  #set ($query = $query.bindValue('space', $parentDoc.space).bindValue('tag', $parentDoc.name))
+  #set ($result = $query.count())
+  #setVariable("$return" $result)
 #end
 
 #macro (getFiles $statement $parameters $return)

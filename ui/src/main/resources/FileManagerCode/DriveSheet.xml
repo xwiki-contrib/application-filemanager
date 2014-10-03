@@ -2148,7 +2148,7 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
       folder.type = 'folder';
       return {
         id: folder.id,
-        text: folder.name,
+        text: folder.name + ' (' + folder.filesCount +')',
         icon: '$xwiki.getSkinFile("icons/silk/folder.png")',
         state: {
           selected: false
