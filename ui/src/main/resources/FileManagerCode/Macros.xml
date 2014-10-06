@@ -190,7 +190,7 @@
     'size': 'attach.filesize',
     'creationDate': 'doc.creationDate',
     'date': 'doc.date',
-	'creator': 'doc.creator',
+    'creator': 'doc.creator',
     'author': 'doc.author'
   })
   #foreach ($entry in $storedColumns.entrySet())
