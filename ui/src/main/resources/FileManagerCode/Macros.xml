@@ -87,12 +87,14 @@
     #set ($path = $path.subList(1, $path.size()))
   #end
   #checkIfHasFolders($folderDoc $hasFolders)
+  #getChildFilesCount($folderDoc $filesCount)
   #set ($return = $NULL)
   #setVariable("$return" {
     'id': $folderDoc.name,
     'name': $folderDoc.plainTitle,
     'path': $path,
-    'hasFolders': $hasFolders
+    'hasFolders': $hasFolders,
+    'filesCount': $filesCount
   })
 #end
 
@@ -237,14 +239,29 @@
 #end
 
 #macro (getChildFiles $parentDoc $return)
+  #getChildFilesStatement($parentDoc $statement)
   #set ($parameters = {'space': $parentDoc.space, 'tag': $parentDoc.name})
-  #set ($fromTags = 'BaseObject as tagObj, DBStringListProperty as tagsProp')
-  #set ($joinTags = "tagObj.className = 'XWiki.TagClass' and tagObj.name = doc.fullName and tagObj.id = tagsProp.id.id and tagsProp.id.name = 'tags'")
-  #getFilesStatement($fromTags "doc.space = :space and $joinTags and :tag in elements(tagsProp.list)"
-    $parameters $statement)
   #getFiles($statement $parameters $_return)
   #set ($return = $NULL)
   #setVariable("$return" $_return)
+#end
+
+#macro (getChildFilesCount $parentDoc $return)
+  #getChildFilesStatement($parentDoc $statement)
+  #set ($query = $services.query.hql($statement))
+  #set ($query = $query.bindValue('space', $parentDoc.space).bindValue('tag', $parentDoc.name))
+  #set ($result = $query.count())
+  #set ($return = $NULL)
+  #setVariable("$return" $result)
+#end
+
+#macro (getChildFilesStatement $parentDoc $return)
+  #set ($parameters = {'space': $parentDoc.space, 'tag': $parentDoc.name})
+  #set ($fromTags = 'BaseObject as tagObj, DBStringListProperty as tagsProp')
+  #set ($joinTags = "tagObj.className = 'XWiki.TagClass' and tagObj.name = doc.fullName and tagObj.id = tagsProp.id.id and tagsProp.id.name = 'tags'")
+  #getFilesStatement($fromTags "doc.space = :space and $joinTags and :tag in elements(tagsProp.list)" $parameters $statement)
+  #set ($return = $NULL)
+  #setVariable("$return" $statement)
 #end
 
 #macro (getFiles $statement $parameters $return)
