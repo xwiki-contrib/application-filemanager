@@ -239,21 +239,29 @@
 #end
 
 #macro (getChildFiles $parentDoc $return)
+  #getChildFilesStatement($parentDoc $statement)
   #set ($parameters = {'space': $parentDoc.space, 'tag': $parentDoc.name})
-  #set ($fromTags = 'BaseObject as tagObj, DBStringListProperty as tagsProp')
-  #set ($joinTags = "tagObj.className = 'XWiki.TagClass' and tagObj.name = doc.fullName and tagObj.id = tagsProp.id.id and tagsProp.id.name = 'tags'")
-  #getFilesStatement($fromTags "doc.space = :space and $joinTags and :tag in elements(tagsProp.list)"
-    $parameters $statement)
   #getFiles($statement $parameters $_return)
   #set ($return = $NULL)
   #setVariable("$return" $_return)
 #end
 
 #macro (getChildFilesCount $parentDoc $return)
- #set ($query = $services.query.hql(", BaseObject as fileObj, BaseObject as tagObj, DBStringListProperty as tagsProp where fileObj.className = 'FileManagerCode.FileClass' and fileObj.name = doc.fullName and doc.space = :space and tagObj.className = 'XWiki.TagClass' and tagObj.name = doc.fullName and tagObj.id = tagsProp.id.id and tagsProp.id.name = 'tags' and :tag in elements(tagsProp.list) "))
+  #getChildFilesStatement($parentDoc $statement)
+  #set ($query = $services.query.hql($statement))
   #set ($query = $query.bindValue('space', $parentDoc.space).bindValue('tag', $parentDoc.name))
   #set ($result = $query.count())
+  #set ($return = $NULL)
   #setVariable("$return" $result)
+#end
+
+#macro (getChildFilesStatement $parentDoc $return)
+  #set ($parameters = {'space': $parentDoc.space, 'tag': $parentDoc.name})
+  #set ($fromTags = 'BaseObject as tagObj, DBStringListProperty as tagsProp')
+  #set ($joinTags = "tagObj.className = 'XWiki.TagClass' and tagObj.name = doc.fullName and tagObj.id = tagsProp.id.id and tagsProp.id.name = 'tags'")
+  #getFilesStatement($fromTags "doc.space = :space and $joinTags and :tag in elements(tagsProp.list)" $parameters $statement)
+  #set ($return = $NULL)
+  #setVariable("$return" $statement)
 #end
 
 #macro (getFiles $statement $parameters $return)

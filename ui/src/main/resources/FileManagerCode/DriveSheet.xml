@@ -2154,7 +2154,8 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
           selected: false
         },
         children: !!folder.id &amp;&amp; folder.hasFolders !== false,
-        data: folder
+        data: folder,
+        filesCount: folder.filesCount
       }
     };
 
@@ -2318,6 +2319,13 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
             action: function(data) {
               var tree = $.jstree.reference(data.reference);
               var node = tree.get_node(data.reference);
+              // Remove number of files from name
+              var cleanText = node.text;
+              var suffixPos = cleanText.lastIndexOf(' (');
+              if (suffixPos &gt; 0) {
+                cleanText = cleanText.substr(0, suffixPos);
+              }
+              node.text = cleanText;
               setTimeout(function() {tree.edit(node);}, 0);
             },
             __disabled: isReadOnly
@@ -2461,6 +2469,8 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
                 failed: refreshParent
               });
             }
+            // Add number files suffix
+            data.instance.set_text(data.node, data.text+' ('+data.node.data.filesCount + ')');
           } else {
             // Create a new folder.
             scope.drive.createFolder(data.node.text, data.node.parent, function(folder) {
