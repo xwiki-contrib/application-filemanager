@@ -42,11 +42,42 @@
   <content>{{velocity output=false}}
 #set ($isAjaxRequest = $request.getHeader('X-Requested-With') == 'XMLHttpRequest')
 #set ($selectChildFolders = 'from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and doc.parent = :parent')
+## We need to use HQL because XWQL doesn't support nested queries.
+#set ($selectAllFoldersFromDriveHQL = "select folderDoc.fullName from XWikiDocument folderDoc, BaseObject folderObj where folderDoc.space = :space and folderObj.name = folderDoc.fullName and folderObj.className = 'FileManagerCode.FolderClass'")
+#set ($hasNoParent = "(doc.parent = '' or (doc.parent &lt;&gt; :parent and doc.parent not in ($selectAllFoldersFromDriveHQL)))")
+#set ($selectOrphanFolders = "from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and $hasNoParent")
+
+#macro (getDrive $driveDoc $return)
+  #if ($doc.title != '')
+    #set ($name = $doc.plainTitle)
+  #else
+    #set ($name = $doc.space)
+  #end
+  #set ($return = $NULL)
+  #setVariable("$return", {
+    'id': $doc.name,
+    'name': $name
+  })
+#end
 
 #macro (getChildFolders $parentDoc $return)
   #getFolders($selectChildFolders {'space': $parentDoc.space, 'parent': $parentDoc.fullName} $_return)
   #set ($return = $NULL)
   #setVariable("$return" $_return)
+#end
+
+#macro (getOrphanFolders $return)
+  #getFolders($selectOrphanFolders {'space': $doc.space, 'parent': $doc.fullName} $_return)
+  #set ($return = $NULL)
+  #setVariable("$return" $_return)
+#end
+
+#macro (checkIfHasOrphanFolders $return)
+  #set ($query = $services.query.xwql($selectOrphanFolders))
+  #set ($query = $query.bindValue('space', $doc.space).bindValue('parent', $doc.fullName))
+  #set ($results = $query.setLimit(1).execute())
+  #set ($return = $NULL)
+  #setVariable("$return" $results.size().equals(1))
 #end
 
 #macro (getFolders $statement $parameters $return)
@@ -58,14 +89,16 @@
   #end
   #set ($folderCount = $countQuery.execute().get(0))
   #set ($folders = [])
-  #set ($offset = $mathtool.toInteger($request.offset))
-  #if ($offset)
-    #set ($discard = $query.setOffset($offset))
+  #set ($offset = $mathtool.max($mathtool.toInteger($request.offset), 0))
+  #if (!$offset)
+    #set ($offset = 0)
   #end
+  #set ($discard = $query.setOffset($offset))
   #set ($limit = $mathtool.toInteger($request.limit))
-  #if ($limit)
-    #set ($discard = $query.setLimit($limit))
+  #if (!$limit)
+    #set ($limit = 15)
   #end
+  #set ($discard = $query.setLimit($limit))
   #foreach ($folderId in $query.execute())
     #set ($folderDoc = $xwiki.getDocument($folderId))
     #getFolder($folderDoc $folder)
@@ -87,12 +120,17 @@
     #set ($path = $path.subList(1, $path.size()))
   #end
   #checkIfHasFolders($folderDoc $hasFolders)
+  #set ($canDeleteFolderDoc = $folderDoc.hasAccessLevel('delete'))
   #set ($return = $NULL)
   #setVariable("$return" {
     'id': $folderDoc.name,
     'name': $folderDoc.plainTitle,
     'path': $path,
-    'hasFolders': $hasFolders
+    'hasFolders': $hasFolders,
+    'canRename': $canDeleteFolderDoc,
+    'canDelete': $canDeleteFolderDoc,
+    'canMove': $canDeleteFolderDoc,
+    'canCopy': true
   })
 #end
 
@@ -245,6 +283,18 @@
   #getFiles($statement $parameters $_return)
   #set ($return = $NULL)
   #setVariable("$return" $_return)
+#end
+
+#macro (checkIfHasOrphanFiles $return)
+  ## A file can have multiple parent folders, which are declared using tags, and one of these parent folders, usually
+  ## the first, is set as wiki page parent so that a tree widget (such as the XWiki explorer tree) can still display the
+  ## hierarchy nicely.
+  #getFilesStatement('' "doc.space = :space and $hasNoParent" $NULL $statement)
+  #set ($query = $services.query.hql($statement))
+  #set ($query = $query.bindValue('space', $doc.space).bindValue('parent', $doc.fullName))
+  #set ($results = $query.setLimit(1).execute())
+  #set ($return = $NULL)
+  #setVariable("$return" $results.size().equals(1))
 #end
 
 #macro (getFiles $statement $parameters $return)

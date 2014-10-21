@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.1">
+  <web>FileManagerCode</web>
+  <name>DriveTree</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1412695398000</creationDate>
+  <parent>FileManagerCode.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1412846899000</date>
+  <contentUpdateDate>1412778999000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{include reference="FileManagerCode.Macros" /}}
+
+{{velocity output="false"}}
+#macro (handleDriveTreeRequest)
+  #if ($request.action)
+    #if ($services.csrf.isTokenValid($request.form_token))
+      $response.sendError(400, 'The specified action is not supported.')
+    #elseif ($isAjaxRequest)
+      $response.sendError(403, 'The CSRF token is missing.')
+    #else
+      $response.sendRedirect($services.csrf.getResubmissionURL())
+    #end
+  #else
+    #set ($data = $NULL)
+    #if ($request.data == 'children')
+      #getChildren($request.id $data)
+    #elseif ($request.data == 'path')
+      #getNodePath($request.id $data)
+    #elseif ($request.data == 'contextMenu')
+      #getContextMenu($data)
+    #elseif ($request.data == 'jobStatus')
+      #getJobStatus($request.id $data)
+    #end
+    #if ($data)
+      #set ($discard = $response.setContentType('application/json'))
+      $jsontool.serialize($data)
+    #else
+      $response.sendError(404);
+    #end
+  #end
+#end
+
+#macro (getChildren $nodeId $return)
+  #set ($children = [])
+  #if ($nodeId == '#')
+    #addDriveNode($children)
+  #elseif ($nodeId == '/orphanFolders')
+    #addOrphanFolderNodes($children)
+  #else
+    #set ($nodeRef = $services.model.resolveDocument($nodeId, 'explicit', $doc.documentReference))
+    #set ($nodeDoc = $xwiki.getDocument($nodeRef))
+    #if ($nodeDoc.getObject('FileManagerCode.DriveClass'))
+      #addDriveChildNodes($nodeDoc $children)
+    #elseif ($nodeDoc.getObject('FileManagerCode.FolderClass'))
+      #addFolderChildNodes($nodeDoc $children)
+    #end
+  #end
+  #set ($return = $NULL)
+  #setVariable("$return" $children)
+#end
+
+#macro (addDriveNode $children)
+  #if ($doc.getObject('FileManagerCode.DriveClass'))
+    #set ($driveDoc = $doc)
+  #else
+    #getDriveReference($driveRef)
+    #set ($driveDoc = $xwiki.getDocument($driveRef))
+  #end
+  #getDrive($driveDoc $drive)
+  ## Extend the drive data with tree-related info.
+  #set ($discard = $drive.putAll({
+    'type': 'drive',
+    'validChildren': ['folder', 'pagination', 'files', 'folders', 'jobs'],
+    'hasContextMenu': true,
+    'createURL': $driveDoc.getURL('get', 'action=createFolder&amp;outputSyntax=plain')
+  }))
+  #set ($discard = $children.add({
+    'id': $drive.id,
+    'text': $drive.name,
+    'icon': $xwiki.getSkinFile('icons/silk/drive.png'),
+    'state': {
+      'opened': true,
+      'selected': false
+    },
+    'children': true,
+    'data': $drive,
+    'a_attr': {
+      'href': $driveDoc.getURL()
+    }
+  }))
+#end
+
+#macro (addDriveChildNodes $driveDoc $children)
+  #addFolderChildNodes($driveDoc $children)
+  #if ($offset == 0)
+    #addDriveMetaNodes($children)
+  #end
+#end
+
+#macro (addDriveMetaNodes $children)
+  #checkIfHasOrphanFolders($hasOrphanFolders)
+  #if ($hasOrphanFolders)
+    #set ($discard = $children.add({
+      'id': '/orphanFolders',
+      'text': 'Orphan Folders',
+      'icon': $xwiki.getSkinFile('icons/silk/folder_error.png'),
+      'children': true,
+      'data': {
+        'type': 'folders',
+        'validChildren': ['folder', 'pagination']
+      }
+    }))
+  #end
+  #set ($discard = $children.add({
+    'id': '/allFiles',
+    'text': 'All Files',
+    'icon': $xwiki.getSkinFile('icons/silk/page_white_stack.png'),
+    'data': {
+      'type': 'files'
+    }
+  }))
+  #checkIfHasOrphanFiles($hasOrphanFiles)
+  #if ($hasOrphanFiles)
+    #set ($discard = $children.add({
+      'id': '/orphanFiles',
+      'text': 'Orphan Files',
+      'icon': $xwiki.getSkinFile('icons/silk/page_white_error.png'),
+      'data': {
+        'type': 'files'
+      }
+    }))
+  #end
+  #set ($discard = $children.add({
+    'id': '/tasks',
+    'text': 'Tasks',
+    'icon': $xwiki.getSkinFile('icons/silk/clock.png'),
+    'data': {
+      'type': 'jobs'
+    }
+  }))
+#end
+
+#macro (addFolderChildNodes $parentFolderDoc $children)
+  #getChildFolders($parentFolderDoc $childFolders)
+  #addFolderNodes($parentFolderDoc.name $childFolders $children)
+#end
+
+#macro (addFolderNodes $parentId $folders $children)
+  #foreach ($folder in $folders.list)
+    #addFolderNode($folder $children)
+  #end
+  #if ($folders.list.size() &gt;= $folders.limit)
+    #set ($newOffset = $mathtool.add($folders.offset, $folders.list.size()))
+    #if ($newOffset &lt; $folders.totalCount)
+      #addPaginationNode($parentId $newOffset $folders.totalCount 'folder_lightbulb' $children)
+    #end
+  #end
+#end
+
+#macro (addFolderNode $folder $children)
+  ## Extend the folder data with tree-related info.
+  #set ($discard = $folder.putAll({
+    'type': 'folder',
+    'validChildren': ['folder', 'pagination'],
+    'draggable': true,
+    'hasContextMenu': true,
+    'createURL': $xwiki.getURL($folder.id, 'get', 'action=createFolder&amp;outputSyntax=plain'),
+    'copyURL': $xwiki.getURL($folder.id, 'get', 'action=copy&amp;outputSyntax=plain'),
+    'moveURL': $xwiki.getURL($folder.id, 'get', 'action=move&amp;outputSyntax=plain'),
+    'deleteURL': $xwiki.getURL($folder.id, 'get', 'action=delete&amp;outputSyntax=plain')
+  }))
+  #set ($discard = $children.add({
+    'id': $folder.id,
+    'text': $folder.name,
+    'icon': $xwiki.getSkinFile('icons/silk/folder.png'),
+    'children': $folder.hasFolders,
+    'data': $folder,
+    'a_attr': {
+      'href': $xwiki.getURL($folder.id)
+    }
+  }))
+#end
+
+#macro (addOrphanFolderNodes $children)
+  #getOrphanFolders($orphanFolders)
+  #addFolderNodes('/orphanFolders' $orphanFolders $children)
+#end
+
+## FIXME: This macro is pretty generic and should be moved in a common place.
+#macro (addPaginationNode $parentId $offset $totalCount $icon $siblings)
+  #set ($discard = $siblings.add({
+    'id': "/pagination:$parentId",
+    'text': "$!mathtool.sub($totalCount, $offset) more ...",
+    'icon': $xwiki.getSkinFile("icons/silk/${icon}.png"),
+    'children': false,
+    'data': {
+      'type': 'pagination',
+      'validChildren': [],
+      'canDelete': true,
+      'offset': $offset
+    }
+  }))
+#end
+
+#macro (getContextMenu $return)
+  #set ($contextMenuByNodeType = {
+    'drive': {
+      'createFolder': {},
+      'createFile': {},
+      'refresh': {},
+      'download': {},
+      'paste': {}
+    },
+    'folder': {
+      'createFolder': {
+        'label': 'New Folder',
+        'icon': $xwiki.getSkinFile('icons/silk/folder_add.png'),
+        'action': 'create',
+        'parameters': {
+          'template': {
+            'text': 'New Folder',
+            'icon': $xwiki.getSkinFile('icons/silk/folder.png')
+          }
+        }
+      },
+      'createFile': {
+        'label': 'New File',
+        'icon': $xwiki.getSkinFile('icons/silk/page_white_add.png')
+      },
+      'openLink': {
+        'separator_before': true,
+        'label': 'Open',
+        'icon': $xwiki.getSkinFile('icons/silk/application_view_list.png')
+      },
+      'openLinkInNewTab': {
+        'label': 'Open in New Tab',
+        'icon': $xwiki.getSkinFile('icons/silk/application_double.png')
+      },
+      'refresh': {
+        'label': 'Refresh',
+        'icon': $xwiki.getSkinFile('icons/silk/arrow_refresh.png')
+      },
+      'download': {
+        'separator_before': true,
+        'label': 'Download',
+        'icon': $xwiki.getSkinFile('icons/silk/page_white_put.png')
+      },
+      'cut': {
+        'separator_before': true,
+        'label': 'Cut',
+        'icon': $xwiki.getSkinFile('icons/silk/cut.png')
+      },
+      'copy': {
+        'label': 'Copy',
+        'icon': $xwiki.getSkinFile('icons/silk/page_white_copy.png')
+      },
+      'paste': {
+        'label': 'Paste Into Folder',
+        'icon': $xwiki.getSkinFile('icons/silk/page_white_paste.png')
+      },
+      'rename': {
+        'separator_before': true,
+        'label': 'Rename...',
+        'icon': $xwiki.getSkinFile('icons/silk/textfield_rename.png')
+      },
+      'remove': {
+        'label': 'Delete',
+        'icon': $xwiki.getSkinFile('icons/silk/cross.png'),
+        'parameters': {
+          'confirmationMessage': 'Are you sure you want to delete the selected folders?'
+        }
+      }
+    }
+  })
+  ## Adjust the drive menu.
+  #set ($contextMenuByNodeType.drive.createFolder = $contextMenuByNodeType.folder.createFolder)
+  #set ($contextMenuByNodeType.drive.createFile = $contextMenuByNodeType.folder.createFile)
+  #set ($discard = $contextMenuByNodeType.drive.refresh.putAll($contextMenuByNodeType.folder.refresh))
+  #set ($contextMenuByNodeType.drive.download = $contextMenuByNodeType.folder.download)
+  #set ($discard = $contextMenuByNodeType.drive.paste.putAll($contextMenuByNodeType.folder.paste))
+  #set ($contextMenuByNodeType.drive.refresh.separator_before = true)
+  #set ($contextMenuByNodeType.drive.paste.label = 'Paste')
+  #set ($contextMenuByNodeType.drive.paste.separator_before = true)
+  ##
+  #set ($return = $NULL)
+  #setVariable("$return" $contextMenuByNodeType)
+#end
+
+#macro (getNodePath $nodeId $return)
+  #set ($folderRef = $services.model.resolveDocument($nodeId, 'explicit', $doc.documentReference))
+  #set ($folderDoc = $xwiki.getDocument($folderRef))
+  #set ($path = [])
+  #getPath($folderDoc $path)
+  #if (!$path.isEmpty())
+    #getDriveReference($driveReference)
+    #if ($path.get($mathtool.sub($path.size(), 1)) != $driveReference.name)
+      ## The top-most ancestor is orphan.
+      #set ($discard = $path.add('/orphanFolders'))
+    #end
+    #set ($discard = $collectionstool.reverse($path))
+  #end
+  #set ($return = $NULL)
+  #setVariable("$return" $path)
+#end
+{{/velocity}}
+
+{{velocity wiki="false"}}
+#if ($xcontext.action == 'get')
+  #handleDriveTreeRequest
+#end
+{{/velocity}}</content>
+</xwikidoc>

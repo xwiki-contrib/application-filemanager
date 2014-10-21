@@ -42,10 +42,6 @@
   <content>{{include reference="FileManagerCode.Macros" /}}
 
 {{velocity output="false"}}
-## We need to use HQL because XWQL doesn't support nested queries.
-#set ($selectAllFoldersFromDriveHQL = "select folderDoc.fullName from XWikiDocument folderDoc, BaseObject folderObj where folderDoc.space = :space and folderObj.name = folderDoc.fullName and folderObj.className = 'FileManagerCode.FolderClass'")
-#set ($hasNoParent = "(doc.parent = '' or (doc.parent &lt;&gt; :parent and doc.parent not in ($selectAllFoldersFromDriveHQL)))")
-
 #macro (handleDriveWebServiceRequest)
   #if ($request.action)
     #if ($services.csrf.isTokenValid($request.form_token))
@@ -78,7 +74,7 @@
     #elseif ($request.data == 'allFiles')
       #getAllFiles
     #elseif ($request.data == 'orphanFolders')
-      #getOrphanFolders
+      #getOrphanFolders($data)
     #elseif ($request.data == 'orphanFiles')
       #getOrphanFiles
     #elseif ($request.data == 'activeJobs')
@@ -86,7 +82,7 @@
     #elseif ($request.data == 'jobStatus')
       #getJobStatus($request.id $data)
     #else
-      #getDrive
+      #getDrive($doc $data)
     #end
     #if ($data)
       #set ($discard = $response.setContentType('application/json'))
@@ -159,11 +155,6 @@
   #setVariable("$return" $downloadDoc)
 #end
 
-#macro (getOrphanFolders)
-  #set ($statement = "from doc.object(FileManagerCode.FolderClass) as folder where doc.space = :space and $hasNoParent")
-  #getFolders($statement {'space': $doc.space, 'parent': $doc.fullName} $data)
-#end
-
 #macro (getAllFiles)
   #set ($parameters = {'space': $doc.space})
   #getFilesStatement('' 'doc.space = :space' $parameters $statement)
@@ -179,18 +170,6 @@
   #getFiles($statement $parameters $data)
 #end
 
-#macro (getDrive)
-  #if ($doc.title != '')
-    #set ($name = $doc.plainTitle)
-  #else
-    #set ($name = $doc.space)
-  #end
-  #set ($data = {
-    'id': $doc.name,
-    'name': $name
-  })
-#end
-
 #macro (displayDrive)
   {{html clean="false"}}
   #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
@@ -202,7 +181,8 @@
       &lt;tr&gt;
         &lt;td class="pane left"&gt;
           &lt;div class="pane-content"&gt;
-            &lt;drive-tree drive="drive"&gt;&lt;/drive-tree&gt;
+            #set ($sourceURL = $doc.getURL('get', 'sheet=FileManagerCode.DriveTree&amp;outputSyntax=plain'))
+            &lt;drive-tree drive="drive" data-url="$sourceURL"&gt;&lt;/drive-tree&gt;
           &lt;/div&gt;
         &lt;/td&gt;
         &lt;td class="pane-splitter-handler"&gt;
@@ -210,7 +190,7 @@
         &lt;/td&gt;
         &lt;td class="pane right"&gt;
           &lt;div class="pane-content"&gt;
-            &lt;files ng-if="drive.location.type == 'folder' || drive.location.type == 'files'" drive="drive"&gt;&lt;/files&gt;
+            &lt;files ng-if="['drive', 'folder', 'files'].indexOf(drive.location.type) &gt;= 0" drive="drive"&gt;&lt;/files&gt;
             #maybeDisplayJobs
           &lt;/div&gt;
         &lt;/td&gt;
@@ -253,7 +233,7 @@
   ])
   {{ selectedFiles = getSelectedFiles(selection) | hide }}
   &lt;div ng-show="drive.viewer == 'files'" class="btn-toolbar file-actions" role="toolbar"&gt;
-    &lt;div class="btn-group" ng-show="drive.location.type == 'folder'"&gt;
+    &lt;div class="btn-group" ng-show="drive.location.type == 'drive' || drive.location.type == 'folder'"&gt;
       &lt;button class="btn btn-default" ng-disabled="drive.readOnly" ng-click="drive.viewer = 'upload'"
           title="Upload a new file to the current folder" type="button"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_add.png')" alt="New File" class="icon" /&gt;New File
@@ -279,7 +259,8 @@
         &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_copy.png')" alt="Copy" class="icon" /&gt;Copy
       &lt;/button&gt;
       &lt;button type="button" class="btn btn-default" title="Paste into the current folder"
-          ng-if="drive.location.type == 'folder'" ng-disabled="!clipboard" ng-click="paste()"&gt;
+          ng-if="drive.location.type == 'drive' || drive.location.type == 'folder'"
+          ng-disabled="!clipboard" ng-click="paste()"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_paste.png')" alt="Paste" class="icon" /&gt;Paste
       &lt;/button&gt;
     &lt;/div&gt;&lt;div class="btn-group"&gt;
@@ -548,7 +529,7 @@
 #set ($angularVersion = '1.2.25')
 #set ($angularFileUploadVersion = '1.6.1')
 #set ($angularUIBootstrapVersion = '0.11.0')
-#set ($jstreeVersion = '3.0.4')
+#set ($jsTreeVersion = '3.0.4')
 */
 require.config({
   paths: {
@@ -573,9 +554,11 @@ require.config({
       '$!services.webjars.url("angular-file-upload/$angularFileUploadVersion/angular-file-upload.min.js")'
     ],
     jsTree: [
-      '//cdnjs.cloudflare.com/ajax/libs/jstree/$jstreeVersion/jstree.min',
-      '$!services.webjars.url("jstree/$jstreeVersion/jstree.min.js")'
+      '//cdnjs.cloudflare.com/ajax/libs/jstree/$jsTreeVersion/jstree.min',
+      '$!services.webjars.url("jstree/$jsTreeVersion/jstree.min.js")'
     ],
+    JobRunner: "$xwiki.getAttachmentURL('FileManagerCode.JobRunner', 'jobRunner.min')",
+    xtree: "$xwiki.getAttachmentURL('FileManagerCode.TreeWidget', 'tree.min')",
     pagination: '$xwiki.getURL("FileManagerCode.Pagination", "jsx", "language=$xcontext.language")',
     liveTable: '$xwiki.getURL("FileManagerCode.LiveTable", "jsx", "language=$xcontext.language")',
     liveTableFilters: '$xwiki.getURL("FileManagerCode.LiveTableFilter", "jsx", "language=$xcontext.language")',
@@ -601,16 +584,20 @@ require.config({
   }
 });
 
-(function loadCss(url) {
-  var link = document.createElement("link");
-  link.type = "text/css";
-  link.rel = "stylesheet";
-  link.href = url;
-  document.getElementsByTagName("head")[0].appendChild(link);
-// We load the CSS only from CDN due to XWIKI-10674 (Cannot load CSS files from webjars).
-})('//cdnjs.cloudflare.com/ajax/libs/jstree/$jstreeVersion/themes/default/style.min.css');
+(function loadCss(urls) {
+  for (var i = 0; i &lt; urls.length; i++) {
+    var link = document.createElement("link");
+    link.type = "text/css";
+    link.rel = "stylesheet";
+    link.href = urls[i];
+    document.getElementsByTagName("head")[0].appendChild(link);
+  }
+})([
+  '//cdnjs.cloudflare.com/ajax/libs/jstree/$jsTreeVersion/themes/default/style.min.css',
+  "$xwiki.getAttachmentURL('FileManagerCode.TreeWidget', 'tree.min.css')"
+]);
 
-require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveTable', 'jsTree', 'fileUpload'], function($, angular) {</code>
+require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-bootstrap', 'fileUpload', 'xtree', 'liveTable'], function($, angular, JobRunner) {</code>
     </property>
     <property>
       <name>Require Start &amp; Configuration</name>
@@ -1064,10 +1051,48 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
         });
       }
     };
+  });
+
+  driveServices.factory('DriveJob', function() {
+    var jobServiceURL = XWiki.currentDocument.getURL('get', 'outputSyntax=plain');
+    var jobRunner = new JobRunner({
+      createStatusRequest: function(jobId) {
+        return {
+          url: jobServiceURL,
+          data: {
+            id: jobId,
+            data: 'jobStatus'
+          }
+        };
+      },
+      createAnswerRequest: function(jobId, data) {
+        return {
+          url: jobServiceURL,
+          data: $.extend({}, data, {
+            id: jobId,
+            action: 'answer',
+            form_token: formToken
+          })
+        };
+      }
+    });
+
+    return {
+      run: function(action, data) {
+        data = data || {};
+        data.action = action;
+        data.form_token = formToken;
+        // We pass the serialized data because we want the traditional serialization mode.
+        return jobRunner.run(jobServiceURL, $.param(data, true));
+      },
+      resume: function(jobId) {
+        return jobRunner.resume(jobId);
+      }
+    };
   });</code>
     </property>
     <property>
-      <name>Services: Drive, Folder, File, User, FileTree</name>
+      <name>Services: Drive, Folder, File, User, FileTree, DriveJob</name>
     </property>
     <property>
       <parse>1</parse>
@@ -1655,9 +1680,8 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
         };
 
         scope.paste = function() {
-          scope.drive[scope.clipboard.action](scope.clipboard.paths, scope.drive.location.id, {
-            finished: refreshLiveTable
-          });
+          scope.drive[scope.clipboard.action](scope.clipboard.paths, scope.drive.location.id)
+            .done(refreshLiveTable);
           if (scope.clipboard.action == 'move') {
             delete scope.clipboard;
           }
@@ -1692,14 +1716,13 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
             // Don't allow slash character inside the file name and make sure the file name is really changed.
             if (this.value != rowScope.row.name &amp;&amp; this.value.indexOf('/') &lt; 0) {
               var oldName = rowScope.row.name;
-              scope.drive.move(['/' + rowScope.row.id], '/' + this.value, {
-                finished: refreshLiveTable,
-                failed: function() {
+              scope.drive.move(['/' + rowScope.row.id], '/' + this.value)
+                .done(refreshLiveTable)
+                .fail(function() {
                   // Revert the rename.
                   rowScope.row.name = oldName;
                   rowScope.$apply();
-                }
-              });
+                });
               // Visual rename, until we get confirmation from the server.
               rowScope.row.name = this.value;
               rowScope.$apply();
@@ -1739,7 +1762,7 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
           if (window.confirm('Are you sure you want to delete the selected files?')) {
             // Clear the selection.
             scope.selection = {};
-            scope.drive['delete'](getPaths(files), {finished: refreshLiveTable});
+            scope.drive['delete'](getPaths(files)).done(refreshLiveTable);
           }
         };
       }
@@ -2017,183 +2040,9 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
     <property>
       <code>  var driveDirectives = angular.module('driveDirectives');
 
-  driveDirectives.directive('driveTree', ['$location', 'Drive', 'Folder', function($location, Drive, Folder) {
+  driveDirectives.directive('driveTree', ['$location', function($location) {
     var isDrive = function(node) {
       return node.id == XWiki.currentPage;
-    };
-
-    var isFolder = function(node) {
-      return !!node.data &amp;&amp; node.data.type == 'folder';
-    };
-
-    var getChildren = function(node, callback) {
-      // 'this' is the tree instance.
-      callback = angular.bind(this, callback);
-      if (node.id == '#') {
-        getRootNode(callback);
-      } else if (isDrive(node)) {
-        getDriveChildNodes(callback);
-      } else if (node.id == '/orphanFolders') {
-        Drive.getOrphanFolders({}, getChildrenCallback(callback));
-      } else if (isFolder(node)) {
-        Folder.getFolders({page: node.id}, getChildrenCallback(callback));
-      } else {
-        callback([]);
-      }
-    };
-
-    var getChildrenCallback = function(callback) {
-      return function(folders) {
-        callback(asFolderNodes(folders.list));
-      };
-    };
-
-    var getMetaNodes = function() {
-      return [
-        {
-          id: '/allFiles',
-          text: 'All Files',
-          icon: '$xwiki.getSkinFile("icons/silk/page_white_stack.png")',
-          state: {
-            selected: false
-          },
-          data: {
-            type: 'files'
-          }
-        },
-        {
-          id: '/tasks',
-          text: 'Tasks',
-          icon: '$xwiki.getSkinFile("icons/silk/clock.png")',
-          state: {
-            selected: false
-          },
-          data: {
-            type: 'jobs'
-          }
-        },
-        {
-          id: '/orphanFolders',
-          text: 'Orphan Folders',
-          icon: '$xwiki.getSkinFile("icons/silk/folder_error.png")',
-          state: {
-            selected: false
-          },
-          children: true,
-          data: {
-            type: 'folders'
-          }
-        },
-        {
-          id: '/orphanFiles',
-          text: 'Orphan Files',
-          icon: '$xwiki.getSkinFile("icons/silk/page_white_error.png")',
-          state: {
-            selected: false
-          },
-          data: {
-            type: 'files'
-          }
-        }
-      ];
-    };
-
-    var getRootNode = function(callback) {
-      Drive.get({}, function(drive) {
-        callback({
-          id: drive.id,
-          text: drive.name,
-          icon: '$xwiki.getSkinFile("icons/silk/drive.png")',
-          state: {
-            opened: true,
-            selected: false
-          },
-          children: true,
-          data: {
-            type: 'folder'
-          }
-        });
-      });
-    };
-
-    var getDriveChildNodes = function(callback) {
-      var childNodes, metaNodes = getMetaNodes();
-      Drive.getFolders({}).$promise
-        .then(function(folders) {
-          // Add only the 'All Files' and 'Tasks' nodes for now.
-          childNodes = asFolderNodes(folders.list).concat(metaNodes.slice(0, 2));
-          return Drive.getOrphanFolders({limit: 1}).$promise;
-        })
-        .then(function(orphanFolders) {
-          // Add the 'Orphan Folders' node if needed.
-          orphanFolders.totalCount &gt; 0 &amp;&amp; childNodes.splice(-2, 0, metaNodes[2]);
-          return Drive.getOrphanFiles({limit: 1}).$promise;
-        })
-        .then(function(orphanFiles) {
-          // Add the 'Orphan Files' node if needed.
-          orphanFiles.totalCount &gt; 0 &amp;&amp; childNodes.splice(-1, 0, metaNodes[3]);
-          callback(childNodes);
-        });
-    };
-
-    var asFolderNodes = function(folders) {
-      var folderNodes = [];
-      for (var i = 0; i &lt; folders.length; i++) {
-        folderNodes.push(asFolderNode(folders[i]));
-      }
-      return folderNodes;
-    };
-
-    var asFolderNode = function(folder) {
-      folder.type = 'folder';
-      return {
-        id: folder.id,
-        text: folder.name,
-        icon: '$xwiki.getSkinFile("icons/silk/folder.png")',
-        state: {
-          selected: false
-        },
-        children: !!folder.id &amp;&amp; folder.hasFolders !== false,
-        data: folder
-      }
-    };
-
-    var selectNode = function(tree, nodeId) {
-      // We don't allow multiple selection.
-      tree.deselect_all(true);
-      if (tree.get_node(nodeId)) {
-        // The specified node is already loaded in the tree.
-        tree.select_node(nodeId);
-      } else {
-        // The specified node must be a folder. We need to get the folder path in order to load all its ancestors.
-        Folder.get({'page': nodeId}, function(folder) {
-          if (folder &amp;&amp; folder.path) {
-            var path = folder.path.slice().reverse();
-            path.push(folder.id);
-            selectPath(tree, path, true);
-          }
-        });
-      }
-    };
-
-    var selectPath = function(tree, path, isRoot) {
-      if (path.length &gt; 0) {
-        if (tree.get_node(path[0])) {
-          // The specified node is already loaded in the tree.
-          if (path.length &gt; 1) {
-            tree.open_node(path[0], function() {
-              selectPath(tree, path.slice(1));
-            });
-          } else {
-            tree.select_node(path[0]);
-          }
-        } else if (isRoot) {
-          // Probably an orphan (root) folder.
-          tree.open_node('/orphanFolders', function() {
-            selectPath(tree, path);
-          });
-        }
-      }
     };
 
     var defaultViewerByNodeType = {
@@ -2210,206 +2059,14 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
         drive: '='
       },
       link: function(scope, element, attrs) {
-        var isReadOnly = function() {return scope.drive.readOnly;};
-
-        var folderMenu = {
-          createFolder: {
-            label: 'New Folder',
-            icon: '$xwiki.getSkinFile("icons/silk/folder_add.png")',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var parent = tree.get_node(data.reference);
-              tree.create_node(parent, asFolderNode({name: 'New Folder'}), 'last', function(newNode) {
-                setTimeout(function() {
-                  tree.edit(newNode);
-                }, 0);
-              });
-            },
-            __disabled: isReadOnly
-          },
-          createFile: {
-            label: 'New File',
-            icon: '$xwiki.getSkinFile("icons/silk/page_white_add.png")',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              tree.deselect_all(true);
-              tree.select_node(node);
-              setTimeout(function() {
-                scope.drive.viewer = 'upload';
-                scope.$apply();
-              }, 0);
-            },
-            __disabled: isReadOnly
-          },
-          open: {
-            separator_before: true,
-            label: 'Open',
-            icon: '$xwiki.getSkinFile("icons/silk/application_view_list.png")',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              window.location = new XWiki.Document(node.id).getURL();
-            }
-          },
-          openInNewTab: {
-            label: 'Open in New Tab',
-            icon: '$xwiki.getSkinFile("icons/silk/application_double.png")',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              window.open(new XWiki.Document(node.id).getURL());
-            }
-          },
-          refresh: {
-            label: 'Refresh',
-            icon: '$xwiki.getSkinFile("icons/silk/arrow_refresh.png")',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              tree.refresh_node(node);
-            }
-          },
-          download: {
-            separator_before: true,
-            label: 'Download',
-            icon: '$xwiki.getSkinFile("icons/silk/page_white_put.png")',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              scope.drive.download(node.id);
-            }
-          },
-          cut: {
-            separator_before: true,
-            label: 'Cut',
-            icon: '$xwiki.getSkinFile("icons/silk/cut.png")',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              tree.cut(node);
-            }
-          },
-          copy: {
-            label: 'Copy',
-            icon: '$xwiki.getSkinFile("icons/silk/page_white_copy.png")',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              tree.copy(node);
-            }
-          },
-          paste: {
-            label: 'Paste Into Folder',
-            icon: '$xwiki.getSkinFile("icons/silk/page_white_paste.png")',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              tree.paste(node);
-            },
-            __disabled: function(node) {
-              return scope.drive.readOnly || !this.can_paste();
-            }
-          },
-          rename: {
-            separator_before: true,
-            icon: '$xwiki.getSkinFile("icons/silk/textfield_rename.png")',
-            label: 'Rename...',
-            action: function(data) {
-              var tree = $.jstree.reference(data.reference);
-              var node = tree.get_node(data.reference);
-              setTimeout(function() {tree.edit(node);}, 0);
-            },
-            __disabled: isReadOnly
-          },
-          'delete': {
-            label: 'Delete',
-            icon: '$xwiki.getSkinFile("icons/silk/cross.png")',
-            action: function(data) {
-              // Display the confirmation after the context menu closes.
-              setTimeout(function() {
-                if (window.confirm('Are you sure you want to delete this folder?')) {
-                  var tree = $.jstree.reference(data.reference);
-                  var node = tree.get_node(data.reference);
-                  tree.deselect_node(node);
-                  tree.delete_node(node);
-                }
-              }, 0);
-            },
-            __disabled: isReadOnly
-          }
-        };
-
-        var driveMenu = {
-          createFolder: folderMenu.createFolder,
-          createFile: folderMenu.createFile,
-          refresh: folderMenu.refresh,
-          download: angular.copy(folderMenu.download),
-          paste: angular.copy(folderMenu.paste)
-        };
-        driveMenu.refresh.separator_before = true;
-        driveMenu.paste.label = 'Paste';
-        driveMenu.paste.separator_before = true;
-
-        $(element).jstree({
-          core: {
-            data: getChildren,
-            'check_callback' : function (operation, node, parent, position, more) {
-              // Allow operations only on regular folders (drive node excluded). The target parent must be a folder or
-              // the drive itself (which acts like a folder), unless the operation is delete in which case we only care
-              // that the deleted node is a regular folder (not the drive).
-              return (!scope.drive.readOnly &amp;&amp; isFolder(node) &amp;&amp; !isDrive(node)
-                &amp;&amp; (operation == 'delete_node' || isFolder(parent)));
-            },
-            multiple: false
-          },
-          plugins: ['dnd', 'contextmenu'],
-          contextmenu: {
-            select_node: false,
-            items: function(node, callback) {
-              var menu;
-              if (!node.data) {
-                // No context menu.
-              } else if (isDrive(node)) {
-                menu = driveMenu;
-              } else if (isFolder(node)) {
-                menu = folderMenu;
-              }
-              if (menu) {
-                for (var item in menu) {
-                  var menuItem = menu[item];
-                  if (typeof menuItem.__disabled == 'function') {
-                    menuItem._disabled = menuItem.__disabled.call(this, node);
-                  }
-                }
-              }
-              return menu;
-            }
-          },
-          dnd: {
-            is_draggable: function(nodes) {
-              if (scope.drive.readOnly) {
-                return false;
-              } else {
-                // Only folder nodes can be dragged.
-                for (var i = 0; i &lt; nodes.length; i++) {
-                  var node = nodes[i];
-                  if (!isFolder(node) || isDrive(node)) {
-                    return false;
-                  }
-                }
-              }
-              return true;
-            }
-          }
-
+        $(element).xtree()
         // Select the node specified on the request URL after the tree is loaded. We tried to listen to the
         // 'ready.jstree' event but it is fired before the drive child nodes are fetched. As a workaround we listen once
         // to the 'after_open.jstree' event, knowing that the drive node is the first tree node that will be opened.
-        }).one('after_open.jstree', function(event, data) {
+        .one('after_open.jstree', function(event, data) {
           if (isDrive(data.node)) {
             // The drive node has been opened.
-            selectNode(data.instance, $location.search()['driveNode'] || '/allFiles');
+            data.instance.openTo($location.search()['driveNode'] || '/allFiles');
           }
 
         }).on('select_node.jstree deselect_node.jstree', function(event, data) {
@@ -2435,90 +2092,36 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
             })
           }, 0);
 
-        }).on('create_node.jstree', function(event, data) {
-          // We don't create the folder now because we want the user to specify the folder name. The folder will be
-          // created when the user 'renames' the node that has been created with the default folder name ('New Folder').
+        }).on('xtree.contextMenu.download', function(event, data) {
+          var tree = $.jstree.reference(data.reference);
+          scope.drive.download(tree.get_selected());
+          scope.$apply();
 
-        }).on('delete_node.jstree', function(event, data) {
-          // Make sure the deleted tree node has an associated folder.
-          var folderId = data.node.data.id;
-          folderId &amp;&amp; scope.drive['delete']([folderId], {
-            failed: function(response) {
-              data.instance.refresh_node(data.node.parent);
-            }
-          });
+        }).on('xtree.contextMenu.createFile', function(event, data) {
+          var tree = $.jstree.reference(data.reference);
+          var node = tree.get_node(data.reference);
+          tree.deselect_all(true);
+          tree.select_node(node);
+          setTimeout(function() {
+            scope.drive.viewer = 'upload';
+            scope.$apply();
+          }, 0);
 
-        }).on('rename_node.jstree', function(event, data) {
-          var folderId = data.node.data.id;
-          if (folderId) {
-            // Rename a node that has a corresponding folder.
-            if (data.old != data.text) {
-              var refreshParent = function() {
-                data.instance.refresh_node(data.node.parent);
-              };
-              scope.drive.move([folderId], data.node.parent + '/' + data.text, {
-                finished: refreshParent,
-                failed: refreshParent
-              });
-            }
-          } else {
-            // Create a new folder.
-            scope.drive.createFolder(data.node.text, data.node.parent, function(folder) {
-              data.instance.set_id(data.node, folder.id);
-              data.node.data = folder;
-              data.node.data.type = 'folder';
-            }, function(response) {
-              data.instance.delete_node(data.node);
-            });
-          }
-
-        }).on('move_node.jstree', function(event, data) {
-          var folder = data.node.data;
-          // Don't trigger the server-side move unless the tree node has a folder associated.
-          if (!folder.id || data.parent == data.old_parent) {
-            return;
-          }
-          scope.drive.move([folder.id], data.parent, {
-            finished: function(job) {
-              // Refresh the new parent node.
-              data.instance.refresh_node(data.parent);
-            },
-            failed: function(response) {
-              // Undo the move.
-              // Disconnect the node from the associated folder to prevent moving the folder.
-              var folderId = folder.id;
-              folder.id = null;
-              data.instance.move_node(data.node, data.old_parent, data.old_position);
-              // Reconnect the tree node to the folder as soon as possible.
-              setTimeout(function() {folder.id = folderId;}, 0);
-            }
-          });
-
-        }).on('copy_node.jstree', function(event, data) {
-          var folder = data.original.data;
-          // Don't trigger the server-side move unless the tree node has a folder associated.
-          if (!folder.id) {
-            return;
-          }
-          // Mark the copy as folder to be able to delete it in case of error.
-          data.node.data = {type: 'folder'};
-          scope.drive.copy([folder.id], data.parent, {
-            finished: function(job) {
-              // Refresh the new parent node.
-              data.instance.refresh_node(data.parent);
-            },
-            failed: function(response) {
-              // Undo the copy.
-              data.instance.delete_node(data.node);
-            }
+        }).on('xtree.runJob', function(event, promise) {
+          promise.progress(function(job) {
+            scope.drive.updateJob(job);
+            scope.$apply();
           });
         });
 
         scope.$on('$locationChangeSuccess', function(event) {
           // Update the selected tree node when the location changes (if the tree is loaded).
           var tree = $(element).jstree(true);
-          var nodeId = $location.search()['driveNode'] || '/allFiles';
-          tree &amp;&amp; tree.get_node('/allFiles') &amp;&amp; selectNode(tree, nodeId);
+          var nodeId = $location.search()['driveNode'];
+          if (tree &amp;&amp; nodeId &amp;&amp; tree.get_node('/allFiles')) {
+            tree.deselect_all();
+            tree.openTo(nodeId);
+          }
         });
       }
     };
@@ -2717,7 +2320,7 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
     <property>
       <code>  var drive = angular.module('drive', ['driveServices', 'driveFilters', 'driveDirectives', 'driveControllers']);
 
-  drive.controller('DriveCtrl', ['$scope', 'Drive', 'Folder', function ($scope, Drive, Folder) {
+  drive.controller('DriveCtrl', ['$scope', 'Drive', 'Folder', 'DriveJob', function ($scope, Drive, Folder, DriveJob) {
     var asSource = function(service) {
       return {get: service};
     };
@@ -2736,35 +2339,23 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
       }
     };
 
-    var runJob = function(type, data, callback) {
+    var runJob = function(type, data) {
       $scope.drive.readOnly = true;
-
-      var onJobUpdate = function(job) {
-        if (job &amp;&amp; job.id) {
+      // We have to schedule a scope update immediately after the state of the promise changes.
+      var scheduleScopeUpdate = function() {
+        setTimeout(function() {
+          $scope.$apply();
+        }, 0);
+      };
+      return DriveJob.run(type, data)
+        .progress(function(job) {
           updateJob(job);
-          if (job.state == 'FINISHED') {
-            $scope.drive.readOnly = false;
-            callback &amp;&amp; typeof callback.finished == 'function' &amp;&amp; callback.finished(job);
-          } else if (job.state == 'WAITING') {
-            callback &amp;&amp; typeof callback.waiting == 'function' &amp;&amp; callback.waiting(job);
-          } else {
-            callback &amp;&amp; typeof callback.running == 'function' &amp;&amp; callback.running(job);
-            // The job is still running. Wait 1s before asking for a job status update.
-            setTimeout(function() {
-              Drive.getJobStatus({id: job.id}, onJobUpdate, onError);
-            }, 1000);
-          }
-        } else {
-          onError(job);
-        }
-      }
-
-      var onError = function(response) {
-        $scope.drive.readOnly = false;
-        callback &amp;&amp; typeof callback.failed == 'function' &amp;&amp; callback.failed(response);
-      }
-
-      return Drive[type]({}, $.param(data, true), onJobUpdate, onError);
+          scheduleScopeUpdate();
+        })
+        .always(function() {
+          $scope.drive.readOnly = false;
+          scheduleScopeUpdate();
+        });
     };
 
     $scope.drive = {
@@ -2778,6 +2369,7 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
       viewer: null,
 
       jobs: [],
+      updateJob: updateJob,
 
       uploads: {
         pending: [],
@@ -2796,8 +2388,6 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
         }
       },
 
-      createFile: function() {},
-
       createFolder: function(name, parent, onSuccess, onError) {
         Drive.createFolder({}, $.param({
           name: name,
@@ -2805,31 +2395,30 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
         }), onSuccess, onError);
       },
 
-      move: function(paths, destination, callback) {
-        runJob('move', {
+      move: function(paths, destination) {
+        return runJob('move', {
           path: paths,
           destination: destination
-        }, callback);
+        });
       },
 
-      copy: function(paths, destination, callback) {
-        runJob('copy', {
+      copy: function(paths, destination) {
+        return runJob('copy', {
           path: paths,
           destination: destination
-        }, callback);
+        });
       },
 
-      'delete': function(paths, callback) {
-        runJob('delete', {path: paths}, callback);
+      'delete': function(paths) {
+        return runJob('delete', {path: paths});
       },
 
       download: function(paths, outputFileName) {
         this.viewer = 'downloads';
-        runJob('download', {path: paths, name: outputFileName}, {
-          finished: function(job) {
+        return runJob('download', {path: paths, name: outputFileName})
+          .done(function(job) {
             window.location = job.request.outputFile.url;
-          }
-        });
+          });
       }
     };
   }]);
@@ -3043,17 +2632,6 @@ require(['jquery', 'angular', 'angular-resource', 'angular-ui-bootstrap', 'liveT
  */
 drive-tree {
   display: block;
-}
-.jstree ul.jstree-children {
- /* Overwrite the margin from the XWiki skin. */
-  margin: 0;
-}
-.jstree-contextmenu {
-  z-index: 100;
-}
-.jstree-contextmenu a * {
-  /* Overwrite the line height from the XWiki skin. */
-  line-height: inherit;
 }
 /* Display the root node differently. */
 .jstree &gt; .jstree-children &gt; .jstree-node &gt; .jstree-icon {
