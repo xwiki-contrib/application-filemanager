@@ -182,7 +182,8 @@
         &lt;td class="pane left"&gt;
           &lt;div class="pane-content"&gt;
             #set ($sourceURL = $doc.getURL('get', 'sheet=FileManagerCode.DriveTree&amp;outputSyntax=plain'))
-            &lt;drive-tree drive="drive" data-url="$sourceURL"&gt;&lt;/drive-tree&gt;
+            &lt;drive-tree drive="drive" data-url="$sourceURL" data-responsive="true"
+              data-dragAndDrop="true" data-contextMenu="true"&gt;&lt;/drive-tree&gt;
           &lt;/div&gt;
         &lt;/td&gt;
         &lt;td class="pane-splitter-handler"&gt;
