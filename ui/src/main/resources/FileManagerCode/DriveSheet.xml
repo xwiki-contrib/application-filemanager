@@ -2817,6 +2817,7 @@ ul.uploads,
 ul.downloads {
   list-style-type: none;
   margin: 1em 0 .5em 0;
+  padding: 0; /* Overwrite Flamingo skin */
 }
 ul.uploads li.uploads-pending {
   color: $theme.textSecondaryColor;
@@ -2918,6 +2919,7 @@ li.download img.icon {
 ul.jobs {
   list-style-type: none;
   margin: 0;
+  padding: 0; /* Overwrite Flamingo skin */
 }
 ul.jobs li.job + li.job {
   border-top: 1px dashed $theme.borderColor;
