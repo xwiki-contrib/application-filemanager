@@ -42,6 +42,7 @@
   <content>{{include reference="FileManagerCode.Macros" /}}
 
 {{velocity output="false"}}
+$xwiki.ssfx.use('uicomponents/pagination/pagination.css', 'true')
 #macro (handleDriveWebServiceRequest)
   #if ($request.action)
     #if ($services.csrf.isTokenValid($request.form_token))
