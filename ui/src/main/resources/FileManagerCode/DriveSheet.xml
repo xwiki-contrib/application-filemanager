@@ -788,7 +788,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
         // server since it is used for comments).
         return avatarURL + '?width=50';
       } else {
-        return '$xwiki.getSkinFile("/icons/xwiki/noavatar.png")';
+        return '$xwiki.getSkinFile("icons/xwiki/noavatar.png")';
       }
     };
 

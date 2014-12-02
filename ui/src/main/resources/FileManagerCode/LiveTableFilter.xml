@@ -859,7 +859,7 @@
  */
 input.user-filter {
   padding-left: 20px !important;
-  background: transparent url('$xwiki.getSkinFile("/icons/xwiki/noavatar.png")') no-repeat 2px center;
+  background: transparent url('$xwiki.getSkinFile("icons/xwiki/noavatar.png")') no-repeat 2px center;
   background-size: 16px;
 }
 
