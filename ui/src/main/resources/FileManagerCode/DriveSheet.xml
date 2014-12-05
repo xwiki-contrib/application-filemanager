@@ -445,6 +445,7 @@
     #displayDrive
   #end
 #end
+#set($docextras=[])
 {{/velocity}}</content>
   <object>
     <name>FileManagerCode.DriveSheet</name>
