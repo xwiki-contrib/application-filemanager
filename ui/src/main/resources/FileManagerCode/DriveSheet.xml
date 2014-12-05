@@ -2647,6 +2647,7 @@ drive-tree {
  * Pane Splitter
  */
 table.pane-splitter {
+  border: 1px solid $theme.borderColor;
   border-collapse: collapse;
   table-layout: fixed;
   width: 100%;
