@@ -174,7 +174,7 @@
       <parameters>#set ($discard = $services.localization.use('document', 'FileManager.FileManagerTranslations'))
 label=$services.localization.render("filemanager.appname")
 target=FileManager.WebHome
-icon=icon:folder_page</parameters>
+icon=icon:folder</parameters>
     </property>
     <property>
       <scope>wiki</scope>
