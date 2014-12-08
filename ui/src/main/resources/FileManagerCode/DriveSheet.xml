@@ -42,7 +42,6 @@
   <content>{{include reference="FileManagerCode.Macros" /}}
 
 {{velocity output="false"}}
-$xwiki.ssfx.use('uicomponents/pagination/pagination.css', 'true')
 #macro (handleDriveWebServiceRequest)
   #if ($request.action)
     #if ($services.csrf.isTokenValid($request.form_token))
@@ -174,6 +173,7 @@ $xwiki.ssfx.use('uicomponents/pagination/pagination.css', 'true')
 #macro (displayDrive)
   {{html clean="false"}}
   #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
+  #set ($discard = $xwiki.ssfx.use('uicomponents/pagination/pagination.css', 'true'))
   #set ($discard = $xwiki.ssx.use('FileManagerCode.LiveTableFilter'))
   #set ($discard = $xwiki.ssx.use('FileManagerCode.DriveSheet'))
   #set ($discard = $xwiki.jsx.use('FileManagerCode.DriveSheet'))
