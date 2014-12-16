@@ -172,6 +172,10 @@
 
 #macro (displayDrive)
   {{html clean="false"}}
+  #set ($discard = $xwiki.ssx.use('FileManagerCode.TreeWidget'))
+  ## We can use this instead if WebJars are supported.
+  ## #set ($discard = $xwiki.linkx.use($services.webjars.url('org.xwiki.platform:xwiki-platform-tree-webjar',
+  ##   'tree.min.css', {'evaluate': true}), {'type': 'text/css', 'rel': 'stylesheet'}))
   #set ($discard = $xwiki.ssfx.use('js/xwiki/table/livetable.css', true))
   #set ($discard = $xwiki.ssfx.use('uicomponents/pagination/pagination.css', 'true'))
   #set ($discard = $xwiki.ssx.use('FileManagerCode.LiveTableFilter'))
@@ -183,8 +187,8 @@
         &lt;td class="pane left"&gt;
           &lt;div class="pane-content"&gt;
             #set ($sourceURL = $doc.getURL('get', 'sheet=FileManagerCode.DriveTree&amp;outputSyntax=plain'))
-            &lt;drive-tree drive="drive" data-url="$sourceURL" data-responsive="true"
-              data-dragAndDrop="true" data-contextMenu="true"&gt;&lt;/drive-tree&gt;
+            &lt;drive-tree drive="drive" class="jstree-no-links" data-url="$sourceURL" data-responsive="true"
+              data-icons="true" data-edges="true" data-dragAndDrop="true" data-contextMenu="true"&gt;&lt;/drive-tree&gt;
           &lt;/div&gt;
         &lt;/td&gt;
         &lt;td class="pane-splitter-handler"&gt;
@@ -529,36 +533,36 @@
     </property>
     <property>
       <code>/*
-#set ($angularVersion = '1.2.25')
+#set ($angularVersion = '1.2.27')
 #set ($angularFileUploadVersion = '1.6.1')
-#set ($angularUIBootstrapVersion = '0.11.0')
-#set ($jsTreeVersion = '3.0.4')
+#set ($angularUIBootstrapVersion = '0.12.0')
+#set ($jsTreeVersion = '3.0.8')
 */
 require.config({
   paths: {
     angular: [
       '//ajax.googleapis.com/ajax/libs/angularjs/$angularVersion/angular.min',
-      '$!services.webjars.url("angularjs/$angularVersion/angular.min.js")'
+      "$!services.webjars.url('angularjs', 'angular.min.js')"
     ],
     'angular-resource': [
       '//ajax.googleapis.com/ajax/libs/angularjs/$angularVersion/angular-resource.min',
-      '$!services.webjars.url("angularjs/$angularVersion/angular-resource.min.js")'
+      "$!services.webjars.url('angularjs', 'angular-resource.min.js')"
     ],
     'angular-ui-bootstrap': [
       '//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/$angularUIBootstrapVersion/ui-bootstrap-tpls.min',
-      '$!services.webjars.url("angular-ui-bootstrap/$angularUIBootstrapVersion/ui-bootstrap-tpls.min.js")'
+      "$!services.webjars.url('angular-ui-bootstrap', 'ui-bootstrap-tpls.min.js')"
     ],
     fileUploadHTML5Shim: [
       '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/$angularFileUploadVersion/angular-file-upload-html5-shim.min',
-      '$!services.webjars.url("angular-file-upload/$angularFileUploadVersion/angular-file-upload-html5-shim.min.js")'
+      "$!services.webjars.url('angular-file-upload', 'angular-file-upload-html5-shim.min.js')"
     ],
     fileUpload: [
       '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/$angularFileUploadVersion/angular-file-upload.min',
-      '$!services.webjars.url("angular-file-upload/$angularFileUploadVersion/angular-file-upload.min.js")'
+      "$!services.webjars.url('angular-file-upload', 'angular-file-upload.min.js')"
     ],
     jsTree: [
       '//cdnjs.cloudflare.com/ajax/libs/jstree/$jsTreeVersion/jstree.min',
-      '$!services.webjars.url("jstree/$jsTreeVersion/jstree.min.js")'
+      "$!services.webjars.url('jstree', 'jstree.min.js')"
     ],
     JobRunner: "$xwiki.getAttachmentURL('FileManagerCode.JobRunner', 'jobRunner.min')",
     xtree: "$xwiki.getAttachmentURL('FileManagerCode.TreeWidget', 'tree.min')",
@@ -586,19 +590,6 @@ require.config({
     }
   }
 });
-
-(function loadCss(urls) {
-  for (var i = 0; i &lt; urls.length; i++) {
-    var link = document.createElement("link");
-    link.type = "text/css";
-    link.rel = "stylesheet";
-    link.href = urls[i];
-    document.getElementsByTagName("head")[0].appendChild(link);
-  }
-})([
-  '//cdnjs.cloudflare.com/ajax/libs/jstree/$jsTreeVersion/themes/default/style.min.css',
-  "$xwiki.getAttachmentURL('FileManagerCode.TreeWidget', 'tree.min.css')"
-]);
 
 require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-bootstrap', 'fileUpload', 'xtree', 'liveTable'], function($, angular, JobRunner) {</code>
     </property>
