@@ -226,7 +226,9 @@
   #set ($storedColumns = {
     'name': 'attach.filename',
     'size': 'attach.filesize',
+    'creationDate': 'doc.creationDate',
     'date': 'doc.date',
+    'creator': 'doc.creator',
     'author': 'doc.author'
   })
   #foreach ($entry in $storedColumns.entrySet())
@@ -236,7 +238,7 @@
       #if ($entry.key == 'name')
         #set ($where = "$where and lower($entry.value) like :$entry.key")
         #set ($discard = $parameters.put($entry.key, "%$filterValue.toLowerCase()%"))
-      #elseif ($entry.key == 'author')
+      #elseif ($entry.key == 'author' || $entry.key == 'creator')
         #set ($userReference = $services.model.resolveDocument($filterValue))
         #if ($filterValue == $services.model.serialize($userReference, 'compact', $userReference))
           ## Only the user alias is specified. Do partial matching.
@@ -247,7 +249,7 @@
           #set ($where = "$where and $entry.value = :$entry.key")
           #set ($discard = $parameters.put($entry.key, $filterValue))
         #end
-      #elseif ($entry.key == 'date')
+      #elseif ($entry.key == 'date' || $entry.key == 'creationDate')
         #filterByDate()
       #end
     #end
@@ -344,7 +346,9 @@
   #setVariable("$return" {
     'id': $fileDoc.name,
     'name': $attach.filename,
+    'creationDate': $fileDoc.creationDate,
     'date': $fileDoc.date,
+    'creator': $fileDoc.creator,
     'author': $fileDoc.author,
     'size': $attach.filesize,
     'mediaType': $attach.mimeType,

@@ -224,9 +224,21 @@
       'title': $services.localization.render('Type'),
       'type': 'mediaType'
     }, {
+      'id': 'creationDate',
+      'title': $services.localization.render('Created'),
+      'type': 'date',
+      'sortable': true,
+      'filterable': true
+    }, {
       'id': 'date',
       'title': $services.localization.render('Modified'),
       'type': 'date',
+      'sortable': true,
+      'filterable': true
+    }, {
+      'id': 'creator',
+      'title': $services.localization.render('Creator'),
+      'type': 'user',
       'sortable': true,
       'filterable': true
     }, {
