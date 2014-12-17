@@ -249,7 +249,7 @@
           ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="download(selectedFiles)"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_put.png')" alt="Download" class="icon" /&gt;Download
       &lt;/button&gt;
-      &lt;button type="button" class="btn btn-default dropdown-toggle"&gt;
+      &lt;button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle&gt;
         &lt;span class="caret"&gt;&lt;/span&gt;
       &lt;/button&gt;
       &lt;ul class="dropdown-menu" role="menu"&gt;
