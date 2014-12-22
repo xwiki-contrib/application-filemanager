@@ -33,6 +33,7 @@ import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -282,6 +283,30 @@ public class MoveJobTest extends AbstractJobTest
     }
 
     @Test
+    public void renameFolderUsingProtectedReference() throws Exception
+    {
+        mockFolder("Projects", null, Arrays.asList("Concerto"), Collections.<String>emptyList());
+        Folder folder = mockFolder("Concerto", "Projects", Arrays.asList("Specs"), Arrays.asList("readme.txt"));
+        Folder childFolder = mockFolder("Specs", "Concerto");
+        File childFile = mockFile("readme.txt", "Concerto");
+
+        DocumentReference newReference = ref("Resilience");
+        generateReference(newReference, newReference);
+        when(fileSystem.canEdit(newReference)).thenReturn(false);
+
+        MoveRequest request = new MoveRequest();
+        request.setPaths(Collections.singleton(new Path(folder.getReference())));
+        request.setDestination(new Path(null, newReference));
+
+        execute(request);
+
+        verify(mocker.getMockedLogger()).error("You are not allowed to create the folder [{}].", newReference);
+        verify(fileSystem, never()).rename(eq(folder), any(DocumentReference.class));
+        verify(fileSystem, never()).save(childFolder);
+        verify(fileSystem, never()).save(childFile);
+    }
+
+    @Test
     public void renameFolderUsingExistingName() throws Exception
     {
         Folder projects =
@@ -336,6 +361,25 @@ public class MoveJobTest extends AbstractJobTest
 
         verify(fileSystem, never()).rename(file, newReference);
         verify(mocker.getMockedLogger()).error("You are not allowed to rename the file [{}].", file.getReference());
+    }
+
+    @Test
+    public void renameFileUsingProtectedReference() throws Exception
+    {
+        File file = mockFile("readme.txt", "Concerto", "Resilience");
+
+        DocumentReference newReference = ref("README");
+        generateReference(newReference, newReference);
+        when(fileSystem.canEdit(newReference)).thenReturn(false);
+
+        MoveRequest request = new MoveRequest();
+        request.setPaths(Collections.singleton(new Path(null, file.getReference())));
+        request.setDestination(new Path(null, newReference));
+
+        execute(request);
+
+        verify(fileSystem, never()).rename(eq(file), any(DocumentReference.class));
+        verify(mocker.getMockedLogger()).error("You are not allowed to create the file [{}].", newReference);
     }
 
     @Test

@@ -158,6 +158,26 @@ public class CopyJobTest extends AbstractJobTest
     }
 
     @Test
+    public void copyFolderToProtectedDestination() throws Exception
+    {
+        Folder projects = mockFolder("Projects");
+        Folder resilience = mockFolder("Resilience");
+
+        DocumentReference resilienceCopyRef = ref("Resilience Copy");
+        generateReference(resilience.getReference(), resilienceCopyRef);
+        when(fileSystem.canEdit(resilienceCopyRef)).thenReturn(false);
+
+        MoveRequest request = new MoveRequest();
+        request.setPaths(Collections.singleton(new Path(resilience.getReference())));
+        request.setDestination(new Path(projects.getReference()));
+
+        execute(request);
+
+        verify(fileSystem, never()).copy(eq(resilience.getReference()), any(DocumentReference.class));
+        verify(mocker.getMockedLogger()).error("You are not allowed to create the folder [{}].", resilienceCopyRef);
+    }
+
+    @Test
     public void mergeFolder() throws Exception
     {
         File pom = mockFile("pom.xml", "Concerto");
@@ -252,6 +272,26 @@ public class CopyJobTest extends AbstractJobTest
 
         verify(fileSystem, never()).copy(eq(readme.getReference()), any(DocumentReference.class));
         verify(mocker.getMockedLogger()).error("You are not allowed to copy the file [{}].", readme.getReference());
+    }
+
+    @Test
+    public void copyFileToProtectedDestination() throws Exception
+    {
+        File readme = mockFile("README");
+        Folder concerto = mockFolder("Concerto");
+
+        DocumentReference readmeCopyRef = ref("README1");
+        generateReference(readme.getReference(), readmeCopyRef);
+        when(fileSystem.canEdit(readmeCopyRef)).thenReturn(false);
+
+        MoveRequest request = new MoveRequest();
+        request.setPaths(Collections.singleton(new Path(null, readme.getReference())));
+        request.setDestination(new Path(concerto.getReference()));
+
+        execute(request);
+
+        verify(fileSystem, never()).copy(eq(readme.getReference()), any(DocumentReference.class));
+        verify(mocker.getMockedLogger()).error("You are not allowed to create the file [{}].", readmeCopyRef);
     }
 
     @Test

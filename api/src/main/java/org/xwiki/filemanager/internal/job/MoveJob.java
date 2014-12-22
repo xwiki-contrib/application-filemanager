@@ -245,7 +245,11 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
 
             // Delete the source folder if it's empty.
             if (source.getChildFolderReferences().isEmpty() && source.getChildFileReferences().isEmpty()) {
-                fileSystem.delete(source.getReference());
+                if (fileSystem.canDelete(source.getReference())) {
+                    fileSystem.delete(source.getReference());
+                } else {
+                    this.logger.error("You are not allowed to delete the folder [{}].", source.getReference());
+                }
             }
             notifyStepPropress();
         } finally {
@@ -289,14 +293,8 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
     private void moveFile(File file, DocumentReference oldParentReference, Folder newParent)
     {
         // Check if a file with the same name already exits under the new parent folder.
-        File child = getChildFileByName(newParent, file.getName());
-        if (child != null) {
-            if (fileSystem.canDelete(child.getReference())
-                && shouldOverwrite(file.getReference(), child.getReference())) {
-                deleteFile(child, newParent.getReference());
-            } else {
-                return;
-            }
+        if (!prepareOverwrite(file.getName(), newParent, file.getReference())) {
+            return;
         }
 
         Collection<DocumentReference> parentReferences = file.getParentReferences();
@@ -305,6 +303,26 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
         if (save) {
             fileSystem.save(file);
         }
+    }
+
+    protected boolean prepareOverwrite(String fileName, Folder parentFolder, DocumentReference newFileReference)
+    {
+        File child = getChildFileByName(parentFolder, fileName);
+        if (child != null) {
+            boolean hasMoreParents = child.getParentReferences().size() > 1;
+            if ((hasMoreParents && fileSystem.canEdit(child.getReference()))
+                || (!hasMoreParents && fileSystem.canDelete(child.getReference()))) {
+                if (shouldOverwrite(newFileReference, child.getReference())) {
+                    deleteFile(child, parentFolder.getReference());
+                } else {
+                    return false;
+                }
+            } else {
+                this.logger.error("You are not allowed to overwrite the file [{}].", child.getReference());
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -362,7 +380,7 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
      * @param file the file to be deleted
      * @param parentReference the folder from where to delete the file
      */
-    protected void deleteFile(File file, DocumentReference parentReference)
+    private void deleteFile(File file, DocumentReference parentReference)
     {
         Collection<DocumentReference> parentReferences = file.getParentReferences();
         parentReferences.remove(parentReference);
@@ -464,19 +482,24 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
         folder.setName(newReference.getName());
 
         DocumentReference oldReference = folder.getReference();
-        fileSystem.rename(folder, getUniqueReference(newReference));
+        DocumentReference actualNewReference = getUniqueReference(newReference);
+        if (fileSystem.canEdit(actualNewReference)) {
+            fileSystem.rename(folder, actualNewReference);
 
-        for (DocumentReference childFolderReference : childFolderReferences) {
-            Folder childFolder = fileSystem.getFolder(childFolderReference);
-            childFolder.setParentReference(folder.getReference());
-            fileSystem.save(childFolder);
-        }
+            for (DocumentReference childFolderReference : childFolderReferences) {
+                Folder childFolder = fileSystem.getFolder(childFolderReference);
+                childFolder.setParentReference(folder.getReference());
+                fileSystem.save(childFolder);
+            }
 
-        for (DocumentReference childFileReference : childFileReferences) {
-            File childFile = fileSystem.getFile(childFileReference);
-            childFile.getParentReferences().remove(oldReference);
-            childFile.getParentReferences().add(folder.getReference());
-            fileSystem.save(childFile);
+            for (DocumentReference childFileReference : childFileReferences) {
+                File childFile = fileSystem.getFile(childFileReference);
+                childFile.getParentReferences().remove(oldReference);
+                childFile.getParentReferences().add(folder.getReference());
+                fileSystem.save(childFile);
+            }
+        } else {
+            this.logger.error("You are not allowed to create the folder [{}].", actualNewReference);
         }
     }
 
@@ -529,7 +552,12 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
             }
             file.setName(newReference.getName());
         }
-        fileSystem.rename(file, getUniqueReference(newReference));
+        DocumentReference actualNewReference = getUniqueReference(newReference);
+        if (fileSystem.canEdit(actualNewReference)) {
+            fileSystem.rename(file, actualNewReference);
+        } else {
+            this.logger.error("You are not allowed to create the file [{}].", actualNewReference);
+        }
     }
 
     /**

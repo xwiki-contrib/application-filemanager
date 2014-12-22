@@ -275,5 +275,7 @@ public abstract class AbstractJobTest
         UniqueDocumentReferenceGenerator generator = getMocker().getInstance(UniqueDocumentReferenceGenerator.class);
         when(generator.generate(base.getLastSpaceReference(), new DocumentNameSequence(base.getName()))).thenReturn(
             result);
+        // We suppose the new reference can be used.
+        when(fileSystem.canEdit(result)).thenReturn(true);
     }
 }

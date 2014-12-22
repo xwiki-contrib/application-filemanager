@@ -126,27 +126,25 @@ public class CopyJob extends MoveJob
     private void copyFile(File file, Path destination)
     {
         Folder folder = fileSystem.getFolder(destination.getFolderReference());
-        File child = getChildFileByName(folder, destination.getFileReference().getName());
-        if (child != null) {
-            if (fileSystem.canDelete(child.getReference())
-                && shouldOverwrite(file.getReference(), child.getReference())) {
-                deleteFile(child, folder.getReference());
-            } else {
-                return;
-            }
+        if (!prepareOverwrite(destination.getFileReference().getName(), folder, file.getReference())) {
+            return;
         }
 
         DocumentReference copyReference = getUniqueReference(destination.getFileReference());
-        fileSystem.copy(file.getReference(), copyReference);
-        File copy = fileSystem.getFile(copyReference);
-        if (copy != null) {
-            // Update the name ..
-            copy.setName(destination.getFileReference().getName());
-            // .. and the parent folder.
-            Collection<DocumentReference> parentReferences = copy.getParentReferences();
-            parentReferences.clear();
-            parentReferences.add(destination.getFolderReference());
-            fileSystem.save(copy);
+        if (fileSystem.canEdit(copyReference)) {
+            fileSystem.copy(file.getReference(), copyReference);
+            File copy = fileSystem.getFile(copyReference);
+            if (copy != null) {
+                // Update the name ..
+                copy.setName(destination.getFileReference().getName());
+                // .. and the parent folder.
+                Collection<DocumentReference> parentReferences = copy.getParentReferences();
+                parentReferences.clear();
+                parentReferences.add(destination.getFolderReference());
+                fileSystem.save(copy);
+            }
+        } else {
+            this.logger.error("You are not allowed to create the file [{}].", copyReference);
         }
     }
 
@@ -198,14 +196,18 @@ public class CopyJob extends MoveJob
             copyContent(folder, child.getReference());
         } else {
             DocumentReference copyReference = getUniqueReference(destination.getFileReference());
-            fileSystem.copy(folder.getReference(), copyReference);
-            Folder copy = fileSystem.getFolder(copyReference);
-            if (copy != null) {
-                copy.setName(destination.getFileReference().getName());
-                copy.setParentReference(destination.getFolderReference());
-                fileSystem.save(copy);
+            if (fileSystem.canEdit(copyReference)) {
+                fileSystem.copy(folder.getReference(), copyReference);
+                Folder copy = fileSystem.getFolder(copyReference);
+                if (copy != null) {
+                    copy.setName(destination.getFileReference().getName());
+                    copy.setParentReference(destination.getFolderReference());
+                    fileSystem.save(copy);
 
-                copyContent(folder, copyReference);
+                    copyContent(folder, copyReference);
+                }
+            } else {
+                this.logger.error("You are not allowed to create the folder [{}].", copyReference);
             }
         }
     }
