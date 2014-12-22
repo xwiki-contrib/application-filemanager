@@ -1231,6 +1231,9 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
     };
 
     return function(mediaType) {
+      if (!mediaType) {
+        return '-';
+      }
       var category = getCategory(mediaType);
       if (category) {
         return category;
@@ -1313,6 +1316,11 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
     ];
 
     return function(timestamp, dateFormat) {
+      timestamp = parseInt(timestamp);
+      if (isNaN(timestamp) || !isFinite(timestamp)) {
+        return '-';
+      }
+
       var now = (new Date()).getTime();
       if (now &gt; referenceTime) {
         // The reference time is older than a second. Update it.
@@ -1536,17 +1544,17 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
         'file': '='
       },
       template: '&lt;img ng-src="{{icon}}" alt="{{type}}" title="{{type}}" class="icon" /&gt; '
-        + '&lt;a href="{{url}}" ng-if="url"&gt;{{file.name}}&lt;/a&gt;&lt;span ng-if="!url"&gt;{{file.name}}&lt;/span&gt;',
+        + '&lt;a href="{{url}}" ng-if="url"&gt;{{file.name}}&lt;/a&gt;&lt;span ng-if="!url"&gt;{{file.name || file.id || "-"}}&lt;/span&gt;',
       link: function(scope, element, attrs) {
         scope.icon = "$xwiki.getSkinFile('icons/silk/page_white.png')";
         scope.type = 'Attachment';
-        var icon = getIcon(scope.file.name);
+        var icon = getIcon(scope.file.name || scope.file.id || '');
         if (icon) {
           scope.icon = scope.icon.replace('page_white', icon.name);
           scope.type = icon.type;
         }
         scope.$watch('file.id', function(newValue, oldValue) {
-          scope.url = scope.file.id ? new XWiki.Document(scope.file.id).getURL() : null;
+          scope.url = scope.file.id &amp;&amp; scope.file.name ? new XWiki.Document(scope.file.id).getURL() : null;
         });
       }
     }
@@ -1556,12 +1564,15 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
     return {
       restrict: 'A',
       scope: {},
-      template: '&lt;img ng-src="{{user.avatarURL}}" alt="Avatar" class="avatar" /&gt; &lt;a href="{{user.url}}" title="{{user.alias}}"&gt;{{user.name}}&lt;/a&gt;',
+      template: '&lt;img ng-src="{{user.avatarURL}}" alt="Avatar" class="avatar" /&gt; &lt;a href="{{user.url}}" title="{{user.alias}}" '
+        + 'ng-if="user.name"&gt;{{user.name}}&lt;/a&gt;&lt;span ng-if="!user.name"&gt;-&lt;/span&gt;',
       link: function(scope, element, attrs) {
         scope.user = User.fromId(attrs.user);
-        User.get(scope.user.reference, function(user) {
-          scope.user = user;
-        });
+        if (scope.user.name) {
+          User.get(scope.user.reference, function(user) {
+            scope.user = user;
+          });
+        }
       }
     }
   }]);
