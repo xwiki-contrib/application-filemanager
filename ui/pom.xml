@@ -44,7 +44,7 @@
     <!-- Don't run CLIRR here since there's no Java code. -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
     <!-- The version of the XWiki Platform webjars this extension depends on. -->
-    <xwiki.webjar.version>6.4-SNAPSHOT</xwiki.webjar.version>
+    <xwiki.webjar.version>6.4-milestone-2</xwiki.webjar.version>
     <!-- Where to unpack the XWiki Platform WebJars this extension depends on. -->
     <webjars.unpack.directory>${project.build.directory}/webjars</webjars.unpack.directory>
     <job.webjar.directory>${webjars.unpack.directory}/META-INF/resources/webjars/xwiki-platform-job-webjar/${xwiki.webjar.version}</job.webjar.directory>
