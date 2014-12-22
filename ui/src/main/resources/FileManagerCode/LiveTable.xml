@@ -73,7 +73,9 @@
           &lt;/thead&gt;
           &lt;tbody class="xwiki-livetable-display-body"&gt;
             &lt;tr ng-repeat="row in rows.list"&gt;
-              &lt;td ng-if="selection"&gt;&lt;input type="checkbox" ng-model="selection[row.id]" /&gt;&lt;/td&gt;
+              &lt;!-- Show the selection check box only if the row is visible. --&gt;
+              &lt;td ng-if="selection"&gt;&lt;input type="checkbox" ng-show="row.id"
+                ng-model="selectedRowIds[row.id]" ng-change="updateSelectedValue(row)" /&gt;&lt;/td&gt;
               &lt;td ng-repeat="column in columns" ng-include="liveTableCellTemplate"&gt;&lt;/td&gt;
             &lt;/tr&gt;
           &lt;/tbody&gt;
@@ -249,6 +251,11 @@
           // Reset the selected rows.
           if (scope.selection) {
             scope.selection = {};
+            // Unfortunately the ngTrueValue directive supports only constant expressions so we can't bind the row
+            // object to the checkbox value. All the data from the selected rows must be available so we use an
+            // workaround: we keep an internal map with the selected row ids and we update the selection whenever it
+            // changes.
+            scope.selectedRowIds = {};
           }
           if (newValue === oldValue) {
             // Initialize the live table parameters and filters only after the source is initialized.
@@ -267,7 +274,7 @@
         // Update the live table whenever the parameters are modified.
         scope.$watch('params', function(newValue, oldValue) {
           storeParams(scope.id, newValue);
-          scope.rows = scope.source.get(newValue);
+          scope.rows = scope.source ? scope.source.get(newValue) : [];
         }, true);
 
         // Update the parameters whenever the URL changes.
@@ -298,6 +305,15 @@
             }
           }, 500);
         }, true);
+
+        scope.updateSelectedValue = function(row) {
+          if (scope.selectedRowIds[row.id] === true) {
+            // All the data from the selected rows must be available.
+            scope.selection[row.id] = row;
+          } else {
+            delete scope.selection[row.id];
+          }
+        };
       }
     };
   }]);

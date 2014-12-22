@@ -240,8 +240,8 @@
   {{ selectedFiles = getSelectedFiles(selection) | hide }}
   &lt;div ng-show="drive.viewer == 'files'" class="btn-toolbar file-actions" role="toolbar"&gt;
     &lt;div class="btn-group" ng-show="drive.location.type == 'drive' || drive.location.type == 'folder'"&gt;
-      &lt;button class="btn btn-default" ng-disabled="drive.readOnly" ng-click="drive.viewer = 'upload'"
-          title="Upload a new file to the current folder" type="button"&gt;
+      &lt;button class="btn btn-default" ng-disabled="drive.readOnly || !drive.location.node.data.canCreate"
+          ng-click="drive.viewer = 'upload'" title="Upload a new file to the current folder" type="button"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_add.png')" alt="New File" class="icon" /&gt;New File
       &lt;/button&gt;
     &lt;/div&gt;&lt;div class="btn-group" dropdown&gt;
@@ -257,11 +257,11 @@
       &lt;/ul&gt;
     &lt;/div&gt;&lt;div class="btn-group"&gt;
       &lt;button type="button" class="btn btn-default" title="Cut selected files"
-          ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="cut(selectedFiles)"&gt;
+          ng-disabled="drive.readOnly || !canCut(selectedFiles)" ng-click="cut(selectedFiles)"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/cut.png')" alt="Cut" class="icon" /&gt;Cut
       &lt;/button&gt;
       &lt;button type="button" class="btn btn-default" title="Copy selected files"
-          ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="copy(selectedFiles)"&gt;
+          ng-disabled="drive.readOnly || !canCopy(selectedFiles)" ng-click="copy(selectedFiles)"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_copy.png')" alt="Copy" class="icon" /&gt;Copy
       &lt;/button&gt;
       &lt;button type="button" class="btn btn-default" title="Paste into the current folder"
@@ -271,11 +271,12 @@
       &lt;/button&gt;
     &lt;/div&gt;&lt;div class="btn-group"&gt;
       &lt;button type="button" class="btn btn-default" title="Rename selected file"
-          ng-disabled="drive.readOnly || selectedFiles.length != 1" ng-click="rename(selectedFiles[0])"&gt;
+          ng-disabled="drive.readOnly || selectedFiles.length != 1 || !selectedFiles[0].canRename"
+          ng-click="rename(selectedFiles[0])"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/textfield_rename.png')" alt="Rename" class="icon" /&gt;Rename...
       &lt;/button&gt;
       &lt;button type="button" class="btn btn-default" title="Delete selected files"
-          ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="delete(selectedFiles)"&gt;
+          ng-disabled="drive.readOnly || !canDelete(selectedFiles)" ng-click="delete(selectedFiles)"&gt;
         &lt;img src="$xwiki.getSkinFile('icons/silk/cross.png')" alt="Delete" class="icon" /&gt;Delete
       &lt;/button&gt;
     &lt;/div&gt;
@@ -298,7 +299,7 @@
         ng-if="drive.uploads.finished.length &gt; 0" ng-click="clearUploads()"&gt;Clear&lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-  &lt;h3&gt;Upload files to {{drive.location.name}} folder&lt;/h3&gt;
+  &lt;h3&gt;Upload files to {{drive.location.node.text}} folder&lt;/h3&gt;
   &lt;input type="file" on-file-select="uploadFiles($files)" multiple
     folder-selection-enabled="folderSelectionEnabled" /&gt;
   &lt;label ng-show="folderSelectionSupported"&gt;
@@ -1631,8 +1632,9 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
 
         scope.getSelectedFiles = function(selection) {
           var selectedFiles = [];
-          for (var file in selection) {
-            if (selection.hasOwnProperty(file) &amp;&amp; selection[file]) {
+          for (var fileId in selection) {
+            var file = selection[fileId];
+            if (selection.hasOwnProperty(fileId) &amp;&amp; file) {
               selectedFiles.push(file);
             }
           }
@@ -1643,7 +1645,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
           var paths = [];
           var folder = scope.drive.location.type == 'folder' ? scope.drive.location.id : '';
           for (var i = 0; i &lt; files.length; i++) {
-            paths.push(folder + '/' + files[i]);
+            paths.push(folder + '/' + files[i].id);
           }
           return paths;
         };
@@ -1659,6 +1661,19 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
 
         scope.$watch('drive.location', scope.backToList);
 
+        var canPerformBatchOperation = function(files, action) {
+          for (var i = 0; i &lt; files.length; i++) {
+            var file = files[i];
+            if (!file['can' + action]) {
+              return false;
+            }
+          }
+          return files.length &gt; 0;
+        };
+
+        scope.canCut = function(files) {
+          return canPerformBatchOperation(files, 'Move');
+        };
         scope.cut = function(files) {
           scope.clipboard = {
             action: 'move',
@@ -1666,6 +1681,9 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
           };
         };
 
+        scope.canCopy = function(files) {
+          return canPerformBatchOperation(files, 'Copy');
+        };
         scope.copy = function(files) {
           scope.clipboard = {
             action: 'copy',
@@ -1683,7 +1701,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
 
         scope.download = function(files) {
           if (files.length == 1) {
-            window.location = File.getDownloadURL(files[0]);
+            window.location = File.getDownloadURL(files[0].id);
           } else {
             scope.drive.download(getPaths(files));
           }
@@ -1691,7 +1709,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
 
         scope.rename = function(file) {
           // Clear the selection.
-          delete scope.selection[file];
+          delete scope.selection[file.id];
 
           var selectedRows = $(element).find('.xwiki-livetable-display-body').find('input:checked').closest('tr');
           if (selectedRows.length != 1) return;
@@ -1708,17 +1726,17 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
             // 'this' is the rename text input.
             backToView.call(this, event);
             // Don't allow slash character inside the file name and make sure the file name is really changed.
-            if (this.value != rowScope.row.name &amp;&amp; this.value.indexOf('/') &lt; 0) {
-              var oldName = rowScope.row.name;
-              scope.drive.move(['/' + rowScope.row.id], '/' + this.value)
+            if (this.value != file.name &amp;&amp; this.value.indexOf('/') &lt; 0) {
+              var oldName = file.name;
+              scope.drive.move(['/' + file.id], '/' + this.value)
                 .done(refreshLiveTable)
                 .fail(function() {
                   // Revert the rename.
-                  rowScope.row.name = oldName;
+                  file.name = oldName;
                   rowScope.$apply();
                 });
               // Visual rename, until we get confirmation from the server.
-              rowScope.row.name = this.value;
+              file.name = this.value;
               rowScope.$apply();
             }
           };
@@ -1736,7 +1754,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
 
           var inputElement = $(document.createElement('input'))
             .prop('type', 'text')
-            .val(rowScope.row.name)
+            .val(file.name)
             .css('width', '100%')
             .one('blur', onRename)
             .keyup(onKeyUp);
@@ -1752,6 +1770,9 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
           inputElement.select();
         };
 
+        scope.canDelete = function(files) {
+          return canPerformBatchOperation(files, 'Delete');
+        };
         scope['delete'] = function(files) {
           if (window.confirm('Are you sure you want to delete the selected files?')) {
             // Clear the selection.
@@ -2078,13 +2099,22 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
                   scope.drive.viewer = defaultViewerByNodeType[data.node.data.type];
                   scope.drive.location = {
                     id: selectedNode,
-                    name: data.node.text,
-                    type: data.node.data.type
+                    type: data.node.data.type,
+                    node: data.node
                   };
                 }
               }
             })
           }, 0);
+
+        // Enable/Disable context menu items before the context menu is shown.
+        }).on('xtree.openContextMenu', function(event, data) {
+          if (data.menu.createFolder) {
+            data.menu.createFolder._disabled = !data.node.data || !data.node.data.canCreate;
+          }
+          if (data.menu.createFile) {
+            data.menu.createFile._disabled = !data.node.data || !data.node.data.canCreate;
+          }
 
         }).on('xtree.contextMenu.download', function(event, data) {
           var tree = $.jstree.reference(data.reference);

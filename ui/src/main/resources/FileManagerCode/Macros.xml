@@ -56,7 +56,8 @@
   #set ($return = $NULL)
   #setVariable("$return", {
     'id': $doc.name,
-    'name': $name
+    'name': $name,
+    'canCreate': $hasCreatePage
   })
 #end
 
@@ -82,12 +83,10 @@
 
 #macro (getFolders $statement $parameters $return)
   #set ($query = $services.query.xwql("$statement order by doc.name"))
-  #set ($countQuery = $services.query.xwql($statement).addFilter('count'))
   #foreach ($entry in $parameters.entrySet())
     #set ($discard = $query.bindValue($entry.key, $entry.value))
-    #set ($discard = $countQuery.bindValue($entry.key, $entry.value))
   #end
-  #set ($folderCount = $countQuery.execute().get(0))
+  #set ($folderCount = $query.count())
   #set ($folders = [])
   #set ($offset = $mathtool.max($mathtool.toInteger($request.offset), 0))
   #if (!$offset)
@@ -101,8 +100,10 @@
   #set ($discard = $query.setLimit($limit))
   #foreach ($folderId in $query.execute())
     #set ($folderDoc = $xwiki.getDocument($folderId))
-    #getFolder($folderDoc $folder)
-    #set ($discard = $folders.add($folder))
+    #if ($folderDoc)
+      #getFolder($folderDoc $folder)
+      #set ($discard = $folders.add($folder))
+    #end
   #end
   #set ($return = $NULL)
   #setVariable("$return" {
@@ -130,7 +131,8 @@
     'canRename': $canDeleteFolderDoc,
     'canDelete': $canDeleteFolderDoc,
     'canMove': $canDeleteFolderDoc,
-    'canCopy': true
+    'canCopy': $hasCreatePage,
+    'canCreate': $hasCreatePage
   })
 #end
 
@@ -301,12 +303,10 @@
 
 #macro (getFiles $statement $parameters $return)
   #set ($query = $services.query.hql($statement))
-  #set ($countQuery = $services.query.hql($statement).addFilter('count'))
   #foreach ($entry in $parameters.entrySet())
     #set ($discard = $query.bindValue($entry.key, $entry.value))
-    #set ($discard = $countQuery.bindValue($entry.key, $entry.value))
   #end
-  #set ($fileCount = $countQuery.execute().get(0))
+  #set ($fileCount = $query.count())
   #set ($files = [])
   #set ($offset = $mathtool.toInteger($request.offset))
   #if ($offset)
@@ -318,8 +318,13 @@
   #end
   #foreach ($fileId in $query.execute())
     #set ($fileDoc = $xwiki.getDocument($fileId))
-    #getFile($fileDoc $file)
-    #set ($discard = $files.add($file))
+    #if ($fileDoc)
+      #getFile($fileDoc $file)
+      #set ($discard = $files.add($file))
+    #else
+      ## The current user doesn't have the right to view this file.
+      #set ($discard = $files.add({}))
+    #end
   #end
   #set ($return = $NULL)
   #setVariable("$return" {
@@ -342,6 +347,7 @@
       'filesize': 0
     })
   #end
+  #set ($canDeleteFileDoc = $fileDoc.hasAccessLevel('delete'))
   #set ($return = $NULL)
   #setVariable("$return" {
     'id': $fileDoc.name,
@@ -354,7 +360,12 @@
     'mediaType': $attach.mimeType,
     'version': $fileDoc.version,
     'description': $fileDoc.display('description'),
-    'paths': $paths
+    'paths': $paths,
+    'canRename': $canDeleteFileDoc,
+    'canDelete': $canDeleteFileDoc,
+    'canMove': $canDeleteFileDoc,
+    'canCopy': $hasCreatePage,
+    'canCreate': $hasCreatePage
   })
 #end
 
@@ -480,7 +491,7 @@
       'state': $jobStatus.state,
       'request': {
         'type': $jobStatus.request.getProperty('job.type'),
-        'user': "$jobStatus.request.getProperty('user.reference')",
+        'user': "$!jobStatus.request.getProperty('user.reference')",
         'paths': $pathsAsJSON
       },
       'log': {},
