@@ -103,7 +103,13 @@
   #end
 #end
 
-#macro (linkToFileManager)
+#macro (fileToolBar)
+  {{html}}
+  #set ($discard = $xwiki.ssx.use('FileManagerCode.DriveSheet'))
+  &lt;div class="btn-toolbar file-actions" role="toolbar"&gt;
+  ##
+  ## Back to the File Manager
+  ##
   #set ($driveReference = $services.model.resolveDocument('', 'default', $doc.documentReference.lastSpaceReference))
   #set ($driveDoc = $xwiki.getDocument($driveReference))
   #if (!$driveDoc.getObject('FileManagerCode.DriveClass'))
@@ -119,10 +125,29 @@
         #set ($driveNode = $parentReference.name)
       #end
     #end
-    ## We append the anchor at the end of the URL instead of passing it as a parameter (or link attribute) because the
-    ## URL factory encodes the anchor badly, messing the ? and = characters.
-    [[View in File Manager&gt;&gt;path:$xwiki.getURL($driveReference)#?driveNode=$escapetool.url($driveNode)]]
+    &lt;div class="btn-group"&gt;
+      ## We append the anchor at the end of the URL instead of passing it as a parameter (or link attribute) because the
+      ## URL factory encodes the anchor badly, messing the ? and = characters.
+      &lt;a href="$xwiki.getURL($driveReference)#?driveNode=$escapetool.url($driveNode)" class="btn btn-default"
+          title="Back to the File Manager"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')" alt="Back" class="icon" /&gt;Back to the File Manager
+      &lt;/a&gt;
+    &lt;/div&gt;
   #end
+  ##
+  ## Download
+  ##
+  #set ($attachments = $doc.attachmentList)
+  #if ($attachments.size() &gt; 0)
+    &lt;div class="btn-group"&gt;
+      &lt;a href="$doc.getAttachmentURL($attachments.get(0).filename, 'download', 'force-download=1')"
+          class="btn btn-default" title="Download this file"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_put.png')" alt="Download" class="icon" /&gt;Download
+      &lt;/a&gt;
+    &lt;/div&gt;
+  #end
+  &lt;/div&gt;
+  {{/html}}
 #end
 
 #macro (openFile)
@@ -230,7 +255,7 @@
 
 {{velocity}}
 #if ($xcontext.action != 'get')
-  #linkToFileManager
+  #fileToolBar
   #openFile
 #end
 {{/velocity}}</content>

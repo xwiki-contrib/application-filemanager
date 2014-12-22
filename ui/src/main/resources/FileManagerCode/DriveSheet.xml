@@ -2723,7 +2723,6 @@ table.pane-splitter .pane-content {
   cursor: pointer;
   float: left;
   margin: 0;
-  min-height: 30px;
   padding: 6px 12px;
   white-space: nowrap;
   -webkit-user-select: none;
