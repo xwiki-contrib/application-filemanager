@@ -35,6 +35,7 @@ import org.xwiki.model.reference.EntityReference;
 
 import com.xpn.xwiki.XWikiException;
 import com.xpn.xwiki.doc.XWikiAttachment;
+import com.xpn.xwiki.doc.XWikiDocument;
 import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.BaseProperty;
 
@@ -78,11 +79,23 @@ public class DefaultFile extends AbstractDocument implements File
     @Override
     public void setName(String name)
     {
-        List<XWikiAttachment> attachments = getDocument().getAttachmentList();
+        // Avoid cloning the underlying document and modifying the attachment list if it's not really needed.
+        if (getName().equals(name)) {
+            return;
+        }
+
+        super.setName(name);
+
+        XWikiDocument document = getClonedDocument();
+        List<XWikiAttachment> attachments = document.getAttachmentList();
         if (attachments.size() > 0) {
-            attachments.get(0).setFilename(name);
-        } else {
-            super.setName(name);
+            XWikiAttachment oldAttachment = attachments.get(0);
+            try {
+                document.removeAttachment(oldAttachment, false);
+                document.addAttachment(name, oldAttachment.getContentInputStream(getContext()), getContext());
+            } catch (Exception e) {
+                logger.error("Failed to rename file [{}] to [{}].", oldAttachment.getReference(), name, e);
+            }
         }
     }
 
@@ -106,11 +119,12 @@ public class DefaultFile extends AbstractDocument implements File
 
         // A file can have multiple parent folders, which are declared using tags because the underlying document can
         // have only one real parent.
-        BaseObject tagObject = getDocument().getXObject(TAG_CLASS_REFERENCE);
+        XWikiDocument document = getClonedDocument();
+        BaseObject tagObject = document.getXObject(TAG_CLASS_REFERENCE);
         if (tagObject == null) {
             tagObject = new BaseObject();
             tagObject.setXClassReference(TAG_CLASS_REFERENCE);
-            getDocument().addXObject(tagObject);
+            document.addXObject(tagObject);
         }
 
         List<String> tags = new ArrayList<String>();
@@ -122,13 +136,13 @@ public class DefaultFile extends AbstractDocument implements File
         // We set the first parent folder as the parent of the underlying document to ensure the document hierarchy is
         // still displayed nicely outside of the file manager. This also helps us detect orphan files more easily.
         if (parentReferences.isEmpty()) {
-            getDocument().setParentReference((EntityReference) null);
+            document.setParentReference((EntityReference) null);
         } else {
             DocumentReference parentReference = parentReferences.iterator().next();
             if (parentReference.getWikiReference().equals(getReference().getWikiReference())) {
-                getDocument().setParentReference(parentReference.removeParent(parentReference.getWikiReference()));
+                document.setParentReference(parentReference.removeParent(parentReference.getWikiReference()));
             } else {
-                getDocument().setParentReference(parentReference.extractReference(EntityType.DOCUMENT));
+                document.setParentReference(parentReference.extractReference(EntityType.DOCUMENT));
             }
         }
 

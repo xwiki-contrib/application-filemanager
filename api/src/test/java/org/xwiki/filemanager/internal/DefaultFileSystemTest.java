@@ -19,9 +19,6 @@
  */
 package org.xwiki.filemanager.internal;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import javax.inject.Provider;
 
 import org.junit.Before;
@@ -38,6 +35,9 @@ import org.xwiki.test.mockito.MockitoComponentMockingRule;
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link DefaultFileSystem}.
@@ -109,9 +109,13 @@ public class DefaultFileSystemTest
     @Test
     public void saveFile() throws Exception
     {
-        DefaultFile file = spy(new DefaultFile());
         XWikiDocument xdoc = mock(XWikiDocument.class);
-        when(file.getDocument()).thenReturn(xdoc);
+        when(xdoc.clone()).thenReturn(xdoc);
+        when(xdoc.isContentDirty()).thenReturn(false);
+        when(xdoc.isMetaDataDirty()).thenReturn(true);
+
+        DefaultFile file = spy(new DefaultFile());
+        file.setDocument(xdoc);
 
         mocker.getComponentUnderTest().save(file);
 

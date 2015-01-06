@@ -418,7 +418,7 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
     {
         Folder folder = fileSystem.getFolder(oldReference);
         if (folder != null) {
-            if (fileSystem.canEdit(oldReference)) {
+            if (fileSystem.canDelete(oldReference)) {
                 DocumentReference newParentReference = newPath.getFolderReference();
                 if (newParentReference == null) {
                     // If the new parent is not specified we assume the parent doesn't change.
@@ -430,7 +430,7 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
                     return;
                 }
                 if (newParentReference != null) {
-                    renameFolder(folder, new Path(newParentReference, newPath.getFileReference()));
+                    moveAndRenameFolder(folder, new Path(newParentReference, newPath.getFileReference()));
                 } else {
                     // Rename an orphan folder.
                     // The file reference from the new path is actually used as the new folder reference.
@@ -443,21 +443,24 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
     }
 
     /**
-     * Renames a folder.
+     * Moves and renames a folder.
      * 
-     * @param folder the folder to rename
+     * @param folder the folder to move and rename
      * @param newPath the new path
      */
-    private void renameFolder(Folder folder, Path newPath)
+    private void moveAndRenameFolder(Folder folder, Path newPath)
     {
         Folder newParent = fileSystem.getFolder(newPath.getFolderReference());
         Folder child = getChildFolderByName(newParent, newPath.getFileReference().getName());
         if (child == null) {
-            folder.setParentReference(newParent.getReference());
-            if (newPath.getFileReference().equals(folder.getReference())) {
-                // No rename, just move.
+            // Move the folder first, if needed, because the rename must be performed inside the right parent.
+            if (!newParent.getReference().equals(folder.getParentReference())) {
+                folder.setParentReference(newParent.getReference());
                 fileSystem.save(folder);
-            } else {
+            }
+
+            // Rename the folder.
+            if (!newPath.getFileReference().equals(folder.getReference())) {
                 // The file reference from the new path is actually used as the new folder reference.
                 renameFolder(folder, newPath.getFileReference());
             }
@@ -476,26 +479,28 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
      */
     private void renameFolder(Folder folder, DocumentReference newReference)
     {
-        List<DocumentReference> childFolderReferences = folder.getChildFolderReferences();
-        List<DocumentReference> childFileReferences = folder.getChildFileReferences();
-
-        folder.setName(newReference.getName());
-
-        DocumentReference oldReference = folder.getReference();
         DocumentReference actualNewReference = getUniqueReference(newReference);
         if (fileSystem.canEdit(actualNewReference)) {
-            fileSystem.rename(folder, actualNewReference);
+            // Update the folder reference.
+            fileSystem.rename(folder.getReference(), actualNewReference);
 
-            for (DocumentReference childFolderReference : childFolderReferences) {
+            // Update the folder pretty name.
+            Folder newFolder = fileSystem.getFolder(actualNewReference);
+            newFolder.setName(newReference.getName());
+            fileSystem.save(newFolder);
+
+            // Update the child folders.
+            for (DocumentReference childFolderReference : folder.getChildFolderReferences()) {
                 Folder childFolder = fileSystem.getFolder(childFolderReference);
-                childFolder.setParentReference(folder.getReference());
+                childFolder.setParentReference(actualNewReference);
                 fileSystem.save(childFolder);
             }
 
-            for (DocumentReference childFileReference : childFileReferences) {
+            // Update the child files.
+            for (DocumentReference childFileReference : folder.getChildFileReferences()) {
                 File childFile = fileSystem.getFile(childFileReference);
-                childFile.getParentReferences().remove(oldReference);
-                childFile.getParentReferences().add(folder.getReference());
+                childFile.getParentReferences().remove(folder.getReference());
+                childFile.getParentReferences().add(actualNewReference);
                 fileSystem.save(childFile);
             }
         } else {
@@ -513,23 +518,38 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
     {
         File file = fileSystem.getFile(oldPath.getFileReference());
         if (file != null) {
-            if (fileSystem.canEdit(file.getReference())) {
-                boolean save = false;
-                Collection<DocumentReference> parentReferences = file.getParentReferences();
-                if (newPath.getFolderReference() != null && oldPath.getFolderReference() != null
-                    && !newPath.getFolderReference().equals(oldPath.getFolderReference())) {
-                    save |= parentReferences.remove(oldPath.getFolderReference());
-                    save |= parentReferences.add(newPath.getFolderReference());
-                }
-
-                if (!file.getReference().equals(newPath.getFileReference())) {
-                    renameFile(file, newPath.getFileReference());
-                } else if (save) {
-                    fileSystem.save(file);
-                }
+            if (fileSystem.canDelete(file.getReference())) {
+                moveAndRenameFile(file, oldPath.getFolderReference(), newPath);
             } else {
                 this.logger.error("You are not allowed to rename the file [{}].", file.getReference());
             }
+        }
+    }
+
+    /**
+     * Moves and renames the given file.
+     * 
+     * @param file the file to move and rename
+     * @param parentReference the parent folder the file may be moved from (a file can have multiple parent folders so
+     *            we need to specify the source parent folder)
+     * @param newPath the new file path
+     */
+    private void moveAndRenameFile(File file, DocumentReference parentReference, Path newPath)
+    {
+        // Move the file first, if needed, because the rename must be performed inside the right parents.
+        if (newPath.getFolderReference() != null && parentReference != null
+            && !newPath.getFolderReference().equals(parentReference)) {
+            Collection<DocumentReference> parentReferences = file.getParentReferences();
+            boolean save = parentReferences.remove(parentReference);
+            save |= parentReferences.add(newPath.getFolderReference());
+            if (save) {
+                fileSystem.save(file);
+            }
+        }
+
+        // Rename the file.
+        if (!file.getReference().equals(newPath.getFileReference())) {
+            renameFile(file, newPath.getFileReference());
         }
     }
 
@@ -550,11 +570,17 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
                     return;
                 }
             }
-            file.setName(newReference.getName());
         }
+
         DocumentReference actualNewReference = getUniqueReference(newReference);
         if (fileSystem.canEdit(actualNewReference)) {
-            fileSystem.rename(file, actualNewReference);
+            // Update the file reference.
+            fileSystem.rename(file.getReference(), actualNewReference);
+
+            // Update the file pretty name.
+            File newFile = fileSystem.getFile(actualNewReference);
+            newFile.setName(newReference.getName());
+            fileSystem.save(newFile);
         } else {
             this.logger.error("You are not allowed to create the file [{}].", actualNewReference);
         }

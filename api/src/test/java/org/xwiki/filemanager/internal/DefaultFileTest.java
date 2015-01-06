@@ -19,11 +19,8 @@
  */
 package org.xwiki.filemanager.internal;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,6 +43,10 @@ import com.xpn.xwiki.objects.BaseObject;
 import com.xpn.xwiki.objects.BaseProperty;
 import com.xpn.xwiki.objects.PropertyInterface;
 
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
+
 /**
  * Unit tests for {@link DefaultFile}.
  * 
@@ -63,6 +64,7 @@ public class DefaultFileTest
     public void configure() throws Exception
     {
         XWikiDocument document = mock(XWikiDocument.class);
+        when(document.clone()).thenReturn(document);
 
         file = (DefaultFile) mocker.getComponentUnderTest();
         file.setDocument(document);
@@ -81,7 +83,7 @@ public class DefaultFileTest
     @Test
     public void getNameWithoutAttachment()
     {
-        when(file.getDocument().getAttachmentList()).thenReturn(Collections.<XWikiAttachment> emptyList());
+        when(file.getDocument().getAttachmentList()).thenReturn(Collections.<XWikiAttachment>emptyList());
         when(file.getDocument().getRenderedTitle(eq(Syntax.PLAIN_1_0), any(XWikiContext.class)))
             .thenReturn("style.css");
 
@@ -89,23 +91,34 @@ public class DefaultFileTest
     }
 
     @Test
-    public void setName()
+    public void setName() throws Exception
     {
+        InputStream content = mock(InputStream.class);
+
         XWikiAttachment attachment = mock(XWikiAttachment.class);
+        // We need to specify the previous name because the setter checks if the new name is different.
+        when(attachment.getFilename()).thenReturn("old.html");
+        when(attachment.getContentInputStream(any(XWikiContext.class))).thenReturn(content);
         when(file.getDocument().getAttachmentList()).thenReturn(Collections.singletonList(attachment));
 
         file.setName("index.html");
 
-        verify(attachment).setFilename("index.html");
+        verify(file.getDocument()).clone();
+        verify(file.getDocument()).setTitle("index.html");
+        verify(file.getDocument()).addAttachment(eq("index.html"), same(content), any(XWikiContext.class));
+        verify(file.getDocument()).removeAttachment(attachment, false);
     }
 
     @Test
     public void setNameWithoutAttachment()
     {
-        when(file.getDocument().getAttachmentList()).thenReturn(Collections.<XWikiAttachment> emptyList());
+        when(file.getDocument().getAttachmentList()).thenReturn(Collections.<XWikiAttachment>emptyList());
+        // We need to specify the previous name because the setter checks if the new name is different.
+        when(file.getDocument().getRenderedTitle(eq(Syntax.PLAIN_1_0), any(XWikiContext.class))).thenReturn("old.ttf");
 
         file.setName("font.ttf");
 
+        verify(file.getDocument()).clone();
         verify(file.getDocument()).setTitle("font.ttf");
     }
 
@@ -144,6 +157,7 @@ public class DefaultFileTest
 
         verify(tagObject).setStringListValue(DefaultFile.PROPERTY_TAGS,
             Arrays.asList(firstParent.getName(), secondParent.getName()));
+        verify(file.getDocument()).clone();
         verify(file.getDocument()).setParentReference(firstParent.removeParent(firstParent.getWikiReference()));
     }
 
@@ -159,6 +173,7 @@ public class DefaultFileTest
         file.updateParentReferences();
 
         verify(tagObject).setStringListValue(DefaultFile.PROPERTY_TAGS, Collections.emptyList());
+        verify(file.getDocument()).clone();
         verify(file.getDocument()).setParentReference((EntityReference) null);
     }
 
@@ -177,7 +192,7 @@ public class DefaultFileTest
     @Test
     public void getContentWithoutAttachment() throws Exception
     {
-        when(file.getDocument().getAttachmentList()).thenReturn(Collections.<XWikiAttachment> emptyList());
+        when(file.getDocument().getAttachmentList()).thenReturn(Collections.<XWikiAttachment>emptyList());
 
         assertTrue(IOUtils.contentEquals(file.getContent(), new ByteArrayInputStream(new byte[] {})));
     }

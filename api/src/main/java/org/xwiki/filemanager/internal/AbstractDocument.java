@@ -55,6 +55,12 @@ public abstract class AbstractDocument implements Document
      */
     private XWikiDocument document;
 
+    /**
+     * Flag indicating if the underlying document has been cloned. We have to clone the document before making any
+     * changes in order to avoid modifying the cached document object.
+     */
+    private boolean cloned;
+
     @Override
     public DocumentReference getReference()
     {
@@ -70,7 +76,7 @@ public abstract class AbstractDocument implements Document
     @Override
     public void setName(String name)
     {
-        document.setTitle(name);
+        getClonedDocument().setTitle(name);
     }
 
     /**
@@ -82,6 +88,18 @@ public abstract class AbstractDocument implements Document
     }
 
     /**
+     * @return a clone of the underlying {@link XWikiDocument} that is safe to modify
+     */
+    protected XWikiDocument getClonedDocument()
+    {
+        if (!cloned) {
+            document = document.clone();
+            cloned = true;
+        }
+        return document;
+    }
+
+    /**
      * Sets the underlying {@link XWikiDocument} that defines this file system document.
      * 
      * @param document the underlying document
@@ -89,6 +107,7 @@ public abstract class AbstractDocument implements Document
     void setDocument(XWikiDocument document)
     {
         this.document = document;
+        this.cloned = false;
     }
 
     /**

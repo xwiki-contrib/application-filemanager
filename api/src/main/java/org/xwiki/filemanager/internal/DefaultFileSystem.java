@@ -164,11 +164,11 @@ public class DefaultFileSystem implements FileSystem
         if (document instanceof AbstractDocument) {
             XWikiContext context = xcontextProvider.get();
             try {
-                XWikiDocument xdoc = ((AbstractDocument) document).getDocument();
-
                 if (document instanceof DefaultFile) {
                     ((DefaultFile) document).updateParentReferences();
                 }
+
+                XWikiDocument xdoc = ((AbstractDocument) document).getClonedDocument();
 
                 // The existing convention is that when the current user reference is null, it's the guest user.
                 DocumentReference currentUserReference = context.getUserReference();
@@ -178,7 +178,10 @@ public class DefaultFileSystem implements FileSystem
                 }
                 xdoc.setAuthorReference(currentUserReference);
 
-                context.getWiki().saveDocument(xdoc, "", false, context);
+                // Don't generate useless versions.
+                if (xdoc.isContentDirty() || xdoc.isMetaDataDirty()) {
+                    context.getWiki().saveDocument(xdoc, "", false, context);
+                }
             } catch (XWikiException e) {
                 logger.error("Failed to save document [{}].", document.getReference(), e);
             }
@@ -200,15 +203,13 @@ public class DefaultFileSystem implements FileSystem
     }
 
     @Override
-    public void rename(Document document, DocumentReference newReference)
+    public void rename(DocumentReference oldReference, DocumentReference newReference)
     {
-        if (document instanceof AbstractDocument) {
-            XWikiContext context = xcontextProvider.get();
-            try {
-                ((AbstractDocument) document).getDocument().rename(newReference, context);
-            } catch (XWikiException e) {
-                logger.error("Failed to rename document [{}] to [{}]", document.getReference(), newReference, e);
-            }
+        XWikiContext context = xcontextProvider.get();
+        try {
+            context.getWiki().getDocument(oldReference, context).rename(newReference, context);
+        } catch (XWikiException e) {
+            logger.error("Failed to rename document [{}] to [{}]", oldReference, newReference, e);
         }
     }
 

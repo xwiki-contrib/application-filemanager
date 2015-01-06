@@ -39,6 +39,8 @@ import org.xwiki.query.Query;
 import org.xwiki.query.QueryException;
 import org.xwiki.query.QueryManager;
 
+import com.xpn.xwiki.doc.XWikiDocument;
+
 /**
  * Default {@link Folder} implementation, based on XWiki document.
  * 
@@ -83,14 +85,15 @@ public class DefaultFolder extends AbstractDocument implements Folder
     @Override
     public void setParentReference(DocumentReference parentReference)
     {
+        XWikiDocument document = getClonedDocument();
         if (parentReference != null) {
             if (parentReference.getWikiReference().equals(getReference().getWikiReference())) {
-                getDocument().setParentReference(parentReference.removeParent(parentReference.getWikiReference()));
+                document.setParentReference(parentReference.removeParent(parentReference.getWikiReference()));
             } else {
-                getDocument().setParentReference(parentReference.extractReference(EntityType.DOCUMENT));
+                document.setParentReference(parentReference.extractReference(EntityType.DOCUMENT));
             }
         } else {
-            getDocument().setParentReference((EntityReference) null);
+            document.setParentReference((EntityReference) null);
         }
     }
 

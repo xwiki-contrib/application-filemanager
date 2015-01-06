@@ -28,7 +28,6 @@ import java.util.List;
 import org.junit.Before;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.xwiki.filemanager.Document;
 import org.xwiki.filemanager.File;
 import org.xwiki.filemanager.FileSystem;
 import org.xwiki.filemanager.Folder;
@@ -99,19 +98,6 @@ public abstract class AbstractJobTest
     public void configure() throws Exception
     {
         fileSystem = getMocker().getInstance(FileSystem.class);
-
-        doAnswer(new Answer<Void>()
-        {
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable
-            {
-                Document document = (Document) invocation.getArguments()[0];
-                DocumentReference reference = (DocumentReference) invocation.getArguments()[1];
-                when(document.getReference()).thenReturn(reference);
-                return null;
-            }
-
-        }).when(fileSystem).rename(any(Document.class), any(DocumentReference.class));
 
         doAnswer(new Answer<Void>()
         {

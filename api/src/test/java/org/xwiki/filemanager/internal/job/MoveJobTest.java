@@ -239,7 +239,9 @@ public class MoveJobTest extends AbstractJobTest
 
         // Test the unique ID counter.
         Folder otherFolder = mockFolder("Resilience");
-        DocumentReference newReference = ref("Resilience1");
+        Folder newFolder =
+            mockFolder("Resilience1", "Concerto", "Projects", Arrays.asList("Specs"), Arrays.asList("readme.txt"));
+        DocumentReference newReference = newFolder.getReference();
         generateReference(otherFolder.getReference(), newReference);
 
         MoveRequest request = new MoveRequest();
@@ -248,8 +250,9 @@ public class MoveJobTest extends AbstractJobTest
 
         execute(request);
 
-        verify(folder).setName(otherFolder.getName());
-        verify(fileSystem).rename(folder, newReference);
+        verify(fileSystem).rename(folder.getReference(), newReference);
+        verify(newFolder).setName(otherFolder.getName());
+        verify(fileSystem).save(newFolder);
 
         verify(childFolder).setParentReference(newReference);
         verify(fileSystem).save(childFolder);
@@ -266,7 +269,7 @@ public class MoveJobTest extends AbstractJobTest
         Folder childFolder = mockFolder("Specs", "Concerto");
         File childFile = mockFile("readme.txt", "Concerto");
 
-        when(fileSystem.canEdit(folder.getReference())).thenReturn(false);
+        when(fileSystem.canDelete(folder.getReference())).thenReturn(false);
 
         DocumentReference newReference = ref("Resilience");
 
@@ -277,7 +280,7 @@ public class MoveJobTest extends AbstractJobTest
         execute(request);
 
         verify(mocker.getMockedLogger()).error("You are not allowed to rename the folder [{}].", folder.getReference());
-        verify(fileSystem, never()).rename(folder, newReference);
+        verify(fileSystem, never()).rename(folder.getReference(), newReference);
         verify(fileSystem, never()).save(childFolder);
         verify(fileSystem, never()).save(childFile);
     }
@@ -301,7 +304,7 @@ public class MoveJobTest extends AbstractJobTest
         execute(request);
 
         verify(mocker.getMockedLogger()).error("You are not allowed to create the folder [{}].", newReference);
-        verify(fileSystem, never()).rename(eq(folder), any(DocumentReference.class));
+        verify(fileSystem, never()).rename(eq(folder.getReference()), any(DocumentReference.class));
         verify(fileSystem, never()).save(childFolder);
         verify(fileSystem, never()).save(childFile);
     }
@@ -322,7 +325,7 @@ public class MoveJobTest extends AbstractJobTest
 
         verify(mocker.getMockedLogger()).error("A folder with the same name [{}] already exists under [{}]",
             resilience.getName(), projects.getReference());
-        verify(fileSystem, never()).rename(concerto, resilience.getReference());
+        verify(fileSystem, never()).rename(concerto.getReference(), resilience.getReference());
     }
 
     @Test
@@ -332,7 +335,9 @@ public class MoveJobTest extends AbstractJobTest
         mockFolder("Resilience");
         File file = mockFile("readme.txt", "Concerto", "Resilience");
 
-        DocumentReference newReference = ref("README");
+        File newFile = mockFile("README", "readme.txt", Arrays.asList("Concerto", "Resilience"));
+        DocumentReference newReference = newFile.getReference();
+
         generateReference(newReference, newReference);
 
         MoveRequest request = new MoveRequest();
@@ -341,15 +346,16 @@ public class MoveJobTest extends AbstractJobTest
 
         execute(request);
 
-        verify(file).setName(newReference.getName());
-        verify(fileSystem).rename(file, newReference);
+        verify(fileSystem).rename(file.getReference(), newReference);
+        verify(newFile).setName(newReference.getName());
+        verify(fileSystem).save(newFile);
     }
 
     @Test
     public void renameProtectedFile() throws Exception
     {
         File file = mockFile("readme.txt", "Concerto", "Resilience");
-        when(fileSystem.canEdit(file.getReference())).thenReturn(false);
+        when(fileSystem.canDelete(file.getReference())).thenReturn(false);
 
         DocumentReference newReference = ref("README");
 
@@ -359,7 +365,7 @@ public class MoveJobTest extends AbstractJobTest
 
         execute(request);
 
-        verify(fileSystem, never()).rename(file, newReference);
+        verify(fileSystem, never()).rename(file.getReference(), newReference);
         verify(mocker.getMockedLogger()).error("You are not allowed to rename the file [{}].", file.getReference());
     }
 
@@ -378,7 +384,7 @@ public class MoveJobTest extends AbstractJobTest
 
         execute(request);
 
-        verify(fileSystem, never()).rename(eq(file), any(DocumentReference.class));
+        verify(fileSystem, never()).rename(eq(file.getReference()), any(DocumentReference.class));
         verify(mocker.getMockedLogger()).error("You are not allowed to create the file [{}].", newReference);
     }
 
@@ -396,7 +402,7 @@ public class MoveJobTest extends AbstractJobTest
 
         execute(request);
 
-        verify(fileSystem, never()).rename(file, readme.getReference());
+        verify(fileSystem, never()).rename(file.getReference(), readme.getReference());
         verify(mocker.getMockedLogger()).error("A file with the same name [{}] already exists under [{}]",
             readme.getName(), folder.getReference());
     }
@@ -412,7 +418,8 @@ public class MoveJobTest extends AbstractJobTest
         Folder projects =
             mockFolder("Projects", null, Arrays.asList("Concerto", "Resilience"), Collections.<String>emptyList());
 
-        DocumentReference actualDestinationReference = ref("README1");
+        File newFile = mockFile("README1", "readme.txt", Arrays.asList("Concerto", "Resilience"));
+        DocumentReference actualDestinationReference = newFile.getReference();
         generateReference(readme.getReference(), actualDestinationReference);
 
         MoveRequest request = new MoveRequest();
@@ -422,9 +429,8 @@ public class MoveJobTest extends AbstractJobTest
         execute(request);
 
         assertEquals(Arrays.asList("Resilience", "Projects"), getParents(file));
-
-        verify(file).setName(readme.getName());
-        verify(fileSystem).rename(file, actualDestinationReference);
-        assertEquals(Arrays.asList("Resilience", "Projects"), getParents(file));
+        verify(fileSystem).rename(file.getReference(), actualDestinationReference);
+        verify(newFile).setName(readme.getName());
+        verify(fileSystem).save(newFile);
     }
 }

@@ -84,12 +84,12 @@ public interface FileSystem
     void delete(DocumentReference reference);
 
     /**
-     * Renames the given file or folder.
+     * Renames the specified file or folder.
      * 
-     * @param document the document to rename
+     * @param oldReference the document to rename
      * @param newReference the new reference
      */
-    void rename(Document document, DocumentReference newReference);
+    void rename(DocumentReference oldReference, DocumentReference newReference);
 
     /**
      * Copy a file or a folder.
