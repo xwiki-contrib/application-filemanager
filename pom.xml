@@ -66,8 +66,24 @@
       <url>http://nexus.xwiki.org/nexus/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
-  <modules>
-    <module>api</module>
-    <module>ui</module>
-  </modules>
+  <!-- HACK: We cannot release (perform) the API and UI modules at the same time because the API must use Java 6 in order
+    to work with older versions of XWiki while the UI module requires at build time some recent XWiki tools that have
+    been released with Java 7. As a consequene the release steps are:
+    (1) :prepare -DautoVersionSubmodules -Papi,ui
+    (2) :perform -Papi (using Java 6)
+    (3) :perform -Pui (using Java 7) -->
+  <profiles>
+    <profile>
+      <id>api</id>
+      <modules>
+        <module>api</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>ui</id>
+      <modules>
+        <module>ui</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
