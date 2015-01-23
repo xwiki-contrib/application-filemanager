@@ -121,14 +121,12 @@
     </property>
     <property>
       <code>ul.filemanager-recent {
-  margin: 0 0 0 0.5em !important;
+  margin: 0;
   overflow: hidden;
-  padding: 0 !important;
+  padding: 0;
 }
 
 ul.filemanager-recent li {
-  height: 100%;
-  width: 100% !important;
   list-style-type: none;
   padding: 0.1em 0;
 }
