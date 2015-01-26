@@ -120,18 +120,18 @@
       <cache>long</cache>
     </property>
     <property>
-      <code>ul.filemanager-recent {
+      <code>.filemanager-recent {
   margin: 0;
   overflow: hidden;
   padding: 0;
 }
 
-ul.filemanager-recent li {
+.filemanager-recent li {
   list-style-type: none;
   padding: 0.1em 0;
 }
 
-ul.filemanager-recent li:last-of-type {
+.filemanager-recent li:last-of-type {
   margin-top: 10px;
 }</code>
     </property>
