@@ -72,7 +72,7 @@ filemanager.livetable.emptyvalue=-
 
 # Live table specific keys
 filemanager.livetable.description=Description
-filemanager.appname=Documents
+filemanager.appname=Fichiers
 
 # Recent files macro
 filemanager.recentfiles.title=Fichiers récents</content>
