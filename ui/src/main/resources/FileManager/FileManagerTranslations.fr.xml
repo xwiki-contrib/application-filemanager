@@ -46,6 +46,13 @@
   <content># Class fields
 FileManager.FileManagerClass_description=Description
 
+# Generic
+filemanager.author=par {0}
+filemanager.date=le {0}
+filemanager.nofiles=Il n'y a pas de fichiers
+filemanager.addfiles=Ajouter des fichiers
+filemanager.seeallfiles=Voir tous les fichiers
+
 # Live table generic keys
 filemanager.livetable.doc.title=Titre
 filemanager.livetable.doc.name=Nom
@@ -65,6 +72,8 @@ filemanager.livetable.emptyvalue=-
 
 # Live table specific keys
 filemanager.livetable.description=Description
+filemanager.appname=Fichiers
 
-filemanager.appname=Documents</content>
+# Recent files macro
+filemanager.recentfiles.title=Fichiers récents</content>
 </xwikidoc>
