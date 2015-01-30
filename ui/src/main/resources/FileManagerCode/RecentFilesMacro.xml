@@ -121,9 +121,10 @@
     </property>
     <property>
       <code>.filemanager-recent {
-  margin: 0;
+  color: #656565;
+  margin: 0 !important;
   overflow: hidden;
-  padding: 0;
+  padding: 0 !important;
 }
 
 .filemanager-recent li {
