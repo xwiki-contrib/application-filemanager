@@ -133,7 +133,7 @@
   #if ($hasOrphanFolders)
     #set ($discard = $children.add({
       'id': '/orphanFolders',
-      'text': 'Orphan Folders',
+      'text': $services.localization.render('fileManager.tree.orphanFolders'),
       'icon': $xwiki.getSkinFile('icons/silk/folder_error.png'),
       'children': true,
       'data': {
@@ -144,7 +144,7 @@
   #end
   #set ($discard = $children.add({
     'id': '/allFiles',
-    'text': 'All Files',
+    'text': $services.localization.render('fileManager.tree.allFiles'),
     'icon': $xwiki.getSkinFile('icons/silk/page_white_stack.png'),
     'data': {
       'type': 'files'
@@ -154,7 +154,7 @@
   #if ($hasOrphanFiles)
     #set ($discard = $children.add({
       'id': '/orphanFiles',
-      'text': 'Orphan Files',
+      'text': $services.localization.render('fileManager.tree.orphanFiles'),
       'icon': $xwiki.getSkinFile('icons/silk/page_white_error.png'),
       'data': {
         'type': 'files'
@@ -163,7 +163,7 @@
   #end
   #set ($discard = $children.add({
     'id': '/tasks',
-    'text': 'Tasks',
+    'text': $services.localization.render('fileManager.tree.tasks'),
     'icon': $xwiki.getSkinFile('icons/silk/clock.png'),
     'data': {
       'type': 'jobs'
@@ -221,7 +221,7 @@
 #macro (addPaginationNode $parentId $offset $totalCount $icon $siblings)
   #set ($discard = $siblings.add({
     'id': "/pagination:$parentId",
-    'text': "$!mathtool.sub($totalCount, $offset) more ...",
+    'text': $services.localization.render('fileManager.tree.pagination.more', [$mathtool.sub($totalCount, $offset)]),
     'icon': $xwiki.getSkinFile("icons/silk/${icon}.png"),
     'children': false,
     'data': {
@@ -244,61 +244,61 @@
     },
     'folder': {
       'createFolder': {
-        'label': 'New Folder',
+        'label': $services.localization.render('fileManager.action.newFolder'),
         'icon': $xwiki.getSkinFile('icons/silk/folder_add.png'),
         'action': 'create',
         'parameters': {
           'template': {
-            'text': 'New Folder',
+            'text': $services.localization.render('fileManager.action.newFolder'),
             'icon': $xwiki.getSkinFile('icons/silk/folder.png')
           }
         }
       },
       'createFile': {
-        'label': 'New File',
+        'label': $services.localization.render('fileManager.action.newFile'),
         'icon': $xwiki.getSkinFile('icons/silk/page_white_add.png')
       },
       'openLink': {
         'separator_before': true,
-        'label': 'Open',
+        'label': $services.localization.render('fileManager.action.open'),
         'icon': $xwiki.getSkinFile('icons/silk/application_view_list.png')
       },
       'openLinkInNewTab': {
-        'label': 'Open in New Tab',
+        'label': $services.localization.render('fileManager.action.openInNewTab'),
         'icon': $xwiki.getSkinFile('icons/silk/application_double.png')
       },
       'refresh': {
-        'label': 'Refresh',
+        'label': $services.localization.render('fileManager.action.refresh'),
         'icon': $xwiki.getSkinFile('icons/silk/arrow_refresh.png')
       },
       'download': {
         'separator_before': true,
-        'label': 'Download',
+        'label': $services.localization.render('fileManager.action.download'),
         'icon': $xwiki.getSkinFile('icons/silk/page_white_put.png')
       },
       'cut': {
         'separator_before': true,
-        'label': 'Cut',
+        'label': $services.localization.render('fileManager.action.cut'),
         'icon': $xwiki.getSkinFile('icons/silk/cut.png')
       },
       'copy': {
-        'label': 'Copy',
+        'label': $services.localization.render('fileManager.action.copy'),
         'icon': $xwiki.getSkinFile('icons/silk/page_white_copy.png')
       },
       'paste': {
-        'label': 'Paste Into Folder',
+        'label': $services.localization.render('fileManager.action.pasteIntoFolder'),
         'icon': $xwiki.getSkinFile('icons/silk/page_white_paste.png')
       },
       'rename': {
         'separator_before': true,
-        'label': 'Rename...',
+        'label': $services.localization.render('fileManager.action.rename'),
         'icon': $xwiki.getSkinFile('icons/silk/textfield_rename.png')
       },
       'remove': {
-        'label': 'Delete',
+        'label': $services.localization.render('fileManager.action.delete'),
         'icon': $xwiki.getSkinFile('icons/silk/cross.png'),
         'parameters': {
-          'confirmationMessage': 'Are you sure you want to delete the selected folders?'
+          'confirmationMessage': $services.localization.render('fileManager.action.deleteFoldersConfirmation')
         }
       }
     }
@@ -310,7 +310,7 @@
   #set ($contextMenuByNodeType.drive.download = $contextMenuByNodeType.folder.download)
   #set ($discard = $contextMenuByNodeType.drive.paste.putAll($contextMenuByNodeType.folder.paste))
   #set ($contextMenuByNodeType.drive.refresh.separator_before = true)
-  #set ($contextMenuByNodeType.drive.paste.label = 'Paste')
+  #set ($contextMenuByNodeType.drive.paste.label = $services.localization.render('fileManager.action.paste'))
   #set ($contextMenuByNodeType.drive.paste.separator_before = true)
   ##
   #set ($return = $NULL)

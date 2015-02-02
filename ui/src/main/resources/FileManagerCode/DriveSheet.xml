@@ -210,28 +210,28 @@
   #set ($columns = [
     {
       'id': 'name',
-      'title': $services.localization.render('Name'),
+      'title': $services.localization.render('fileManager.liveTable.name'),
       'type': 'file',
       'sortable': true,
       'filterable': true
     }, {
       'id': 'size',
-      'title': $services.localization.render('Size'),
+      'title': $services.localization.render('fileManager.liveTable.size'),
       'type': 'bytes',
       'sortable': true
     }, {
       'id': 'mediaType',
-      'title': $services.localization.render('Type'),
+      'title': $services.localization.render('fileManager.liveTable.type'),
       'type': 'mediaType'
     }, {
       'id': 'date',
-      'title': $services.localization.render('Modified'),
+      'title': $services.localization.render('fileManager.liveTable.date'),
       'type': 'date',
       'sortable': true,
       'filterable': true
     }, {
       'id': 'author',
-      'title': $services.localization.render('Author'),
+      'title': $services.localization.render('fileManager.liveTable.author'),
       'type': 'user',
       'sortable': true,
       'filterable': true
@@ -241,43 +241,62 @@
   &lt;div ng-show="drive.viewer == 'files'" class="btn-toolbar file-actions" role="toolbar"&gt;
     &lt;div class="btn-group" ng-show="drive.location.type == 'drive' || drive.location.type == 'folder'"&gt;
       &lt;button class="btn btn-default" ng-disabled="drive.readOnly || !drive.location.node.data.canCreate"
-          ng-click="drive.viewer = 'upload'" title="Upload a new file to the current folder" type="button"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_add.png')" alt="New File" class="icon" /&gt;New File
+          ng-click="drive.viewer = 'upload'" type="button"
+          title="$services.localization.render('fileManager.action.newFileHint')"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_add.png')"
+          alt="$services.localization.render('fileManager.action.newFile')"
+          class="icon" /&gt;$services.localization.render('fileManager.action.newFile')
       &lt;/button&gt;
     &lt;/div&gt;&lt;div class="btn-group" dropdown&gt;
-      &lt;button type="button" class="btn btn-default" title="Download selected files"
+      &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.downloadFilesHint')"
           ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="download(selectedFiles)"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_put.png')" alt="Download" class="icon" /&gt;Download
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_put.png')"
+          alt="$services.localization.render('fileManager.action.download')"
+          class="icon" /&gt;$services.localization.render('fileManager.action.download')
       &lt;/button&gt;
       &lt;button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle&gt;
         &lt;span class="caret"&gt;&lt;/span&gt;
       &lt;/button&gt;
       &lt;ul class="dropdown-menu" role="menu"&gt;
-        &lt;li&gt;&lt;a href="#" ng-click="drive.viewer = 'downloads'; $event.preventDefault()"&gt;Recent Downloads&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;
+          &lt;a href="#" ng-click="drive.viewer = 'downloads'; $event.preventDefault()"&gt;
+            $services.localization.render('fileManager.action.recentDownloads')
+          &lt;/a&gt;
+        &lt;/li&gt;
       &lt;/ul&gt;
     &lt;/div&gt;&lt;div class="btn-group"&gt;
-      &lt;button type="button" class="btn btn-default" title="Cut selected files"
+      &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.cutFilesHint')"
           ng-disabled="drive.readOnly || !canCut(selectedFiles)" ng-click="cut(selectedFiles)"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/cut.png')" alt="Cut" class="icon" /&gt;Cut
+        &lt;img src="$xwiki.getSkinFile('icons/silk/cut.png')"
+          alt="$services.localization.render('fileManager.action.cut')"
+          class="icon" /&gt;$services.localization.render('fileManager.action.cut')
       &lt;/button&gt;
-      &lt;button type="button" class="btn btn-default" title="Copy selected files"
+      &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.copyFilesHint')"
           ng-disabled="drive.readOnly || !canCopy(selectedFiles)" ng-click="copy(selectedFiles)"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_copy.png')" alt="Copy" class="icon" /&gt;Copy
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_copy.png')"
+          alt="$services.localization.render('fileManager.action.copy')"
+          class="icon" /&gt;$services.localization.render('fileManager.action.copy')
       &lt;/button&gt;
-      &lt;button type="button" class="btn btn-default" title="Paste into the current folder"
+      &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.pasteHint')"
           ng-if="drive.location.type == 'drive' || drive.location.type == 'folder'"
           ng-disabled="!clipboard" ng-click="paste()"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_paste.png')" alt="Paste" class="icon" /&gt;Paste
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_paste.png')"
+          alt="$services.localization.render('fileManager.action.paste')"
+          class="icon" /&gt;$services.localization.render('fileManager.action.paste')
       &lt;/button&gt;
     &lt;/div&gt;&lt;div class="btn-group"&gt;
-      &lt;button type="button" class="btn btn-default" title="Rename selected file"
+      &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.renameFileHint')"
           ng-disabled="drive.readOnly || selectedFiles.length != 1 || !selectedFiles[0].canRename"
           ng-click="rename(selectedFiles[0])"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/textfield_rename.png')" alt="Rename" class="icon" /&gt;Rename...
+        &lt;img src="$xwiki.getSkinFile('icons/silk/textfield_rename.png')"
+          alt="$services.localization.render('fileManager.action.rename')"
+          class="icon" /&gt;$services.localization.render('fileManager.action.rename')
       &lt;/button&gt;
-      &lt;button type="button" class="btn btn-default" title="Delete selected files"
+      &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.deleteFilesHint')"
           ng-disabled="drive.readOnly || !canDelete(selectedFiles)" ng-click="delete(selectedFiles)"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/cross.png')" alt="Delete" class="icon" /&gt;Delete
+        &lt;img src="$xwiki.getSkinFile('icons/silk/cross.png')"
+          alt="$services.localization.render('fileManager.action.delete')"
+          class="icon" /&gt;$services.localization.render('fileManager.action.delete')
       &lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
@@ -290,26 +309,32 @@
 #macro (fileUploadTemplate)
   &lt;div class="btn-toolbar" role="toolbar"&gt;
     &lt;div class="btn-group"&gt;
-      &lt;button type="button" class="btn btn-default" title="Back to the file list" ng-if="back" ng-click="back()"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')" alt="Back" class="icon" /&gt;Back
+      &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.backToFileList')"
+          ng-if="back" ng-click="back()"&gt;
+        &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')"
+          alt="$services.localization.render('fileManager.action.back')"
+          class="icon" /&gt;$services.localization.render('fileManager.action.back')
       &lt;/button&gt;
     &lt;/div&gt;
     &lt;div class="btn-group"&gt;
-      &lt;button type="button" class="btn btn-default" title="Clear the upload status"
-        ng-if="drive.uploads.finished.length &gt; 0" ng-click="clearUploads()"&gt;Clear&lt;/button&gt;
+      &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.clearUploadStatus')"
+         ng-if="drive.uploads.finished.length &gt; 0" ng-click="clearUploads()"&gt;
+        $services.localization.render('fileManager.action.clear')
+      &lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-  &lt;h3&gt;Upload files to {{drive.location.node.text}} folder&lt;/h3&gt;
+  &lt;h3&gt;$services.localization.render('fileManager.action.upload.destinationFolder', ['{{drive.location.node.text}}'])&lt;/h3&gt;
   &lt;input type="file" on-file-select="uploadFiles($files)" multiple
     folder-selection-enabled="folderSelectionEnabled" /&gt;
   &lt;label ng-show="folderSelectionSupported"&gt;
-    &lt;input type="checkbox" ng-model="folderSelectionEnabled" /&gt; Enable folder selection
+    &lt;input type="checkbox" ng-model="folderSelectionEnabled" /&gt;
+    $services.localization.render('fileManager.action.upload.enableFolderSelection')
   &lt;/label&gt;
   &lt;div ng-if="dropSupported" on-file-drop="uploadFiles($files)" drag-over-class="active"
-    class="file-drop-zone"&gt;... or you can drop files here&lt;/div&gt;
+    class="file-drop-zone"&gt;$services.localization.render('fileManager.action.upload.dropZoneHint')&lt;/div&gt;
   &lt;ul class="uploads"&gt;
     &lt;li class="upload loading uploads-pending" ng-show="drive.uploads.pending.length &gt; 0"&gt;
-      {{drive.uploads.pending.length}} uploads pending
+      $services.localization.render('fileManager.action.upload.pendingUploadsCount', ['{{drive.uploads.pending.length}}'])
     &lt;/li&gt;
     &lt;li class="upload" ng-repeat="upload in drive.uploads.running" file-upload-status="upload"&gt;&lt;/li&gt;
     &lt;li class="upload" ng-repeat="upload in drive.uploads.finished" file-upload-status="upload"&gt;&lt;/li&gt;
@@ -321,23 +346,23 @@
     &lt;span file="upload.file"&gt;&lt;/span&gt;
     &lt;span class="upload-file-path"&gt;
       &lt;span ng-if="upload.status == 'Done'"&gt;({{ upload.file.size | bytes }}) {{ upload.file.date | timeAgo }}&lt;/span&gt;
-      in {{upload.path.join(' / ')}}
+      $services.localization.render('fileManager.action.upload.destinationPath', ['{{upload.path.join(" / ")}}'])
     &lt;/span&gt;
   &lt;/div&gt;
   &lt;div class="progress-container {{upload.status}}" ng-if="upload.status != 'Done'"&gt;
     &lt;xprogress value="{{upload.loaded}}" max="{{upload.total}}"&gt;&lt;/xprogress&gt;
     &lt;input type="image" src="$xwiki.getSkinFile('icons/silk/cancel.png')" ng-if="upload.status == 'InProgress'"
-      class="cancel icon" title="Cancel this upload" ng-click="upload.abort()" /&gt;
+      class="cancel icon" title="$services.localization.render('fileManager.action.upload.cancelHint')" ng-click="upload.abort()" /&gt;
     &lt;div class="progress-info"&gt;
       &lt;span ng-if="upload.status == 'InProgress' &amp;&amp; upload.estimatedRemainingTime"&gt;
-        {{ upload.estimatedRemainingTime | duration }} remaining
-        &amp;#8212
+        $services.localization.render('fileManager.action.upload.estimatedRemainingTime', ['{{ upload.estimatedRemainingTime | duration }}'])
+        &amp;#8212;
       &lt;/span&gt;
       &lt;span ng-if="upload.status == 'Aborted'"&gt;
         {{ upload.end | timeAgo }}
-        &amp;#8212
+        &amp;#8212;
       &lt;/span&gt;
-      {{ upload.loaded | bytes }} of {{ upload.total | bytes }}
+      $services.localization.render('fileManager.action.upload.bytesSent', ['{{ upload.loaded | bytes }}', '{{ upload.total | bytes }}'])
     &lt;/div&gt;
   &lt;/div&gt;
 #end
@@ -346,13 +371,15 @@
   &lt;div ng-show="drive.viewer == 'downloads'" ng-controller="DownloadCtrl"&gt;
     &lt;div class="btn-toolbar" role="toolbar"&gt;
       &lt;div class="btn-group"&gt;
-        &lt;button type="button" class="btn btn-default" title="Back to the file list"
-            ng-click="drive.viewer = 'files'"&gt;
-          &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')" alt="Back" class="icon" /&gt;Back
+        &lt;button type="button" class="btn btn-default" ng-click="drive.viewer = 'files'"
+            title="$services.localization.render('fileManager.action.backToFileList')"&gt;
+          &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')"
+            alt="$services.localization.render('fileManager.action.back')"
+            class="icon" /&gt;$services.localization.render('fileManager.action.back')
         &lt;/button&gt;
       &lt;/div&gt;
     &lt;/div&gt;
-    &lt;h3&gt;Recent Downloads&lt;/h3&gt;
+    &lt;h3&gt;$services.localization.render('fileManager.action.recentDownloads')&lt;/h3&gt;
     &lt;ul class="downloads"&gt;
       &lt;li class="download" ng-repeat="download in downloadsInProgress = (drive.jobs | filter:isDownloadReady(false))"&gt;
         &lt;div&gt;
@@ -365,7 +392,7 @@
         &lt;div class="progress-container"&gt;
           &lt;xprogress value="{{download.progress.offset}}" max="1"&gt;&lt;/xprogress&gt;
           &lt;div class="progress-info"&gt;
-            Building package...
+            $services.localization.render('fileManager.action.download.buildingPackage')
           &lt;/div&gt;
         &lt;/div&gt;
       &lt;/li&gt;
@@ -376,7 +403,9 @@
           ({{ download.outputFileSize | bytes }}) {{ download.endDate | timeAgo }}
         &lt;/span&gt;
       &lt;/li&gt;
-      &lt;li class="download" ng-show="downloadsInProgress.length == 0 &amp;&amp; downloadsReady.length == 0"&gt;No recent downloads&lt;/li&gt;
+      &lt;li class="download" ng-show="downloadsInProgress.length == 0 &amp;&amp; downloadsReady.length == 0"&gt;
+        $services.localization.render('fileManager.action.noRecentDownloads')
+      &lt;/li&gt;
     &lt;/ul&gt;
   &lt;/div&gt;
 #end
@@ -525,7 +554,7 @@
         <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
@@ -676,7 +705,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
         <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
@@ -1168,7 +1197,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
         <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
@@ -1201,20 +1230,25 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
 
   driveFilters.filter('mediaType', function() {
     var categories = {
-      Text: ['text/', 'application/xml', 'application/javascript', 'application/ecmascript',
+      "$services.localization.render('fileManager.fileType.text')":
+        ['text/', 'application/xml', 'application/javascript', 'application/ecmascript',
         'application/json', 'application/x-sh', '+xml'],
-      Image: ['image/'],
-      Audio: ['audio/'],
-      Video: ['video/'],
-      Document: ['application/pdf', 'application/postscript', 'application/msword', 'application/vnd.ms-word.',
+      "$services.localization.render('fileManager.fileType.image')": ['image/'],
+      "$services.localization.render('fileManager.fileType.audio')": ['audio/'],
+      "$services.localization.render('fileManager.fileType.video')": ['video/'],
+      "$services.localization.render('fileManager.fileType.document')":
+        ['application/pdf', 'application/postscript', 'application/msword', 'application/vnd.ms-word.',
         'application/vnd.oasis.opendocument.text', 'application/vnd.openxmlformats-officedocument.word'],
-      Presentation: ['application/vnd.ms-powerpoint', 'application/vnd.oasis.opendocument.presentation',
+      "$services.localization.render('fileManager.fileType.presentation')":
+        ['application/vnd.ms-powerpoint', 'application/vnd.oasis.opendocument.presentation',
         'application/vnd.openxmlformats-officedocument.presentation'],
-      Spreadsheet: ['application/vnd.ms-excel', 'application/vnd.oasis.opendocument.spreadsheet',
+      "$services.localization.render('fileManager.fileType.spreadsheet')":
+        ['application/vnd.ms-excel', 'application/vnd.oasis.opendocument.spreadsheet',
         'application/vnd.openxmlformats-officedocument.spreadsheet'],
-      Archive: ['application/zip', 'application/x-gzip', 'application/x-bzip', 'application/x-tar',
+      "$services.localization.render('fileManager.fileType.archive')":
+        ['application/zip', 'application/x-gzip', 'application/x-bzip', 'application/x-tar',
         'application/x-gtar', 'application/vnd.xara', '-archive', '-compressed', '-package', '+zip'],
-      Font: ['application/font-', 'application/x-font-']
+      "$services.localization.render('fileManager.fileType.font')": ['application/font-', 'application/x-font-']
     };
 
     var getCategory = function(mediaType) {
@@ -1267,50 +1301,50 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
       {
         range: '0 to 45 seconds',
         limit: 45,
-        text: 'Seconds ago'
+        text: "$services.localization.render('fileManager.timeAgo.seconds')"
       }, {
         range: '45 to 90 seconds',
         limit: 90,
-        text: 'A minute ago'
+        text: "$services.localization.render('fileManager.timeAgo.minute')"
       }, {
         range: '90 seconds to 45 minutes',
         limit: 2700,
-        text: '__x__ minutes ago',
+        text: "$services.localization.render('fileManager.timeAgo.minutes', ['__x__'])",
         unit: 60
       }, {
         range: '45 to 90 minutes',
         limit: 5400,
-        text: 'An hour ago'
+        text: "$services.localization.render('fileManager.timeAgo.hour')"
       }, {
         range: '90 minutes to 22 hours',
         limit: 22 * 3600,
-        text: '__x__ hours ago',
+        text: "$services.localization.render('fileManager.timeAgo.hours', ['__x__'])",
         unit: 3600
       }, {
         range: '22 to 36 hours',
         limit: 36 * 3600,
-        text: 'A day ago'
+        text: "$services.localization.render('fileManager.timeAgo.day')"
       }, {
         range: '36 hours to 25 days',
         limit: 25 * 86400,
-        text: '__x__ days ago',
+        text: "$services.localization.render('fileManager.timeAgo.days', ['__x__'])",
         unit: 86400
       }, {
         range: '25 to 45 days',
         value: 45 * 86400,
-        text: 'A month ago'
+        text: "$services.localization.render('fileManager.timeAgo.month')"
       }, {
         range: '45 to 345 days',
         limit: 345 * 86400,
-        text: '__x__ months ago',
+        text: "$services.localization.render('fileManager.timeAgo.months', ['__x__'])",
         unit: 31 * 86400
       }, {
         range: '345 to 547 days (1.5 years)',
         limit: 547 * 86400,
-        text: 'A year ago'
+        text: "$services.localization.render('fileManager.timeAgo.year')"
       }, {
         range: '548 days+',
-        text: '__x__ years ago',
+        text: "$services.localization.render('fileManager.timeAgo.years', ['__x__'])",
         unit: 365 * 86400
       }
     ];
@@ -1456,7 +1490,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
         <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
@@ -1785,7 +1819,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
           return canPerformBatchOperation(files, 'Delete');
         };
         scope['delete'] = function(files) {
-          if (window.confirm('Are you sure you want to delete the selected files?')) {
+          if (window.confirm("$services.localization.render('fileManager.action.deleteFilesConfirmation')")) {
             // Clear the selection.
             scope.selection = {};
             scope.drive['delete'](getPaths(files)).done(refreshLiveTable);
@@ -2056,7 +2090,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
         <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
@@ -2244,7 +2278,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
         <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
@@ -2345,7 +2379,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
         <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
@@ -2542,7 +2576,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
         <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
@@ -2602,6 +2636,22 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
         <unmodifiable>0</unmodifiable>
         <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
       </code>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>6</number>
+        <prettyName>Content Type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators> ,|</separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>CSS|LESS</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
       <name>
         <disabled>0</disabled>
         <name>name</name>
@@ -2634,7 +2684,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
         <separators> ,|</separators>
         <size>1</size>
         <unmodifiable>0</unmodifiable>
-        <values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+        <values>currentPage|onDemand|always</values>
         <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
       </use>
     </class>
@@ -2962,6 +3012,9 @@ ul.jobs li.job + li.job {
 ul.jobs li.job &gt; dl {
   margin: 0 .5em;
 }</code>
+    </property>
+    <property>
+      <contentType>CSS</contentType>
     </property>
     <property>
       <name>Styles: File Live Table, Drive Tree, Pane Splitter, Button Group</name>

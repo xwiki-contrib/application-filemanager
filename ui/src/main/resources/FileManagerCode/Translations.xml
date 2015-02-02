@@ -31,15 +31,88 @@
   <parent>FileManagerCode.WebHome</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <date>1422870096000</date>
-  <contentUpdateDate>1422870088000</contentUpdateDate>
+  <date>1422904236000</date>
+  <contentUpdateDate>1422904112000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content>fileManager.recentFiles.creator=by {0}
+  <content>fileManager.tree.allFiles=All Files
+fileManager.tree.orphanFiles=Orphan Files
+fileManager.tree.orphanFolders=Orphan Folders
+fileManager.tree.tasks=Tasks
+fileManager.tree.pagination.more={0} more ...
+
+fileManager.action.newFolder=New Folder
+fileManager.action.newFile=New File
+fileManager.action.newFileHint=Upload a new file to the current folder
+fileManager.action.open=Open
+fileManager.action.openInNewTab=Open in New Tab
+fileManager.action.refresh=Refresh
+fileManager.action.download=Download
+fileManager.action.download.buildingPackage=Building package...
+fileManager.action.downloadFilesHint=Download selected files
+fileManager.action.recentDownloads=Recent Downloads
+fileManager.action.noRecentDownloads=No recent downloads
+fileManager.action.cut=Cut
+fileManager.action.cutFilesHint=Cut selected files
+fileManager.action.copy=Copy
+fileManager.action.copyFilesHint=Copy selected files
+fileManager.action.paste=Paste
+fileManager.action.pasteHint=Paste into the current folder
+fileManager.action.pasteIntoFolder=Paste Into Folder
+fileManager.action.rename=Rename...
+fileManager.action.renameFileHint=Rename selected file
+fileManager.action.delete=Delete
+fileManager.action.deleteFilesHint=Delete selected files
+fileManager.action.deleteFilesConfirmation=Are you sure you want to delete the selected files?
+fileManager.action.deleteFoldersConfirmation=Are you sure you want to delete the selected folders?
+fileManager.action.back=Back
+fileManager.action.backToFileList=Back to the file list
+fileManager.action.clear=Clear
+fileManager.action.clearUploadStatus=Clear the upload status
+
+fileManager.action.upload.destinationFolder=Upload files to {0} folder
+fileManager.action.upload.destinationPath=in {0}
+fileManager.action.upload.enableFolderSelection=Enable folder selection
+fileManager.action.upload.dropZoneHint=... or you can drop files here
+fileManager.action.upload.pendingUploadsCount={0} uploads pending
+fileManager.action.upload.cancelHint=Cancel this upload
+fileManager.action.upload.estimatedRemainingTime={0} remaining
+fileManager.action.upload.bytesSent={0} of {1}
+
+fileManager.liveTable.name=Name
+fileManager.liveTable.size=Size
+fileManager.liveTable.type=Type
+fileManager.liveTable.date=Modified
+fileManager.liveTable.author=Author
+
+fileManager.fileType.text=Text
+fileManager.fileType.image=Image
+fileManager.fileType.audio=Audio
+fileManager.fileType.video=Video
+fileManager.fileType.document=Document
+fileManager.fileType.presentation=Presentation
+fileManager.fileType.spreadsheet=Spreadsheet
+fileManager.fileType.archive=Archive
+fileManager.fileType.font=Font
+
+fileManager.timeAgo.seconds=Seconds ago
+fileManager.timeAgo.minute=A minute ago
+fileManager.timeAgo.minutes={0} minutes ago
+fileManager.timeAgo.hour=An hour ago
+fileManager.timeAgo.hours={0} hours ago
+fileManager.timeAgo.day=A day ago
+fileManager.timeAgo.days={0} days ago
+fileManager.timeAgo.month=A month ago
+fileManager.timeAgo.months={0} months ago
+fileManager.timeAgo.year=A year ago
+fileManager.timeAgo.years={0} years ago
+
+# Recent Files Macro
+fileManager.recentFiles.creator=by {0}
 fileManager.recentFiles.creationDate=on {0}
 fileManager.recentFiles.noFiles=There are no files yet
 fileManager.recentFiles.addFiles=Add files
