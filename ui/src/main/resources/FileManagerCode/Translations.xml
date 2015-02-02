@@ -24,10 +24,11 @@
   <web>FileManagerCode</web>
   <name>Translations</name>
   <language/>
-  <defaultLanguage/>
+  <defaultLanguage>en</defaultLanguage>
   <translation>0</translation>
   <creator>xwiki:XWiki.Admin</creator>
   <creationDate>1422868958000</creationDate>
+  <parent>FileManagerCode.WebHome</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <date>1422870096000</date>
@@ -80,7 +81,7 @@ rendering.macro.fileManager.recentFiles.parameter.limit.description=The maximum 
       </scope>
     </class>
     <property>
-      <scope>ON_DEMAND</scope>
+      <scope>WIKI</scope>
     </property>
   </object>
 </xwikidoc>

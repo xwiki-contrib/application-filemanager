@@ -294,7 +294,6 @@
 
 {{velocity}}
 #set ($discard = $xwiki.ssx.use('FileManagerCode.RecentFilesMacro'))
-#set ($discard = $services.localization.use('document', 'FileManagerCode.Translations'))
 #set ($statement = 'from doc.object(FileManagerCode.FileClass) as file order by doc.creationDate desc')
 #set ($fetchLimit = 100)
 #set ($viewLimit = $mathtool.toInteger($xcontext.macro.params.limit))
