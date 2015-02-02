@@ -42,13 +42,6 @@
   <content># Class fields
 FileManager.FileManagerClass_description=Description
 
-# Generic
-filemanager.author=by {0}
-filemanager.date=on {0}
-filemanager.nofiles=There are no files yet
-filemanager.addfiles=Add files
-filemanager.seeallfiles=See all files
-
 # Live table generic keys
 filemanager.livetable.doc.title=Page title
 filemanager.livetable.doc.name=Page name
@@ -70,8 +63,12 @@ filemanager.livetable.emptyvalue=-
 filemanager.livetable.description=Description
 filemanager.appname=File Manager
 
-# Recent files macro
-filemanager.recentfiles.title=Recent files</content>
+# Old keys, from the first version of the application.
+contrib.FM.description=Description of the file
+contrib.FM.noDescription=No description of this file is available.
+contrib.FM.noAttachment=No file is attached to this document. Add one by clicking on "edit" or by directly adding it as an attachment.
+contrib.FM.editDescription=Save and view
+contrib.FM.change.explanations=You can manage the file(s) to attach to this document using the "Attachments" section below. You can also tag this document with the application at the bottom of this section, so it would be easier to find it.</content>
   <object>
     <name>FileManager.FileManagerTranslations</name>
     <number>0</number>

@@ -42,13 +42,6 @@
   <content># Class fields
 FileManager.FileManagerClass_description=Description
 
-# Generic
-filemanager.author=par {0}
-filemanager.date=le {0}
-filemanager.nofiles=Il n'y a pas de fichiers
-filemanager.addfiles=Ajouter des fichiers
-filemanager.seeallfiles=Voir tous les fichiers
-
 # Live table generic keys
 filemanager.livetable.doc.title=Titre
 filemanager.livetable.doc.name=Nom
@@ -70,6 +63,13 @@ filemanager.livetable.emptyvalue=-
 filemanager.livetable.description=Description
 filemanager.appname=Fichiers
 
-# Recent files macro
-filemanager.recentfiles.title=Fichiers récents</content>
+# Old keys, from the first version of the application.
+contrib.FM.description=Description du fichier
+contrib.FM.noDescription=Aucune description de ce fichier n'est disponible.
+contrib.FM.noAttachment=Aucun fichier n'est actuellement attaché à ce document. Ajoutez en un en cliquant sur "éditer" ou en ajoutant directement le fichier en tant que pièce jointe. 
+contrib.FM.editDescription=Sauver et visualiser
+contrib.FM.change.explanations=Joignez votre fichier en utilisant la section "Pièces jointes" ci-dessous. Vous pouvez aussi ajouter des 'tags' à ce document (en utilisant l'application située en bas de cette section) pour qu'il soit plus facile de le retrouver.
+
+rendering.macro.filetagcloud.name=Gestionnaire des documents
+rendering.macro.filetagcloud.description=Affiche les mots clés des documents du gestionnaire des fichiers.</content>
 </xwikidoc>
