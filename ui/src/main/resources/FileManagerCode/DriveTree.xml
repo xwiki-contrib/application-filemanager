@@ -78,7 +78,8 @@
   #elseif ($nodeId == '/orphanFolders')
     #addOrphanFolderNodes($children)
   #else
-    #set ($nodeRef = $services.model.resolveDocument($nodeId, 'explicit', $doc.documentReference))
+    ## Don't use resolve because the node id is the name of a document and it can contain a dot.
+    #set ($nodeRef = $services.model.createDocumentReference($doc.wiki, $doc.space, $nodeId))
     #set ($nodeDoc = $xwiki.getDocument($nodeRef))
     #if ($nodeDoc.getObject('FileManagerCode.DriveClass'))
       #addDriveChildNodes($nodeDoc $children)
@@ -190,15 +191,16 @@
 
 #macro (addFolderNode $folder $children)
   ## Extend the folder data with tree-related info.
+  #set ($folderReference = $services.model.createDocumentReference($doc.wiki, $doc.space, $folder.id))
   #set ($discard = $folder.putAll({
     'type': 'folder',
     'validChildren': ['folder', 'pagination'],
     'draggable': true,
     'hasContextMenu': true,
-    'createURL': $xwiki.getURL($folder.id, 'get', 'action=createFolder&amp;outputSyntax=plain'),
-    'copyURL': $xwiki.getURL($folder.id, 'get', 'action=copy&amp;outputSyntax=plain'),
-    'moveURL': $xwiki.getURL($folder.id, 'get', 'action=move&amp;outputSyntax=plain'),
-    'deleteURL': $xwiki.getURL($folder.id, 'get', 'action=delete&amp;outputSyntax=plain')
+    'createURL': $xwiki.getURL($folderReference, 'get', 'action=createFolder&amp;outputSyntax=plain'),
+    'copyURL': $xwiki.getURL($folderReference, 'get', 'action=copy&amp;outputSyntax=plain'),
+    'moveURL': $xwiki.getURL($folderReference, 'get', 'action=move&amp;outputSyntax=plain'),
+    'deleteURL': $xwiki.getURL($folderReference, 'get', 'action=delete&amp;outputSyntax=plain')
   }))
   #set ($discard = $children.add({
     'id': $folder.id,
@@ -207,7 +209,7 @@
     'children': $folder.hasFolders,
     'data': $folder,
     'a_attr': {
-      'href': $xwiki.getURL($folder.id)
+      'href': $xwiki.getURL($folderReference)
     }
   }))
 #end
@@ -318,7 +320,8 @@
 #end
 
 #macro (getNodePath $nodeId $return)
-  #set ($folderRef = $services.model.resolveDocument($nodeId, 'explicit', $doc.documentReference))
+  ## Don't use resolve because the node id is the name of a document and it can contain a dot.
+  #set ($folderRef = $services.model.createDocumentReference($doc.wiki, $doc.space, $nodeId))
   #set ($folderDoc = $xwiki.getDocument($folderRef))
   #set ($path = [])
   #getPath($folderDoc $path)
