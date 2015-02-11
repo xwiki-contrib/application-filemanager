@@ -317,7 +317,10 @@
 #end
 #if ($i == 0)
   * {{translation key="fileManager.recentFiles.noFiles"/}}
-  * [[{{translation key="fileManager.recentFiles.addFiles"/}}&gt;&gt;FileManager.WebHome||queryString="#?driveNode=WebHome"]]
+  #set($spaceReference = $services.model.resolveSpace("FileManager"))
+  #if($services.security.authorization.hasAccess("edit", $spaceReference))
+    * [[{{translation key="fileManager.recentFiles.addFiles"/}}&gt;&gt;FileManager.WebHome||queryString="#?driveNode=WebHome"]]
+  #end
 #else
   * [[{{translation key="fileManager.recentFiles.seeAllFiles"/}}&gt;&gt;FileManager.WebHome||queryString="#?driveNode=%2FallFiles"]]
 #end
