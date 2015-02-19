@@ -189,7 +189,7 @@
       <contentType>No content</contentType>
     </property>
     <property>
-      <defaultCategory>content</defaultCategory>
+      <defaultCategory>Content</defaultCategory>
     </property>
     <property>
       <description>Inserts a file manager document in a page, with or without preview</description>
