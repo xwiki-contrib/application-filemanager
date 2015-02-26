@@ -72,6 +72,13 @@ contrib.FM.change.explanations=You can manage the file(s) to attach to this docu
 
 rendering.macro.filetagcloud.name=FileManager tag cloud
 rendering.macro.filetagcloud.description=Displays the cloud of file tags in this wiki or in the specified space, if any.
+
+rendering.macro.filemanagerdoc.name=File Manager Document
+rendering.macro.filemanagerdoc.description=Inserts a file manager document in a page, with or without preview
+rendering.macro.filemanagerdoc.parameter.page.name=Page
+rendering.macro.filemanagerdoc.parameter.page.description=Page name of the FileManager document
+rendering.macro.filemanagerdoc.parameter.preview.name=Preview
+rendering.macro.filemanagerdoc.parameter.preview.description=True if a preview should be included
 </content>
   <object>
     <name>FileManager.FileManagerTranslations</name>

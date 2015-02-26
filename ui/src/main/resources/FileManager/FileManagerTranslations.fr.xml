@@ -71,5 +71,13 @@ contrib.FM.editDescription=Sauver et visualiser
 contrib.FM.change.explanations=Joignez votre fichier en utilisant la section "Pièces jointes" ci-dessous. Vous pouvez aussi ajouter des 'tags' à ce document (en utilisant l'application située en bas de cette section) pour qu'il soit plus facile de le retrouver.
 
 rendering.macro.filetagcloud.name=Gestionnaire des documents
-rendering.macro.filetagcloud.description=Affiche les mots clés des documents du gestionnaire des fichiers.</content>
+rendering.macro.filetagcloud.description=Affiche les mots clés des documents du gestionnaire des fichiers.
+
+rendering.macro.filemanagerdoc.name=Document du gestionnaire de fichier
+rendering.macro.filemanagerdoc.description=Insérer un document du gestionnaire de fichiers dans une page, avec ou sans aperçu
+rendering.macro.filemanagerdoc.parameter.page.name=Page
+rendering.macro.filemanagerdoc.parameter.page.description=Nom de la page du document du gestionnaire de fichiers
+rendering.macro.filemanagerdoc.parameter.preview.name=Aperçu
+rendering.macro.filemanagerdoc.parameter.preview.description=Vrai si un aperçu doit être inclus
+</content>
 </xwikidoc>
