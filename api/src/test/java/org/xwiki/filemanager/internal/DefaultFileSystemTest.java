@@ -123,4 +123,40 @@ public class DefaultFileSystemTest
         verify(xdoc).setAuthorReference(xcontext.getUserReference());
         verify(xcontext.getWiki()).saveDocument(xdoc, "", false, xcontext);
     }
+
+    /**
+     * @see "FILEMAN-105: Files from File manager disappear after renaming the folder"
+     */
+    @Test
+    public void rename() throws Exception
+    {
+        DocumentReference oldReference = new DocumentReference("wiki", "Space", "OldPage");
+        DocumentReference newReference = new DocumentReference("wiki", "Space", "NewPage");
+
+        XWikiDocument oldDocument = mock(XWikiDocument.class, "old");
+        when(xcontext.getWiki().getDocument(oldReference, xcontext)).thenReturn(oldDocument);
+
+        XWikiDocument clonedDocument = mock(XWikiDocument.class, "cloned");
+        when(oldDocument.clone()).thenReturn(clonedDocument);
+
+        mocker.getComponentUnderTest().rename(oldReference, newReference);
+
+        verify(clonedDocument).rename(newReference, xcontext);
+    }
+
+    @Test
+    public void delete() throws Exception
+    {
+        DocumentReference reference = new DocumentReference("wiki", "Drive", "File");
+
+        XWikiDocument cachedDocument = mock(XWikiDocument.class, "cached");
+        when(xcontext.getWiki().getDocument(reference, xcontext)).thenReturn(cachedDocument);
+
+        XWikiDocument clonedDocument = mock(XWikiDocument.class, "cloned");
+        when(cachedDocument.clone()).thenReturn(clonedDocument);
+
+        mocker.getComponentUnderTest().delete(reference);
+
+        verify(xcontext.getWiki()).deleteDocument(clonedDocument, xcontext);
+    }
 }

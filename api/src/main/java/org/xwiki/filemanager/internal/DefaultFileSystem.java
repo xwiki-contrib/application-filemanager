@@ -195,7 +195,8 @@ public class DefaultFileSystem implements FileSystem
         try {
             XWikiDocument document = context.getWiki().getDocument(reference, context);
             if (!document.isNew()) {
-                context.getWiki().deleteDocument(document, context);
+                // Clone the document before deleting to make sure we don't modify the cache document.
+                context.getWiki().deleteDocument(document.clone(), context);
             }
         } catch (XWikiException e) {
             logger.error("Failed to delete document [{}].", reference, e);
@@ -207,7 +208,9 @@ public class DefaultFileSystem implements FileSystem
     {
         XWikiContext context = xcontextProvider.get();
         try {
-            context.getWiki().getDocument(oldReference, context).rename(newReference, context);
+            // The (entity) reference of the target document is updated in the rename process and so we clone the
+            // document before renaming in order to avoid modifying the cached document.
+            context.getWiki().getDocument(oldReference, context).clone().rename(newReference, context);
         } catch (XWikiException e) {
             logger.error("Failed to rename document [{}] to [{}]", oldReference, newReference, e);
         }
