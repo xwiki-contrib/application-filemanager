@@ -789,27 +789,38 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
   }]);
 
   driveServices.factory('User', ['$resource', function($resource) {
-    var documentURLTemplate = '$xwiki.getURL($services.model.createDocumentReference("__wiki__", "__space__", "__page__"))';
+    // We use an URL dispatcher to overcome the fact that in a domain-based farm we cannot compute an entity URL on the
+    // client side knowing only the entity reference. Precisely, we cannot compute the URL to access an entity from a
+    // different wiki knowing only the wiki id. We need to know the domain associated with the wiki id, and the domain
+    // is stored on the wiki descriptor (on the main wiki). Thus we would need to make an additional request to get the
+    // entity URL. The workaround is to use a dedicated page (service) that redirects to the entity specified on the
+    // request parameters.
+    var urlDispatcher = new XWiki.Document('URLDispatcher', 'FileManagerCode');
     var getDocumentURL = function(wiki, space, page) {
-      var url = documentURLTemplate.replace('__wiki__', encodeURIComponent(wiki));
-      url = url.replace('__space__', encodeURIComponent(space));
-      return url.replace('__page__', encodeURIComponent(page));
+      return urlDispatcher.getURL('get', $.param({
+        entityType: 'document',
+        wiki: wiki,
+        space: space,
+        page: page
+      }));
     };
 
-    var attachmentURLTemplate = '$xwiki.getAttachmentURL("__wiki__:__space__.__page__", "__file__")';
-    var getAttachmentURL = function(docRef, file) {
-      var url = attachmentURLTemplate.replace('__wiki__', encodeURIComponent(docRef.wiki));
-      url = url.replace('__space__', encodeURIComponent(docRef.space));
-      url = url.replace('__page__', encodeURIComponent(docRef.page));
-      return url.replace('__file__', encodeURIComponent(file));
+    var getAttachmentURL = function(docRef, file, queryString) {
+      return urlDispatcher.getURL('get', $.param({
+        entityType: 'attachment',
+        wiki: docRef.wiki,
+        space: docRef.space,
+        page: docRef.page,
+        file: file,
+        queryString: queryString
+      }));
     };
 
     var getAvatarURL = function(user) {
       if (user.avatar) {
-        var avatarURL = getAttachmentURL(user.reference, user.avatar);
         // Resize the avatar image on the server (use the medium avatar size as it may have been already cached on the
         // server since it is used for comments).
-        return avatarURL + '?width=50';
+        return getAttachmentURL(user.reference, user.avatar, 'width=50');
       } else {
         return '$xwiki.getSkinFile("icons/xwiki/noavatar.png")';
       }
