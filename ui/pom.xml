@@ -43,11 +43,19 @@
     <xwiki.extension.name>File Manager Application</xwiki.extension.name>
     <!-- Don't run CLIRR here since there's no Java code. -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
-    <!-- The version of the XWiki Platform webjars this extension depends on. -->
+    <!-- The version of the WebJars this extension depends on. -->
     <xwiki.webjar.version>6.4-milestone-2</xwiki.webjar.version>
-    <!-- Where to unpack the XWiki Platform WebJars this extension depends on. -->
+    <angular.version>1.3.8</angular.version>
+    <angular.ui.bootstrap.version>0.12.0</angular.ui.bootstrap.version>
+    <angular.file.upload.version>1.6.1</angular.file.upload.version>
+    <jstree.version>3.0.8</jstree.version>
+    <!-- Where to unpack the WebJars this extension depends on. -->
     <webjars.unpack.directory>${project.build.directory}/webjars</webjars.unpack.directory>
+    <angular.webjar.directory>${webjars.unpack.directory}/META-INF/resources/webjars/angularjs/${angular.version}</angular.webjar.directory>
+    <angular.ui.bootstrap.webjar.directory>${webjars.unpack.directory}/META-INF/resources/webjars/angular-ui-bootstrap/${angular.ui.bootstrap.version}</angular.ui.bootstrap.webjar.directory>
+    <angular.file.upload.webjar.directory>${webjars.unpack.directory}/META-INF/resources/webjars/angular-file-upload/${angular.file.upload.version}</angular.file.upload.webjar.directory>
     <job.webjar.directory>${webjars.unpack.directory}/META-INF/resources/webjars/xwiki-platform-job-webjar/${xwiki.webjar.version}</job.webjar.directory>
+    <jstree.webjar.directory>${webjars.unpack.directory}/META-INF/resources/webjars/jstree/${jstree.version}</jstree.webjar.directory>
     <tree.webjar.directory>${webjars.unpack.directory}/META-INF/resources/webjars/xwiki-platform-tree-webjar/${xwiki.webjar.version}</tree.webjar.directory>
   </properties>
   <dependencies>
@@ -55,25 +63,6 @@
       <groupId>org.xwiki.contrib</groupId>
       <artifactId>application-filemanager-api</artifactId>
       <version>${project.version}</version>
-      <scope>runtime</scope>
-    </dependency>
-    <!-- Third-party JavaScript libraries -->
-    <dependency>
-      <groupId>org.webjars</groupId>
-      <artifactId>angularjs</artifactId>
-      <version>1.3.8</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.webjars</groupId>
-      <artifactId>angular-ui-bootstrap</artifactId>
-      <version>0.12.0</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.webjars</groupId>
-      <artifactId>angular-file-upload</artifactId>
-      <version>1.6.1</version>
       <scope>runtime</scope>
     </dependency>
     <!-- Wiki syntax macros used in the File Manager sheets -->
@@ -200,6 +189,35 @@
                   <type>jar</type>
                   <outputDirectory>${webjars.unpack.directory}</outputDirectory>
                 </artifactItem>
+                <!-- Third-party JavaScript libraries -->
+                <artifactItem>
+                  <groupId>org.webjars</groupId>
+                  <artifactId>angularjs</artifactId>
+                  <version>${angular.version}</version>
+                  <type>jar</type>
+                  <outputDirectory>${webjars.unpack.directory}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.webjars</groupId>
+                  <artifactId>angular-ui-bootstrap</artifactId>
+                  <version>${angular.ui.bootstrap.version}</version>
+                  <type>jar</type>
+                  <outputDirectory>${webjars.unpack.directory}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.webjars</groupId>
+                  <artifactId>angular-file-upload</artifactId>
+                  <version>${angular.file.upload.version}</version>
+                  <type>jar</type>
+                  <outputDirectory>${webjars.unpack.directory}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.webjars</groupId>
+                  <artifactId>jstree</artifactId>
+                  <version>${jstree.version}</version>
+                  <type>jar</type>
+                  <outputDirectory>${webjars.unpack.directory}</outputDirectory>
+                </artifactItem>
               </artifactItems>
             </configuration>
           </execution>
@@ -212,6 +230,24 @@
         <!-- We need a more recent version that supports attaching multiple files in the same execution.-->
         <version>${xwiki.webjar.version}</version>
         <executions>
+          <execution>
+            <id>attach-angular-resources</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>attach</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>${angular.webjar.directory}/angular.min.js</file>
+                <file>${angular.webjar.directory}/angular-resource.min.js</file>
+                <file>${angular.ui.bootstrap.webjar.directory}/ui-bootstrap-tpls.min.js</file>
+                <file>${angular.file.upload.webjar.directory}/angular-file-upload-html5-shim.min.js</file>
+                <file>${angular.file.upload.webjar.directory}/angular-file-upload.min.js</file>
+                <file>${jstree.webjar.directory}/jstree.min.js</file>
+              </files>
+              <sourceDocument>${project.build.outputDirectory}/FileManagerCode/DriveSheet.xml</sourceDocument>
+            </configuration>
+          </execution>
           <execution>
             <id>attach-job-resources</id>
             <phase>process-resources</phase>
