@@ -128,7 +128,8 @@
 ## base image path were empty, we would still need to set it because we load the CSS using the ssx action while the
 ## images need the download action.
 #set ($webjarImagePath = '$!services.webjars.url(''org.xwiki.platform:xwiki-platform-tree-webjar'', '''')')
-#set ($attachmentImagePath = $doc.getAttachmentURL(''))
+## HACK: We assume the attachment name is the last segment in the URL but it depends on the URL scheme.
+#set ($attachmentImagePath = $stringtool.removeEnd($doc.getAttachmentURL('__attachment__'), '__attachment__'))
 #evaluate($css.replace($webjarImagePath, $attachmentImagePath))</code>
     </property>
     <property>
