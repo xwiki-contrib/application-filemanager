@@ -694,8 +694,9 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
     page: XWiki.currentPage
   };
 
-  // The colon ':' is URL-encoded so we must decode it otherwise Angular won't find the parameter.
-  var url = new XWiki.Document(':page', ':space').getURL('get').replace(/\/%3A/g, '/:');
+  // The colon ':' is a special character for entity references so we use '!' instead to create the URL and then replace
+  // it with ':' so that Angular can find the parameter.
+  var url = new XWiki.Document('!page', '!space').getURL('get').replace(/\/!/g, '/:');
 
   var addGET = function(api, data) {
     api['get' + data.substr(0, 1).toUpperCase() + data.substr(1)] = {
