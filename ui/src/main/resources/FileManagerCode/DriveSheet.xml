@@ -181,7 +181,7 @@
   #set ($discard = $xwiki.ssx.use('FileManagerCode.LiveTableFilter'))
   #set ($discard = $xwiki.ssx.use('FileManagerCode.DriveSheet'))
   #set ($discard = $xwiki.jsx.use('FileManagerCode.DriveSheet'))
-  &lt;div id="drive" ng-controller="DriveCtrl"&gt;
+  &lt;div id="drive" ng-controller="DriveCtrl" class="no-bootstrap"&gt;
     &lt;table class="pane-splitter"&gt;
       &lt;tr&gt;
         &lt;td class="pane left"&gt;
@@ -243,16 +243,16 @@
       &lt;button class="btn btn-default" ng-disabled="drive.readOnly || !drive.location.node.data.canCreate"
           ng-click="drive.viewer = 'upload'" type="button"
           title="$services.localization.render('fileManager.action.newFileHint')"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_add.png')"
-          alt="$services.localization.render('fileManager.action.newFile')"
-          class="icon" /&gt;$services.localization.render('fileManager.action.newFile')
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_add.png')" class="icon"
+          alt="$services.localization.render('fileManager.action.newFile')" /&gt;
+        $services.localization.render('fileManager.action.newFile')
       &lt;/button&gt;
     &lt;/div&gt;&lt;div class="btn-group" dropdown&gt;
       &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.downloadFilesHint')"
           ng-disabled="drive.readOnly || selectedFiles.length == 0" ng-click="download(selectedFiles)"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_put.png')"
-          alt="$services.localization.render('fileManager.action.download')"
-          class="icon" /&gt;$services.localization.render('fileManager.action.download')
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_put.png')" class="icon"
+          alt="$services.localization.render('fileManager.action.download')" /&gt;
+        $services.localization.render('fileManager.action.download')
       &lt;/button&gt;
       &lt;button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle&gt;
         &lt;span class="caret"&gt;&lt;/span&gt;
@@ -267,36 +267,36 @@
     &lt;/div&gt;&lt;div class="btn-group"&gt;
       &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.cutFilesHint')"
           ng-disabled="drive.readOnly || !canCut(selectedFiles)" ng-click="cut(selectedFiles)"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/cut.png')"
-          alt="$services.localization.render('fileManager.action.cut')"
-          class="icon" /&gt;$services.localization.render('fileManager.action.cut')
+        &lt;img src="$xwiki.getSkinFile('icons/silk/cut.png')" class="icon"
+          alt="$services.localization.render('fileManager.action.cut')" /&gt;
+        $services.localization.render('fileManager.action.cut')
       &lt;/button&gt;
       &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.copyFilesHint')"
           ng-disabled="drive.readOnly || !canCopy(selectedFiles)" ng-click="copy(selectedFiles)"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_copy.png')"
-          alt="$services.localization.render('fileManager.action.copy')"
-          class="icon" /&gt;$services.localization.render('fileManager.action.copy')
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_copy.png')" class="icon"
+          alt="$services.localization.render('fileManager.action.copy')" /&gt;
+        $services.localization.render('fileManager.action.copy')
       &lt;/button&gt;
       &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.pasteHint')"
           ng-if="drive.location.type == 'drive' || drive.location.type == 'folder'"
           ng-disabled="!clipboard" ng-click="paste()"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_paste.png')"
-          alt="$services.localization.render('fileManager.action.paste')"
-          class="icon" /&gt;$services.localization.render('fileManager.action.paste')
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_paste.png')" class="icon"
+          alt="$services.localization.render('fileManager.action.paste')" /&gt;
+        $services.localization.render('fileManager.action.paste')
       &lt;/button&gt;
     &lt;/div&gt;&lt;div class="btn-group"&gt;
       &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.renameFileHint')"
           ng-disabled="drive.readOnly || selectedFiles.length != 1 || !selectedFiles[0].canRename"
           ng-click="rename(selectedFiles[0])"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/textfield_rename.png')"
-          alt="$services.localization.render('fileManager.action.rename')"
-          class="icon" /&gt;$services.localization.render('fileManager.action.rename')
+        &lt;img src="$xwiki.getSkinFile('icons/silk/textfield_rename.png')" class="icon"
+          alt="$services.localization.render('fileManager.action.rename')" /&gt;
+        $services.localization.render('fileManager.action.rename')
       &lt;/button&gt;
       &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.deleteFilesHint')"
           ng-disabled="drive.readOnly || !canDelete(selectedFiles)" ng-click="delete(selectedFiles)"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/cross.png')"
-          alt="$services.localization.render('fileManager.action.delete')"
-          class="icon" /&gt;$services.localization.render('fileManager.action.delete')
+        &lt;img src="$xwiki.getSkinFile('icons/silk/cross.png')" class="icon"
+          alt="$services.localization.render('fileManager.action.delete')" /&gt;
+        $services.localization.render('fileManager.action.delete')
       &lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
@@ -311,9 +311,9 @@
     &lt;div class="btn-group"&gt;
       &lt;button type="button" class="btn btn-default" title="$services.localization.render('fileManager.action.backToFileList')"
           ng-if="back" ng-click="back()"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')"
-          alt="$services.localization.render('fileManager.action.back')"
-          class="icon" /&gt;$services.localization.render('fileManager.action.back')
+        &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')" class="icon"
+          alt="$services.localization.render('fileManager.action.back')" /&gt;
+        $services.localization.render('fileManager.action.back')
       &lt;/button&gt;
     &lt;/div&gt;
     &lt;div class="btn-group"&gt;
@@ -373,9 +373,9 @@
       &lt;div class="btn-group"&gt;
         &lt;button type="button" class="btn btn-default" ng-click="drive.viewer = 'files'"
             title="$services.localization.render('fileManager.action.backToFileList')"&gt;
-          &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')"
-            alt="$services.localization.render('fileManager.action.back')"
-            class="icon" /&gt;$services.localization.render('fileManager.action.back')
+          &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')" class="icon"
+            alt="$services.localization.render('fileManager.action.back')" /&gt;
+          $services.localization.render('fileManager.action.back')
         &lt;/button&gt;
       &lt;/div&gt;
     &lt;/div&gt;
@@ -2774,12 +2774,12 @@ table.pane-splitter .pane-content {
 /**
  * Button Group (Bootstrap)
  */
-.btn-group {
+.no-bootstrap .btn-group {
   display: inline-block;
   position: relative;
   vertical-align: middle;
 }
-.btn {
+.no-bootstrap .btn {
   border: 1px solid transparent;
   border-radius: 4px;
   cursor: pointer;
@@ -2791,25 +2791,31 @@ table.pane-splitter .pane-content {
   -moz-user-select: none;
   -ms-user-select: none;
 }
-.btn::-moz-focus-inner {
+.no-bootstrap .btn::-moz-focus-inner {
   padding: 0;
   border: 0;
 }
-.btn:focus, .btn:active:focus, .btn.active:focus {
+.no-bootstrap .btn:focus,
+.no-bootstrap .btn:active:focus,
+.no-bootstrap .btn.active:focus {
   outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
-.btn:hover, .btn:focus {
+.no-bootstrap .btn:hover,
+.no-bootstrap .btn:focus {
   text-decoration:none
 }
-.btn:active, .btn.active {
+.no-bootstrap .btn:active,
+.no-bootstrap .btn.active {
   background-image: none;
   box-shadow: inset 0 3px 5px rgba(0,0,0,.125);
   outline: 0;
   -webkit-box-shadow: inset 0 3px 5px rgba(0,0,0,.125);
 }
-.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+.no-bootstrap .btn.disabled,
+.no-bootstrap .btn[disabled],
+.no-bootstrap fieldset[disabled] .btn {
   box-shadow: none;
   cursor: not-allowed;
   filter: alpha(opacity=65);
@@ -2817,54 +2823,57 @@ table.pane-splitter .pane-content {
   pointer-events: none;
   -webkit-box-shadow: none;
 }
-.btn img.icon {
-  margin-right: .3em;
+.no-bootstrap .btn img.icon {
   vertical-align: bottom;
 }
-.btn-group &gt; .btn:focus {
+.no-bootstrap .btn-group &gt; .btn:focus {
   outline: 0 none;
 }
-.btn-group &gt; .btn:hover,
-.btn-group &gt; .btn:focus,
-.btn-group &gt; .btn:active {
+.no-bootstrap .btn-group &gt; .btn:hover,
+.no-bootstrap .btn-group &gt; .btn:focus,
+.no-bootstrap .btn-group &gt; .btn:active {
   z-index: 2;
 }
-.btn.btn-default {
+.no-bootstrap .btn.btn-default {
   background-color: $theme.pageContentBackgroundColor;
   border-color: $theme.borderColor;
-  color: $theme.textColor;
+  color: $theme.textSecondaryColor;
 }
-.btn.btn-default:hover,
-.btn.btn-default:focus,
-.btn.btn-default:active,
-.btn.btn-default.active {
+.no-bootstrap .btn.btn-default:hover,
+.no-bootstrap .btn.btn-default:focus,
+.no-bootstrap .btn.btn-default:active,
+.no-bootstrap .btn.btn-default.active {
   background-color: $theme.pageBackgroundColor;
 }
-.btn-group &gt; .btn:first-child:not(:last-child):not(.dropdown-toggle) {
+.no-bootstrap .btn-group &gt; .btn:first-child:not(:last-child):not(.dropdown-toggle) {
   border-bottom-right-radius: 0;
   border-top-right-radius: 0;
 }
-.btn-group &gt; .btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {
+.no-bootstrap .btn-group &gt; .btn:not(:first-child):not(:last-child):not(.dropdown-toggle) {
   border-radius: 0;
 }
-.btn-group &gt; .btn:last-child:not(:first-child), .btn-group &gt; .dropdown-toggle:not(:first-child) {
+.no-bootstrap .btn-group &gt; .btn:last-child:not(:first-child),
+.no-bootstrap .btn-group &gt; .dropdown-toggle:not(:first-child) {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
-.btn-group .btn + .btn, .btn-group .btn + .btn-group, .btn-group .btn-group + .btn, .btn-group .btn-group + .btn-group {
+.no-bootstrap .btn-group .btn + .btn,
+.no-bootstrap .btn-group .btn + .btn-group,
+.no-bootstrap .btn-group .btn-group + .btn,
+.no-bootstrap .btn-group .btn-group + .btn-group {
   margin-left: -1px;
 }
-.btn-toolbar .btn-group {
+.no-bootstrap .btn-toolbar .btn-group {
   margin-left: .5em;
 }
-.btn-toolbar .btn-group:first-of-type {
+.no-bootstrap .btn-toolbar .btn-group:first-of-type {
   margin-left: 0;
 }
-.btn-group &gt; .btn + .dropdown-toggle {
+.no-bootstrap .btn-group &gt; .btn + .dropdown-toggle {
   padding-left: 8px;
   padding-right: 8px;
 }
-.btn .caret {
+.no-bootstrap .btn .caret {
   border-left: 4px solid transparent;
   border-right: 4px solid transparent;
   border-top: 4px solid;
@@ -2874,7 +2883,7 @@ table.pane-splitter .pane-content {
   vertical-align: middle;
   width: 0;
 }
-ul.dropdown-menu {
+.no-bootstrap ul.dropdown-menu {
   background-clip: padding-box;
   background-color: $theme.pageContentBackgroundColor;
   border: 1px solid rgba(0, 0, 0, 0.15);
@@ -2891,17 +2900,17 @@ ul.dropdown-menu {
   top: 100%;
   z-index: 1000;
 }
-.open &gt; .dropdown-menu {
+.no-bootstrap .open &gt; .dropdown-menu {
   display: block;
 }
-.dropdown-menu &gt; li &gt; a {
+.no-bootstrap .dropdown-menu &gt; li &gt; a {
   color: $theme.textColor;
   display: block;
   padding: 3px 20px;
   white-space: nowrap;
 }
-.dropdown-menu &gt; li &gt; a:hover,
-.dropdown-menu &gt; li &gt; a:focus {
+.no-bootstrap .dropdown-menu &gt; li &gt; a:hover,
+.no-bootstrap .dropdown-menu &gt; li &gt; a:focus {
   background-color: $theme.highlightColor;
   text-decoration: none;
 }

@@ -71,6 +71,7 @@ fileManager.action.deleteFilesConfirmation=Are you sure you want to delete the s
 fileManager.action.deleteFoldersConfirmation=Are you sure you want to delete the selected folders?
 fileManager.action.back=Back
 fileManager.action.backToFileList=Back to the file list
+fileManager.action.backToFileManager=Back to the File Manager
 fileManager.action.clear=Clear
 fileManager.action.clearUploadStatus=Clear the upload status
 

@@ -124,7 +124,9 @@
 #if ($xcontext.action == 'get')
   #handleFolderWebServiceRequest
 #end
-{{/velocity}}{{velocity}}
+{{/velocity}}
+
+{{velocity}}
 #if ($xcontext.action != 'get')
   #displayFolder
 #end
@@ -212,6 +214,7 @@
       <code>.listing ul {
   list-style: none;
   margin: 0;
+  padding: 0;
 }
 
 .listing li &gt; img {

@@ -130,7 +130,8 @@
       ## URL factory encodes the anchor badly, messing the ? and = characters.
       &lt;a href="$xwiki.getURL($driveReference)#?driveNode=$escapetool.url($driveNode)" class="btn btn-default"
           title="Back to the File Manager"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')" alt="Back" class="icon" /&gt;Back to the File Manager
+        &lt;img src="$xwiki.getSkinFile('icons/silk/arrow_left.png')" alt="Back" class="icon" /&gt;
+        $services.localization.render('fileManager.action.backToFileManager')
       &lt;/a&gt;
     &lt;/div&gt;
   #end
@@ -142,7 +143,8 @@
     &lt;div class="btn-group"&gt;
       &lt;a href="$doc.getAttachmentURL($attachments.get(0).filename, 'download', 'force-download=1')"
           class="btn btn-default" title="Download this file"&gt;
-        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_put.png')" alt="Download" class="icon" /&gt;Download
+        &lt;img src="$xwiki.getSkinFile('icons/silk/page_white_put.png')" alt="Download" class="icon" /&gt;
+        $services.localization.render('fileManager.action.download')
       &lt;/a&gt;
     &lt;/div&gt;
   #end
@@ -255,7 +257,9 @@
 
 {{velocity}}
 #if ($xcontext.action != 'get')
-  #fileToolBar
+  (% class="no-bootstrap" %)(((
+    #fileToolBar
+  )))
   #openFile
 #end
 {{/velocity}}</content>
