@@ -2172,7 +2172,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
           // Update the selected tree node when the location changes (if the tree is loaded).
           var tree = $(element).jstree(true);
           var nodeId = $location.search()['driveNode'];
-          if (tree &amp;&amp; nodeId &amp;&amp; tree.get_node('/allFiles')) {
+          if (tree &amp;&amp; nodeId &amp;&amp; tree.get_node('/allFiles') &amp;&amp; !tree.is_selected(nodeId)) {
             tree.deselect_all();
             tree.openTo(nodeId);
           }
