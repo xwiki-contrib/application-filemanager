@@ -2731,10 +2731,10 @@ drive-tree {
   display: block;
 }
 /* Display the root node differently. */
-.jstree &gt; .jstree-children &gt; .jstree-node &gt; .jstree-icon {
+drive-tree.jstree &gt; .jstree-children &gt; .jstree-node &gt; .jstree-icon {
   display: none;
 }
-.jstree &gt; .jstree-children &gt; .jstree-node &gt; .jstree-children &gt; .jstree-node {
+drive-tree.jstree &gt; .jstree-children &gt; .jstree-node &gt; .jstree-children &gt; .jstree-node {
   margin-left: 0;
 }
 
