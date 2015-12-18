@@ -43,7 +43,7 @@ public class CopyJob extends MoveJob
     /**
      * The id of the job.
      */
-    public static final String JOB_TYPE = "copy";
+    public static final String JOB_TYPE = "fileManager/copy";
 
     @Override
     public String getType()

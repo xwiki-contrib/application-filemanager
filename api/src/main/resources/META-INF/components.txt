@@ -5,6 +5,7 @@ org.xwiki.filemanager.internal.job.DefaultFileManager
 org.xwiki.filemanager.internal.job.DeleteJob
 org.xwiki.filemanager.internal.job.MoveJob
 org.xwiki.filemanager.internal.job.PackJob
+org.xwiki.filemanager.internal.job.PackJobAdapter
 org.xwiki.filemanager.internal.reference.DefaultUniqueDocumentReferenceGenerator
 org.xwiki.filemanager.internal.DefaultFileSystem
 org.xwiki.filemanager.internal.DefaultFolder

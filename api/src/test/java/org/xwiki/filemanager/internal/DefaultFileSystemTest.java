@@ -159,4 +159,15 @@ public class DefaultFileSystemTest
 
         verify(xcontext.getWiki()).deleteDocument(clonedDocument, xcontext);
     }
+
+    @Test
+    public void copy() throws Exception
+    {
+        DocumentReference source = new DocumentReference("wiki", "Source", "Page");
+        DocumentReference target = new DocumentReference("wiki", "Target", "Page");
+
+        mocker.getComponentUnderTest().copy(source, target);
+
+        verify(xcontext.getWiki()).copyDocument(source, target, null, false, true, true, xcontext);
+    }
 }

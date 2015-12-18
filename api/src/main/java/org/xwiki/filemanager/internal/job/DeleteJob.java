@@ -48,7 +48,7 @@ public class DeleteJob extends AbstractJob<BatchPathRequest, DefaultJobStatus<Ba
     /**
      * The id of the job.
      */
-    public static final String JOB_TYPE = "delete";
+    public static final String JOB_TYPE = "fileManager/delete";
 
     /**
      * The pseudo file system.

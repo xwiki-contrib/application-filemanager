@@ -53,7 +53,7 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
     /**
      * The id of the job.
      */
-    public static final String JOB_TYPE = "move";
+    public static final String JOB_TYPE = "fileManager/move";
 
     /**
      * The error message logged when the folder destination of a move operation doesn't exist.
