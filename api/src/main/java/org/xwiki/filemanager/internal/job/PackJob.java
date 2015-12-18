@@ -38,7 +38,10 @@ import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
 import org.xwiki.filemanager.job.PackJobStatus;
 import org.xwiki.filemanager.job.PackRequest;
+import org.xwiki.job.Job;
+import org.xwiki.job.event.status.JobStatus;
 import org.xwiki.job.internal.AbstractJob;
+import org.xwiki.job.internal.DefaultJobStatus;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
 
@@ -49,13 +52,13 @@ import org.xwiki.model.reference.DocumentReference;
  * @since 2.0M2
  */
 @Component
-@Named(PackJob.JOB_TYPE)
-public class PackJob extends AbstractJob<PackRequest, PackJobStatus>
+@Named(PackJob.JOB_TYPE + "/actual")
+public class PackJob extends AbstractJob<PackRequest, DefaultJobStatus<PackRequest>>
 {
     /**
      * The id of the job.
      */
-    public static final String JOB_TYPE = "pack";
+    public static final String JOB_TYPE = "fileManager/pack";
 
     /**
      * The default URL encoding.
@@ -79,16 +82,17 @@ public class PackJob extends AbstractJob<PackRequest, PackJobStatus>
     @Inject
     private Environment environment;
 
+    /**
+     * Wraps the internal {@link DefaultJobStatus} and adds custom data such as the number of bytes written and the size
+     * of the output file. We wrap {@link DefaultJobStatus} instead of extending the class because the constructor of
+     * {@link DefaultJobStatus} has suffered a breaking change in XCOMMONS-811.
+     */
+    private PackJobStatus packJobStatus;
+
     @Override
     public String getType()
     {
         return JOB_TYPE;
-    }
-
-    @Override
-    protected PackJobStatus createNewStatus(PackRequest request)
-    {
-        return new PackJobStatus(request, this.observationManager, this.loggerManager);
     }
 
     @Override
@@ -114,7 +118,7 @@ public class PackJob extends AbstractJob<PackRequest, PackJobStatus>
             }
         } finally {
             IOUtils.closeQuietly(zip);
-            getStatus().setOutputFileSize(outputFile.length());
+            getPackStatus().setOutputFileSize(outputFile.length());
             notifyPopLevelProgress();
         }
     }
@@ -182,7 +186,7 @@ public class PackJob extends AbstractJob<PackRequest, PackJobStatus>
                 zip.putArchiveEntry(new ZipArchiveEntry(path));
                 IOUtils.copy(file.getContent(), zip);
                 zip.closeArchiveEntry();
-                getStatus().setBytesWritten(zip.getBytesWritten());
+                getPackStatus().setBytesWritten(zip.getBytesWritten());
             } catch (IOException e) {
                 this.logger.warn("Failed to pack file [{}].", fileReference, e);
             }
@@ -226,5 +230,22 @@ public class PackJob extends AbstractJob<PackRequest, PackJobStatus>
                 notifyPopLevelProgress();
             }
         }
+    }
+
+    /**
+     * @return the extended job status
+     */
+    public PackJobStatus getPackStatus()
+    {
+        // The internal AbstractJob and AbstractJobStatus classes have been refactored in XWiki 7.4M1 by XCOMMONS-880
+        // which seems to have broken the runtime compatibility in the sense that some protected fields and some public
+        // methods are not accessible anymore after they have been moved higher in the class hierarchy (and in a
+        // different package). The workaround I found is to cast 'this' to the interface/class that provides the public
+        // method I want to access.
+        JobStatus defaultJobStatus = ((Job) this).getStatus();
+        if (this.packJobStatus == null && defaultJobStatus != null) {
+            this.packJobStatus = new PackJobStatus(defaultJobStatus);
+        }
+        return this.packJobStatus;
     }
 }

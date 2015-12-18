@@ -19,9 +19,9 @@
  */
 package org.xwiki.filemanager.job;
 
-import org.xwiki.job.internal.DefaultJobStatus;
-import org.xwiki.logging.LoggerManager;
-import org.xwiki.observation.ObservationManager;
+import java.io.Serializable;
+
+import org.xwiki.job.event.status.JobStatus;
 import org.xwiki.stability.Unstable;
 
 /**
@@ -31,7 +31,7 @@ import org.xwiki.stability.Unstable;
  * @since 2.0M2
  */
 @Unstable
-public class PackJobStatus extends DefaultJobStatus<PackRequest>
+public class PackJobStatus extends JobStatusAdapter implements Serializable
 {
     /**
      * Serialization identifier.
@@ -49,15 +49,13 @@ public class PackJobStatus extends DefaultJobStatus<PackRequest>
     private long outputFileSize;
 
     /**
-     * Creates a new job status.
+     * Creates a new job status by extending the provided (default) job status.
      * 
-     * @param request the request provided when the job was started
-     * @param observationManager the observation manager
-     * @param loggerManager the logger manager
+     * @param jobStatus the (default) job status to extend
      */
-    public PackJobStatus(PackRequest request, ObservationManager observationManager, LoggerManager loggerManager)
+    public PackJobStatus(JobStatus jobStatus)
     {
-        super(request, observationManager, loggerManager, false);
+        super(jobStatus);
     }
 
     /**

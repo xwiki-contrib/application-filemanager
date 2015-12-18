@@ -19,9 +19,6 @@
  */
 package org.xwiki.filemanager.internal.job;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -47,6 +44,9 @@ import org.xwiki.job.Job;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.test.mockito.MockitoComponentMockingRule;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link PackJob}.
@@ -124,8 +124,8 @@ public class PackJobTest extends AbstractJobTest
         assertEquals(2, files.size());
         assertEquals("blah", files.get(readme.getName()));
         assertEquals("foo", files.get(projects.getName() + "/Concerto/" + pom.getName()));
-        assertEquals(("blah" + "foo").getBytes().length, job.getStatus().getBytesWritten());
-        assertTrue(job.getStatus().getOutputFileSize() > 0);
+        assertEquals(("blah" + "foo").getBytes().length, job.getPackStatus().getBytesWritten());
+        assertTrue(job.getPackStatus().getOutputFileSize() > 0);
     }
 
     private void setFileContent(File file, String content)
