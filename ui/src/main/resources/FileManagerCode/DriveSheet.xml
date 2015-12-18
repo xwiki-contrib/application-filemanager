@@ -2306,7 +2306,7 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
   driveControllers.controller('DownloadCtrl', ['$scope', function ($scope) {
     $scope.isDownloadReady = function(ready) {
       return function(job) {
-        return job.request.type == 'pack' &amp;&amp; ((ready &amp;&amp; job.state == 'FINISHED')
+        return job.request.type == 'fileManager/pack' &amp;&amp; ((ready &amp;&amp; job.state == 'FINISHED')
           || (!ready &amp;&amp; job.state != 'FINISHED'));
       };
     }
