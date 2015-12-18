@@ -879,7 +879,10 @@ require(['jquery', 'angular', 'JobRunner', 'angular-resource', 'angular-ui-boots
       return user;
     };
 
-    var url = new XWiki.Document(':page', ':space', ':wiki').getRestURL('objects/XWiki.XWikiUsers/0');
+    // The colon ':' is a special character for entity references so we use '!' instead to create the URL and then
+    // replace it with ':' so that Angular can find the parameter.
+    var url = new XWiki.Document('!page', '!space', '!wiki').getRestURL('objects/XWiki.XWikiUsers/0')
+      .replace(/\/!/g, '/:');
     var resource = $resource(url, {}, {
       get: {
         cache: true,
