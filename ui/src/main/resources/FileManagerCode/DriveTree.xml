@@ -163,14 +163,14 @@
     }))
   #end
   #if ($isAdvancedUser)
-  #set ($discard = $children.add({
-    'id': '/tasks',
-    'text': $services.localization.render('fileManager.tree.tasks'),
-    'icon': $xwiki.getSkinFile('icons/silk/clock.png'),
-    'data': {
-      'type': 'jobs'
-    }
-  }))
+    #set ($discard = $children.add({
+      'id': '/tasks',
+      'text': $services.localization.render('fileManager.tree.tasks'),
+      'icon': $xwiki.getSkinFile('icons/silk/clock.png'),
+      'data': {
+        'type': 'jobs'
+      }
+    }))
   #end
 #end
 
