@@ -1,18 +1,39 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
 <xwikidoc version="1.2" reference="FileManager.WebPreferences" locale="">
   <web>FileManager</web>
   <name>WebPreferences</name>
   <language/>
-  <defaultLanguage>en</defaultLanguage>
+  <defaultLanguage/>
   <translation>0</translation>
-  <creator>XWiki.Admin</creator>
+  <creator>xwiki:XWiki.Admin</creator>
   <creationDate>1454316222000</creationDate>
   <parent>FileManager.WebHome</parent>
-  <author>XWiki.Admin</author>
-  <contentAuthor>XWiki.Admin</contentAuthor>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <date>1454316412000</date>
   <contentUpdateDate>1454316222000</contentUpdateDate>
-  <version>4.1</version>
+  <version>1.1</version>
   <title>Preferences</title>
   <comment/>
   <minorEdit>false</minorEdit>
@@ -212,16 +233,16 @@
 #if ("$!value" == '')
   #set ($value = $xwiki.getDefaultDocumentSyntax())
 #end
-&lt;select name="${object.getxWikiClass().name}_${object.number}_${name}" id="${object.getxWikiClass().name}_${object.number}_${name}">
+&lt;select name="${object.getxWikiClass().name}_${object.number}_${name}" id="${object.getxWikiClass().name}_${object.number}_${name}"&gt;
 #set ($configuredSyntaxes = $xwiki.getConfiguredSyntaxes())
 #set ($availableParserSyntaxes = $services.rendering.getAvailableParserSyntaxes())
 ##
 #foreach($syntax in $availableParserSyntaxes)
   #if($configuredSyntaxes.contains($syntax.toIdString()))
-    &lt;option value="$syntax.toIdString()"#if($syntax.toIdString().equalsIgnoreCase($value)) selected="selected"#end>$syntax.toString()&lt;/option>
+    &lt;option value="$syntax.toIdString()"#if($syntax.toIdString().equalsIgnoreCase($value)) selected="selected"#end&gt;$syntax.toString()&lt;/option&gt;
   #end
 #end
-&lt;/select>
+&lt;/select&gt;
 {{/html}}
 {{/velocity}}</customDisplay>
         <disabled>0</disabled>
@@ -1180,13 +1201,13 @@
       </xwiki.title.mandatory>
     </class>
     <property>
-      <leftPanels></leftPanels>
+      <leftPanels/>
     </property>
     <property>
       <leftPanelsWidth>---</leftPanelsWidth>
     </property>
     <property>
-      <meta></meta>
+      <meta/>
     </property>
     <property>
       <rightPanels>Panels.Recent Files</rightPanels>
@@ -1213,7 +1234,7 @@
       <showinformation/>
     </property>
     <property>
-      <title></title>
+      <title/>
     </property>
   </object>
 </xwikidoc>
