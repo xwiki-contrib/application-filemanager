@@ -162,6 +162,7 @@
       }
     }))
   #end
+  #if ($isAdvancedUser)
   #set ($discard = $children.add({
     'id': '/tasks',
     'text': $services.localization.render('fileManager.tree.tasks'),
@@ -170,6 +171,7 @@
       'type': 'jobs'
     }
   }))
+  #end
 #end
 
 #macro (addFolderChildNodes $parentFolderDoc $children)
