@@ -2,6 +2,13 @@
 
 XWiki application to manage a hierarchy of folders and files. It embeds viewers for many known file types, such as office and PDF. See the [documentation](http://extensions.xwiki.org/xwiki/bin/view/Extension/File+Manager+Application) for more information.
 
+* Extension Page: http://extensions.xwiki.org/xwiki/bin/view/Extension/File+Manager+Application.
+* Bug Tracker: http://jira.xwiki.org/browse/FILEMAN.
+* License: LGPL 2.1+.
+
+## Status
+[![Build Status](http://ci.xwiki.org/buildStatus/icon?job=Contrib%20-%20File%20Manager%20Application)](http://ci.xwiki.org/job/Contrib%20-%20File%20Manager%20Application/)
+
 ## Release Steps
 
 We cannot release (perform) the API and UI modules at the same time because the API must use Java 6 in order to work with older versions of XWiki while the UI module requires at build time some recent XWiki tools that have been released with Java 7. As a consequene the release steps are:
