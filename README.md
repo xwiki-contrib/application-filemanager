@@ -2,8 +2,9 @@
 
 XWiki application to manage a hierarchy of folders and files. It embeds viewers for many known file types, such as office and PDF. See the [documentation](http://extensions.xwiki.org/xwiki/bin/view/Extension/File+Manager+Application) for more information.
 
-* Extension Page: http://extensions.xwiki.org/xwiki/bin/view/Extension/File+Manager+Application.
-* Bug Tracker: http://jira.xwiki.org/browse/FILEMAN.
+* [Extension Wiki Page](http://extensions.xwiki.org/xwiki/bin/view/Extension/File+Manager+Application)
+* [Bug Tracker](http://jira.xwiki.org/browse/FILEMAN)
+* [Translations](http://l10n.xwiki.org/xwiki/bin/view/Contrib/)
 * License: LGPL 2.1+.
 
 ## Status
@@ -13,7 +14,13 @@ XWiki application to manage a hierarchy of folders and files. It embeds viewers 
 
 We cannot release (perform) the API and UI modules at the same time because the API must use Java 6 in order to work with older versions of XWiki while the UI module requires at build time some recent XWiki tools that have been released with Java 7. As a consequene the release steps are:
 
-    ## Update the translations.
+    ## Update the translations:
+    ## * download the translation pack from l10n and unpack
+    ## * copy the translation pages to the source folder
+    ## * apply XAR format and review the changes
+    ## * commit only the significant changes
+
+    ## Release the new version in JIRA
 
     ## Prepare the tag for the new version.
     mvn org.apache.maven.plugins:maven-release-plugin:2.5:prepare -DautoVersionSubmodules -Papi,ui
