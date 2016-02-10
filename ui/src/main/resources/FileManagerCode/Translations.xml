@@ -119,6 +119,9 @@ fileManager.recentFiles.noFiles=There are no files yet
 fileManager.recentFiles.addFiles=Add files
 fileManager.recentFiles.seeAllFiles=See all files
 
+# Recent Files Panel
+fileManager.panel.RecentFiles.header=Recent Files
+
 rendering.macro.fileManager.recentFiles.name=Recent Files
 rendering.macro.fileManager.recentFiles.description=Lists the files that have been recently uploaded through the File Manager.
 rendering.macro.fileManager.recentFiles.parameter.limit.name=limit
