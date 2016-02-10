@@ -33,7 +33,7 @@
   <artifactId>application-filemanager-pom</artifactId>
   <packaging>pom</packaging>
   <name>File Manager Application Parent POM</name>
-  <version>2.1-SNAPSHOT</version>
+  <version>2.0.6</version>
   <description>Application to manage a hierarchy of folders and files. It embeds viewers for many known file types, such as office and PDF.</description>
   <developers>
     <developer>
@@ -57,7 +57,7 @@
     <connection>scm:git:git://github.com/xwiki-contrib/application-filemanager.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/application-filemanager.git</developerConnection>
     <url>https://github.com/xwiki-contrib/application-filemanager/tree/master</url>
-    <tag>HEAD</tag>
+    <tag>application-filemanager-pom-2.0.6</tag>
   </scm>
   <distributionManagement>
     <repository>
