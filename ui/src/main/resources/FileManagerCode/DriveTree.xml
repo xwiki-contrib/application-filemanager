@@ -162,14 +162,16 @@
       }
     }))
   #end
-  #set ($discard = $children.add({
-    'id': '/tasks',
-    'text': $services.localization.render('fileManager.tree.tasks'),
-    'icon': $xwiki.getSkinFile('icons/silk/clock.png'),
-    'data': {
-      'type': 'jobs'
-    }
-  }))
+  #if ($isAdvancedUser)
+    #set ($discard = $children.add({
+      'id': '/tasks',
+      'text': $services.localization.render('fileManager.tree.tasks'),
+      'icon': $xwiki.getSkinFile('icons/silk/clock.png'),
+      'data': {
+        'type': 'jobs'
+      }
+    }))
+  #end
 #end
 
 #macro (addFolderChildNodes $parentFolderDoc $children)
