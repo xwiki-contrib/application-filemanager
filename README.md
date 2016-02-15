@@ -1,11 +1,12 @@
 # File Manager
 
-XWiki application to manage a hierarchy of folders and files. It embeds viewers for many known file types, such as office and PDF. See the [documentation](http://extensions.xwiki.org/xwiki/bin/view/Extension/File+Manager+Application) for more information.
+XWiki application to manage a hierarchy of folders and files. It embeds viewers for many known file types, such as office and PDF.
 
-* [Extension Wiki Page](http://extensions.xwiki.org/xwiki/bin/view/Extension/File+Manager+Application)
-* [Bug Tracker](http://jira.xwiki.org/browse/FILEMAN)
-* [Translations](http://l10n.xwiki.org/xwiki/bin/view/Contrib/)
-* License: LGPL 2.1+.
+* Extension Page: http://extensions.xwiki.org/xwiki/bin/view/Extension/File+Manager+Application
+* Bug Tracker: http://jira.xwiki.org/browse/FILEMAN
+* License: LGPL 2.1+
+* Minimal XWiki version supported: XWiki 5.4.4
+* Translations: http://l10n.xwiki.org/xwiki/bin/view/Contrib/FileManager
 
 ## Status
 [![Build Status](http://ci.xwiki.org/buildStatus/icon?job=Contrib%20-%20File%20Manager%20Application)](http://ci.xwiki.org/job/Contrib%20-%20File%20Manager%20Application/)
