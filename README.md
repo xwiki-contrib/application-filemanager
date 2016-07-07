@@ -2,14 +2,17 @@
 
 XWiki application to manage a hierarchy of folders and files. It embeds viewers for many known file types, such as office and PDF.
 
-* Extension Page: http://extensions.xwiki.org/xwiki/bin/view/Extension/File+Manager+Application
-* Bug Tracker: http://jira.xwiki.org/browse/FILEMAN
-* License: LGPL 2.1+
+* Project Lead: [Marius Dumitru Florea](http://www.xwiki.org/xwiki/bin/view/XWiki/mflorea)
+* [Documentation & Download](http://extensions.xwiki.org/xwiki/bin/view/Extension/File+Manager+Application)
+* [Issue Tracker](http://jira.xwiki.org/browse/FILEMAN)
+* Communication: [Mailing List](http://dev.xwiki.org/xwiki/bin/view/Community/MailingLists>), [IRC]( http://dev.xwiki.org/xwiki/bin/view/Community/IRC)
+* [Development Practices](http://dev.xwiki.org)
 * Minimal XWiki version supported: XWiki 5.4.4
-* Translations: http://l10n.xwiki.org/xwiki/bin/view/Contrib/FileManager
+* License: LGPL 2.1+
+* [Translations](http://l10n.xwiki.org/xwiki/bin/view/Contrib/FileManager)
+* Sonar Dashboard: N/A
+* Continuous Integration Status: [![Build Status](http://ci.xwiki.org/buildStatus/icon?job=Contrib%20-%20File%20Manager%20Application)](http://ci.xwiki.org/job/Contrib%20-%20File%20Manager%20Application/)
 
-## Status
-[![Build Status](http://ci.xwiki.org/buildStatus/icon?job=Contrib%20-%20File%20Manager%20Application)](http://ci.xwiki.org/job/Contrib%20-%20File%20Manager%20Application/)
 
 ## Release Steps
 
