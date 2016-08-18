@@ -133,7 +133,11 @@
   #set ($jobId = $services.drive.pack($paths, $packReference))
   #if ($jobId)
     #set ($discard = $downloadDoc.set('jobId', $jobId))
-    #set ($discard = $downloadDoc.save())
+    #if ($downloadDoc.hasAccessLevel("edit"))
+      #set ($discard = $downloadDoc.save())
+    #else
+      #set ($discard = $downloadDoc.saveAsAuthor())
+    #end
   #end
   #handleJobStartFailure($jobId)
 #end
