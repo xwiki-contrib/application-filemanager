@@ -133,7 +133,7 @@
   #set ($jobId = $services.drive.pack($paths, $packReference))
   #if ($jobId)
     #set ($discard = $downloadDoc.set('jobId', $jobId))
-    #if ($xwiki.hasAccessLevel("edit", $xcontext.getUser() , $downloadDoc))
+    #if ($downloadDoc.hasAccessLevel("edit"))
       #set ($discard = $downloadDoc.save())
     #else
       #set ($discard = $downloadDoc.saveAsAuthor())
