@@ -42,6 +42,7 @@
   <content>## XWiki Translation for language fr generated from http://www.l10n.xwiki.org
 fileManager.action.back=Retour
 fileManager.action.backToFileList=Retour à la liste des fichiers
+fileManager.action.backToFileManager=Retour vers le Gestionnaire de fichiers
 fileManager.action.clear=Effacer
 fileManager.action.clearUploadStatus=Réinitialiser le statut du téléchargement
 fileManager.action.copy=Copier
@@ -90,6 +91,7 @@ fileManager.liveTable.date=Modifié
 fileManager.liveTable.name=Nom
 fileManager.liveTable.size=Taille
 fileManager.liveTable.type=Type
+fileManager.panel.RecentFiles.header=Fichiers récents
 fileManager.recentFiles.addFiles=Ajouter des fichiers
 fileManager.recentFiles.creationDate=le {0}
 fileManager.recentFiles.creator=par {0}
