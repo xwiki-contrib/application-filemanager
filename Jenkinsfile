@@ -25,4 +25,6 @@
 // See https://github.com/jenkinsci/workflow-cps-global-lib-plugin for details.
 
 xwikiModule {
+  // Use install instead of deploy FTM since the module is wrongly configured to use scp to deploy to nexus.xwiki.org
+  goals = 'clean install'
 }
