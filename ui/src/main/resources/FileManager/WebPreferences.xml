@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.2" reference="FileManager.WebPreferences" locale="">
+<xwikidoc>
   <web>FileManager</web>
   <name>WebPreferences</name>
   <language/>
@@ -30,11 +30,14 @@
   <creationDate>1455092530000</creationDate>
   <parent>FileManager.WebHome</parent>
   <author>xwiki:XWiki.Admin</author>
+  <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <date>1455092543000</date>
   <contentUpdateDate>1455092530000</contentUpdateDate>
   <version>1.1</version>
   <title>Preferences</title>
+  <defaultTemplate/>
+  <validationScript/>
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
@@ -145,7 +148,19 @@
       <colorTheme>
         <cache>0</cache>
         <classname/>
-        <customDisplay>{{include reference="XWiki.ColorThemePropertyDisplayer" /}}</customDisplay>
+        <customDisplay>{{velocity}}
+{{html wiki="false" clean="false"}}
+#if ("$!value" == '')
+  #set ($value = '')
+#end
+&lt;select name="${object.getxWikiClass().name}_${object.number}_${name}" id="${object.getxWikiClass().name}_${object.number}_${name}"&gt;
+  #if ($editor != 'globaladmin')&lt;option value=""#if ($value == '') selected="selected"#end&gt;---&lt;/option&gt;#end
+#foreach($theme in $xwiki.wrapDocs($services.query.hql(", BaseObject as theme where doc.fullName=theme.name and theme.className='ColorThemes.ColorThemeClass' and doc.fullName&lt;&gt;'ColorThemes.ColorThemeTemplate' order by doc.title").execute()))
+  &lt;option value="$theme.fullName"#if ($theme.fullName.equals($value)) selected="selected"#end&gt;$theme.plainTitle&lt;/option&gt;
+#end
+&lt;/select&gt;
+{{/html}}
+{{/velocity}}</customDisplay>
         <disabled>0</disabled>
         <displayType>select</displayType>
         <idField/>
@@ -159,7 +174,7 @@
         <separators/>
         <size>1</size>
         <sort>none</sort>
-        <sql>select doc.fullName, doc.title from XWikiDocument as doc, BaseObject as theme where doc.fullName=theme.name and (theme.className='ColorThemes.ColorThemeClass' or theme.className='FlamingoThemesCode.ThemeClass') and doc.fullName&lt;&gt;'ColorThemes.ColorThemeTemplate' and doc.fullName&lt;&gt;'FlamingoThemesCode.ThemeTemplate'</sql>
+        <sql>select doc.fullName, doc.title from XWikiDocument as doc, BaseObject as theme where doc.fullName=theme.name and theme.className='ColorThemes.ColorThemeClass' and doc.fullName&lt;&gt;'ColorThemes.ColorThemeTemplate'</sql>
         <unmodifiable>0</unmodifiable>
         <validationMessage/>
         <validationRegExp/>
@@ -405,21 +420,6 @@
         <validationRegExp/>
         <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
       </guest_comment_requires_captcha>
-      <iconTheme>
-        <cache>0</cache>
-        <disabled>0</disabled>
-        <displayType>select</displayType>
-        <multiSelect>0</multiSelect>
-        <name>iconTheme</name>
-        <number>73</number>
-        <prettyName>Icon theme</prettyName>
-        <relationalStorage>0</relationalStorage>
-        <separator> </separator>
-        <size>1</size>
-        <sql>select doc.fullName, propName.value from XWikiDocument as doc, BaseObject as theme, StringProperty propName where doc.fullName=theme.name and theme.className='IconThemesCode.IconThemeClass' and doc.fullName&lt;&gt;'IconThemesCode.IconThemeTemplate' and theme.id = propName.id and propName.name = 'name'</sql>
-        <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.DBListClass</classType>
-      </iconTheme>
       <invitation_email_content>
         <contenttype>FullyRenderedText</contenttype>
         <customDisplay/>
@@ -702,22 +702,6 @@
         <validationRegExp/>
         <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
       </leftPanels>
-      <leftPanelsWidth>
-        <cache>0</cache>
-        <disabled>0</disabled>
-        <displayType>select</displayType>
-        <multiSelect>0</multiSelect>
-        <name>leftPanelsWidth</name>
-        <number>74</number>
-        <prettyName>Width of the left panel column</prettyName>
-        <relationalStorage>0</relationalStorage>
-        <separator> </separator>
-        <separators> ,|</separators>
-        <size>1</size>
-        <unmodifiable>0</unmodifiable>
-        <values>---|Small|Medium|Large</values>
-        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
-      </leftPanelsWidth>
       <meta>
         <contenttype>FullyRenderedText</contenttype>
         <customDisplay/>
@@ -1090,13 +1074,34 @@
         <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
       </tags>
       <timezone>
+        <customDisplay>{{velocity}}
+      #if ($xcontext.action == 'admin' || $xcontext.action == 'edit' || $xcontext.action == 'inline')
+        {{html}}
+          #if($xwiki.jodatime)
+            &lt;select id='$prefix$name' name='$prefix$name'&gt;
+              &lt;option value="" #if($value == $tz)selected="selected"#end&gt;$services.localization.render('XWiki.XWikiPreferences_timezone_default')&lt;/option&gt;
+              #foreach($tz in $xwiki.jodatime.getServerTimezone().getAvailableIDs())
+                &lt;option value="$tz" #if($value == $tz)selected="selected"#end&gt;$tz&lt;/option&gt;
+              #end
+            &lt;/select&gt;
+          #else
+            &lt;input id='$prefix$name' name='$prefix$name' type="text" value="$!value"/&gt;
+          #end
+        {{/html}}
+      #else
+        $value
+      #end
+      {{/velocity}}</customDisplay>
         <disabled>0</disabled>
         <name>timezone</name>
-        <number>75</number>
-        <prettyName>Time Zone</prettyName>
+        <number>71</number>
+        <picker>0</picker>
+        <prettyName>Timezone</prettyName>
         <size>30</size>
         <unmodifiable>0</unmodifiable>
-        <classType>com.xpn.xwiki.objects.classes.TimezoneClass</classType>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
       </timezone>
       <title>
         <customDisplay/>
@@ -1202,9 +1207,6 @@
     </class>
     <property>
       <leftPanels/>
-    </property>
-    <property>
-      <leftPanelsWidth>---</leftPanelsWidth>
     </property>
     <property>
       <meta/>
