@@ -39,83 +39,92 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content>## XWiki Translation for language fr generated from http://www.l10n.xwiki.org
+  <content>fileManager.tree.allFiles=Tous les fichiers
+fileManager.tree.orphanFiles=Fichiers orphelins
+fileManager.tree.orphanFolders=Dossiers ophelins
+fileManager.tree.tasks=Tâches
+fileManager.tree.pagination.more={0} autre(s)
+
+fileManager.action.newFolder=Nouveau dossier
+fileManager.action.newFile=Nouveau fichier
+fileManager.action.newFileHint=Charger un nouveau fichier dans le dossier courant
+fileManager.action.open=Ouvrir
+fileManager.action.openInNewTab=Ouvrir dans un nouvel onglet
+fileManager.action.refresh=Rafraîchir
+fileManager.action.download=Télécharger
+fileManager.action.download.buildingPackage=Création du paquet
+fileManager.action.downloadFilesHint=Télécharger les fichiers sélectionnés
+fileManager.action.recentDownloads=Téléchargements récents
+fileManager.action.noRecentDownloads=Pas de téléchargements récents
+fileManager.action.cut=Couper
+fileManager.action.cutFilesHint=Couper les fichiers sélectionnés
+fileManager.action.copy=Copier
+fileManager.action.copyFilesHint=Copier les fichiers sélectionnés
+fileManager.action.paste=Coller
+fileManager.action.pasteHint=Coller dans le dossier courant
+fileManager.action.pasteIntoFolder=Coller dans le dossier
+fileManager.action.rename=Renommer
+fileManager.action.renameFileHint=Renommer le fichier sélectionné
+fileManager.action.delete=Supprimer
+fileManager.action.deleteFilesHint=Supprimer les fichiers sélectionnés
+fileManager.action.deleteFilesConfirmation=Etes-vous certain de vouloir supprimer les fichiers sélectionnés ?
+fileManager.action.deleteFoldersConfirmation=Etes-vous certain de vouloir supprimer les dossiers sélectionnés ?
 fileManager.action.back=Retour
 fileManager.action.backToFileList=Retour à la liste des fichiers
 fileManager.action.backToFileManager=Retour vers le Gestionnaire de fichiers
 fileManager.action.clear=Effacer
 fileManager.action.clearUploadStatus=Réinitialiser le statut du téléchargement
-fileManager.action.copy=Copier
-fileManager.action.copyFilesHint=Copier les fichiers sélectionnés
-fileManager.action.cut=Couper
-fileManager.action.cutFilesHint=Couper les fichiers sélectionnés
-fileManager.action.delete=Supprimer
-fileManager.action.deleteFilesConfirmation=Etes-vous certain de vouloir supprimer les fichiers sélectionnés ?
-fileManager.action.deleteFilesHint=Supprimer les fichiers sélectionnés
-fileManager.action.deleteFoldersConfirmation=Etes-vous certain de vouloir supprimer les dossiers sélectionnés ?
-fileManager.action.download=Télécharger
-fileManager.action.download.buildingPackage=Création du paquet
-fileManager.action.downloadFilesHint=Télécharger les fichiers sélectionnés
-fileManager.action.newFile=Nouveau fichier
-fileManager.action.newFileHint=Charger un nouveau fichier dans le dossier courant
-fileManager.action.newFolder=Nouveau dossier
-fileManager.action.noRecentDownloads=Pas de téléchargements récents
-fileManager.action.open=Ouvrir
-fileManager.action.openInNewTab=Ouvrir dans un nouvel onglet
-fileManager.action.paste=Coller
-fileManager.action.pasteHint=Coller dans le dossier courant
-fileManager.action.pasteIntoFolder=Coller dans le dossier
-fileManager.action.recentDownloads=Téléchargements récents
-fileManager.action.refresh=Rafraîchir
-fileManager.action.rename=Renommer
-fileManager.action.renameFileHint=Renommer le fichier sélectionné
-fileManager.action.upload.bytesSent={0} sur {1}
-fileManager.action.upload.cancelHint=Annuler ce téléchargement
+
 fileManager.action.upload.destinationFolder=Téléchargement des fichiers vers {0} dossier
 fileManager.action.upload.destinationPath=dans {0}
-fileManager.action.upload.dropZoneHint=... ou vous pouvez déposer vos fichiers ici
 fileManager.action.upload.enableFolderSelection=Autoriser la sélection des dossiers
-fileManager.action.upload.estimatedRemainingTime={0} restant
+fileManager.action.upload.dropZoneHint=... ou vous pouvez déposer vos fichiers ici
 fileManager.action.upload.pendingUploadsCount={0} téléchargements en attente
-fileManager.fileType.archive=Archiver
-fileManager.fileType.audio=Audio
-fileManager.fileType.document=Document
-fileManager.fileType.font=Police
-fileManager.fileType.image=Image
-fileManager.fileType.presentation=Présentaton
-fileManager.fileType.spreadsheet=Tableur
-fileManager.fileType.text=Texte
-fileManager.fileType.video=Vidéo
-fileManager.liveTable.author=Auteur
-fileManager.liveTable.date=Modifié
+fileManager.action.upload.cancelHint=Annuler ce téléchargement
+fileManager.action.upload.estimatedRemainingTime={0} restant
+fileManager.action.upload.bytesSent={0} sur {1}
+
 fileManager.liveTable.name=Nom
 fileManager.liveTable.size=Taille
 fileManager.liveTable.type=Type
-fileManager.panel.RecentFiles.header=Fichiers récents
-fileManager.recentFiles.addFiles=Ajouter des fichiers
-fileManager.recentFiles.creationDate=le {0}
-fileManager.recentFiles.creator=par {0}
-fileManager.recentFiles.noFiles=Il n'y a pas de fichiers
-fileManager.recentFiles.seeAllFiles=Voir tous les fichiers
-fileManager.timeAgo.day=Il y a un jour
-fileManager.timeAgo.days=Il y a {0} jours
-fileManager.timeAgo.hour=Il y a une heure
-fileManager.timeAgo.hours=Il y a {0} heures
+fileManager.liveTable.date=Modifié
+fileManager.liveTable.author=Auteur
+
+fileManager.fileType.text=Texte
+fileManager.fileType.image=Image
+fileManager.fileType.audio=Audio
+fileManager.fileType.video=Vidéo
+fileManager.fileType.document=Document
+fileManager.fileType.presentation=Présentaton
+fileManager.fileType.spreadsheet=Tableur
+fileManager.fileType.archive=Archiver
+fileManager.fileType.font=Police
+
+fileManager.timeAgo.seconds=Il y a quelques secondes
 fileManager.timeAgo.minute=Il y a une une minute
 fileManager.timeAgo.minutes=Il y a {0} minutes
+fileManager.timeAgo.hour=Il y a une heure
+fileManager.timeAgo.hours=Il y a {0} heures
+fileManager.timeAgo.day=Il y a un jour
+fileManager.timeAgo.days=Il y a {0} jours
 fileManager.timeAgo.month=Il y a un mois
 fileManager.timeAgo.months=Il y a {0} mois
-fileManager.timeAgo.seconds=Il y a quelques secondes
 fileManager.timeAgo.year=Il y a un an
 fileManager.timeAgo.years=Il y a {0} ans
-fileManager.tree.allFiles=Tous les fichiers
-fileManager.tree.orphanFiles=Fichiers orphelins
-fileManager.tree.orphanFolders=Dossiers ophelins
-fileManager.tree.pagination.more={0} autre(s)
-fileManager.tree.tasks=Tâches
-rendering.macro.fileManager.recentFiles.description=Liste les fichiers qui ont été récemment ajouté via le Gestionnaire de Fichier
+
+# Recent Files Macro
+fileManager.recentFiles.creator=par {0}
+fileManager.recentFiles.creationDate=le {0}
+fileManager.recentFiles.noFiles=Il n'y a pas de fichiers
+fileManager.recentFiles.addFiles=Ajouter des fichiers
+fileManager.recentFiles.seeAllFiles=Voir tous les fichiers
+
+# Recent Files Panel
+fileManager.panel.RecentFiles.header=Fichiers récents
+
 rendering.macro.fileManager.recentFiles.name=Fichiers récents
-rendering.macro.fileManager.recentFiles.parameter.limit.description=Le nombre maximum de fichiers à lister
+rendering.macro.fileManager.recentFiles.description=Liste les fichiers qui ont été récemment ajouté via le Gestionnaire de Fichier
 rendering.macro.fileManager.recentFiles.parameter.limit.name=Limite
+rendering.macro.fileManager.recentFiles.parameter.limit.description=Le nombre maximum de fichiers à lister
 </content>
 </xwikidoc>

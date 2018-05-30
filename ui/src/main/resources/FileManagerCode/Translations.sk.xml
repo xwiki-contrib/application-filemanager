@@ -43,46 +43,92 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content>## XWiki Translation for language sk generated from http://www.l10n.xwiki.org
-fileManager.action.back=Späť
-fileManager.action.clear=Vyčistiť
-fileManager.action.copy=Kopírovať
-fileManager.action.cut=Vystrihnúť
-fileManager.action.delete=Odstrániť
-fileManager.action.deleteFilesHint=Odstrániť vybrané súbory
-fileManager.action.download=Stiahnuť
-fileManager.action.downloadFilesHint=Stiahnuť vybrané súbory
-fileManager.action.newFile=Nový súbor
+  <content>fileManager.tree.allFiles=Všetky súbory
+### Missing: fileManager.tree.orphanFiles=Orphan Files
+### Missing: fileManager.tree.orphanFolders=Orphan Folders
+### Missing: fileManager.tree.tasks=Tasks
+fileManager.tree.pagination.more={0} viac...
+
 fileManager.action.newFolder=Nový priečinok
+fileManager.action.newFile=Nový súbor
+### Missing: fileManager.action.newFileHint=Upload a new file to the current folder
 fileManager.action.open=Otvoriť
 fileManager.action.openInNewTab=Otvoriť na novej karte
-fileManager.action.paste=Prilepiť
 fileManager.action.refresh=Obnoviť
+fileManager.action.download=Stiahnuť
+### Missing: fileManager.action.download.buildingPackage=Building package...
+fileManager.action.downloadFilesHint=Stiahnuť vybrané súbory
+### Missing: fileManager.action.recentDownloads=Recent Downloads
+### Missing: fileManager.action.noRecentDownloads=No recent downloads
+fileManager.action.cut=Vystrihnúť
+### Missing: fileManager.action.cutFilesHint=Cut selected files
+fileManager.action.copy=Kopírovať
+### Missing: fileManager.action.copyFilesHint=Copy selected files
+fileManager.action.paste=Prilepiť
+### Missing: fileManager.action.pasteHint=Paste into the current folder
+### Missing: fileManager.action.pasteIntoFolder=Paste Into Folder
 fileManager.action.rename=Premenovať...
-fileManager.action.upload.bytesSent={0} z {1}
+### Missing: fileManager.action.renameFileHint=Rename selected file
+fileManager.action.delete=Odstrániť
+fileManager.action.deleteFilesHint=Odstrániť vybrané súbory
+### Missing: fileManager.action.deleteFilesConfirmation=Are you sure you want to delete the selected files?
+### Missing: fileManager.action.deleteFoldersConfirmation=Are you sure you want to delete the selected folders?
+fileManager.action.back=Späť
+### Missing: fileManager.action.backToFileList=Back to the file list
+### Missing: fileManager.action.backToFileManager=Back to the File Manager
+fileManager.action.clear=Vyčistiť
+### Missing: fileManager.action.clearUploadStatus=Clear the upload status
+
 fileManager.action.upload.destinationFolder=Nahrať súbor do priečinka {0}
+### Missing: fileManager.action.upload.destinationPath=in {0}
+### Missing: fileManager.action.upload.enableFolderSelection=Enable folder selection
+### Missing: fileManager.action.upload.dropZoneHint=... or you can drop files here
+### Missing: fileManager.action.upload.pendingUploadsCount={0} uploads pending
+### Missing: fileManager.action.upload.cancelHint=Cancel this upload
 fileManager.action.upload.estimatedRemainingTime={0} zostáva
-fileManager.fileType.archive=Archive
-fileManager.fileType.audio=Audio
-fileManager.fileType.document=Dokument
-fileManager.fileType.font=Font
-fileManager.fileType.image=Obrázok
-fileManager.fileType.presentation=Prezentácia
-fileManager.fileType.text=Text
-fileManager.fileType.video=Video
-fileManager.liveTable.author=Autor
-fileManager.liveTable.date=Zmenené
+fileManager.action.upload.bytesSent={0} z {1}
+
 fileManager.liveTable.name=Názov
 fileManager.liveTable.size=Veľkosť
 fileManager.liveTable.type=Typ\:
-fileManager.recentFiles.addFiles=Pridať súbory
-fileManager.recentFiles.creationDate=na {0}
-fileManager.recentFiles.creator=podľa {0}
-fileManager.recentFiles.seeAllFiles=Zobraziť všetky súbory
+fileManager.liveTable.date=Zmenené
+fileManager.liveTable.author=Autor
+
+fileManager.fileType.text=Text
+fileManager.fileType.image=Obrázok
+fileManager.fileType.audio=Audio
+fileManager.fileType.video=Video
+fileManager.fileType.document=Dokument
+fileManager.fileType.presentation=Prezentácia
+### Missing: fileManager.fileType.spreadsheet=Spreadsheet
+fileManager.fileType.archive=Archive
+fileManager.fileType.font=Font
+
+### Missing: fileManager.timeAgo.seconds=Seconds ago
+### Missing: fileManager.timeAgo.minute=A minute ago
+### Missing: fileManager.timeAgo.minutes={0} minutes ago
+### Missing: fileManager.timeAgo.hour=An hour ago
+### Missing: fileManager.timeAgo.hours={0} hours ago
+### Missing: fileManager.timeAgo.day=A day ago
+### Missing: fileManager.timeAgo.days={0} days ago
 fileManager.timeAgo.month=Pred mesiacom
+### Missing: fileManager.timeAgo.months={0} months ago
 fileManager.timeAgo.year=Pred rokom
-fileManager.tree.allFiles=Všetky súbory
-fileManager.tree.pagination.more={0} viac...
+### Missing: fileManager.timeAgo.years={0} years ago
+
+# Recent Files Macro
+fileManager.recentFiles.creator=podľa {0}
+fileManager.recentFiles.creationDate=na {0}
+### Missing: fileManager.recentFiles.noFiles=There are no files yet
+fileManager.recentFiles.addFiles=Pridať súbory
+fileManager.recentFiles.seeAllFiles=Zobraziť všetky súbory
+
+# Recent Files Panel
+### Missing: fileManager.panel.RecentFiles.header=Recent Files
+
+### Missing: rendering.macro.fileManager.recentFiles.name=Recent Files
+### Missing: rendering.macro.fileManager.recentFiles.description=Lists the files that have been recently uploaded through the File Manager.
 rendering.macro.fileManager.recentFiles.parameter.limit.name=limita
+### Missing: rendering.macro.fileManager.recentFiles.parameter.limit.description=The maximum number of files to list.
 </content>
 </xwikidoc>
