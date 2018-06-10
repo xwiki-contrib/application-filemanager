@@ -43,7 +43,7 @@
 fileManager.tree.orphanFiles=Fichiers orphelins
 fileManager.tree.orphanFolders=Dossiers ophelins
 fileManager.tree.tasks=Tâches
-fileManager.tree.pagination.more={0} autre(s)
+fileManager.tree.pagination.more={0} autre(s)...
 
 fileManager.action.newFolder=Nouveau dossier
 fileManager.action.newFile=Nouveau fichier
@@ -52,7 +52,7 @@ fileManager.action.open=Ouvrir
 fileManager.action.openInNewTab=Ouvrir dans un nouvel onglet
 fileManager.action.refresh=Rafraîchir
 fileManager.action.download=Télécharger
-fileManager.action.download.buildingPackage=Création du paquet
+fileManager.action.download.buildingPackage=Création du paquet...
 fileManager.action.downloadFilesHint=Télécharger les fichiers sélectionnés
 fileManager.action.recentDownloads=Téléchargements récents
 fileManager.action.noRecentDownloads=Pas de téléchargements récents
@@ -63,7 +63,7 @@ fileManager.action.copyFilesHint=Copier les fichiers sélectionnés
 fileManager.action.paste=Coller
 fileManager.action.pasteHint=Coller dans le dossier courant
 fileManager.action.pasteIntoFolder=Coller dans le dossier
-fileManager.action.rename=Renommer
+fileManager.action.rename=Renommer...
 fileManager.action.renameFileHint=Renommer le fichier sélectionné
 fileManager.action.delete=Supprimer
 fileManager.action.deleteFilesHint=Supprimer les fichiers sélectionnés
@@ -123,8 +123,8 @@ fileManager.recentFiles.seeAllFiles=Voir tous les fichiers
 fileManager.panel.RecentFiles.header=Fichiers récents
 
 rendering.macro.fileManager.recentFiles.name=Fichiers récents
-rendering.macro.fileManager.recentFiles.description=Liste les fichiers qui ont été récemment ajouté via le Gestionnaire de Fichier
+rendering.macro.fileManager.recentFiles.description=Liste les fichiers qui ont été récemment ajoutés via le Gestionnaire de Fichier.
 rendering.macro.fileManager.recentFiles.parameter.limit.name=Limite
-rendering.macro.fileManager.recentFiles.parameter.limit.description=Le nombre maximum de fichiers à lister
+rendering.macro.fileManager.recentFiles.parameter.limit.description=Le nombre maximum de fichiers à lister.
 </content>
 </xwikidoc>
