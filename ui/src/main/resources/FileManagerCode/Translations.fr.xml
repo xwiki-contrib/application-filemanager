@@ -125,6 +125,5 @@ fileManager.panel.RecentFiles.header=Fichiers récents
 rendering.macro.fileManager.recentFiles.name=Fichiers récents
 rendering.macro.fileManager.recentFiles.description=Liste les fichiers qui ont été récemment ajoutés via le Gestionnaire de Fichier.
 rendering.macro.fileManager.recentFiles.parameter.limit.name=Limite
-rendering.macro.fileManager.recentFiles.parameter.limit.description=Le nombre maximum de fichiers à lister.
-</content>
+rendering.macro.fileManager.recentFiles.parameter.limit.description=Le nombre maximum de fichiers à lister.</content>
 </xwikidoc>
