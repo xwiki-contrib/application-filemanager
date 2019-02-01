@@ -115,7 +115,7 @@ fileManager.timeAgo.years=Il y a {0} ans
 # Recent Files Macro
 fileManager.recentFiles.creator=par {0}
 fileManager.recentFiles.creationDate=le {0}
-fileManager.recentFiles.noFiles=Il n'y a pas de fichiers
+fileManager.recentFiles.noFiles=Il n'y a actuellement aucun fichier
 fileManager.recentFiles.addFiles=Ajouter des fichiers
 fileManager.recentFiles.seeAllFiles=Voir tous les fichiers
 
