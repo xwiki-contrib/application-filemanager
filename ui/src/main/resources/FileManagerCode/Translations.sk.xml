@@ -129,6 +129,5 @@ fileManager.recentFiles.seeAllFiles=Zobraziť všetky súbory
 ### Missing: rendering.macro.fileManager.recentFiles.name=Recent Files
 ### Missing: rendering.macro.fileManager.recentFiles.description=Lists the files that have been recently uploaded through the File Manager.
 rendering.macro.fileManager.recentFiles.parameter.limit.name=limita
-### Missing: rendering.macro.fileManager.recentFiles.parameter.limit.description=The maximum number of files to list.
-</content>
+### Missing: rendering.macro.fileManager.recentFiles.parameter.limit.description=The maximum number of files to list.</content>
 </xwikidoc>
