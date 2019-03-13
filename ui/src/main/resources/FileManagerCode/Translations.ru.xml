@@ -39,6 +39,92 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
-  <content></content>
+  <content>fileManager.tree.allFiles=Все файлы
+fileManager.tree.orphanFiles=Брошенные файлы
+fileManager.tree.orphanFolders=Брошенные папки
+fileManager.tree.tasks=Задачи
+fileManager.tree.pagination.more={0} ещё ...
+
+fileManager.action.newFolder=Новая папка
+fileManager.action.newFile=Новый файл
+fileManager.action.newFileHint=Загрузить новый файл в текущую папку
+fileManager.action.open=Открыть
+fileManager.action.openInNewTab=Открыть в новой вкладке
+fileManager.action.refresh=Обновить
+fileManager.action.download=Скачать
+fileManager.action.download.buildingPackage=Сборка пакета...
+fileManager.action.downloadFilesHint=Скачать выбранные файлы
+fileManager.action.recentDownloads=Последние скачивания
+fileManager.action.noRecentDownloads=Нет недавних скачиваний
+fileManager.action.cut=Вырезать
+fileManager.action.cutFilesHint=Вырезать выбранные файлы
+fileManager.action.copy=Копировать
+fileManager.action.copyFilesHint=Копировать выбранные файлы
+fileManager.action.paste=Вставить
+fileManager.action.pasteHint=Вставить в текущую папку
+fileManager.action.pasteIntoFolder=Вставить в папку
+fileManager.action.rename=Переименовать...
+fileManager.action.renameFileHint=Переименовать выбранные файлы
+fileManager.action.delete=Удалить
+fileManager.action.deleteFilesHint=Удалить выбранные файлы
+fileManager.action.deleteFilesConfirmation=Уверены, что хотите удалить выбранные файлы?
+fileManager.action.deleteFoldersConfirmation=Уверены, что хотите удалить выбранные папки?
+fileManager.action.back=Назад
+fileManager.action.backToFileList=Вернуться к списку файлов
+fileManager.action.backToFileManager=Вернуться к файловому менеджеру
+fileManager.action.clear=Очистить
+fileManager.action.clearUploadStatus=Очистить статус загрузки
+
+fileManager.action.upload.destinationFolder=Загрузка файлов в папку {0}
+fileManager.action.upload.destinationPath=в {0}
+fileManager.action.upload.enableFolderSelection=Включить выбор папки
+fileManager.action.upload.dropZoneHint=... или вы можете перетащить файлы сюда
+fileManager.action.upload.pendingUploadsCount={0} загрузок в ожидании
+fileManager.action.upload.cancelHint=Отменить эту загрузку
+fileManager.action.upload.estimatedRemainingTime={0} осталось
+fileManager.action.upload.bytesSent={0} из {1}
+
+fileManager.liveTable.name=Имя
+fileManager.liveTable.size=Размер
+fileManager.liveTable.type=Тип
+fileManager.liveTable.date=Изменён
+fileManager.liveTable.author=Автор
+
+fileManager.fileType.text=Текст
+fileManager.fileType.image=Образ
+fileManager.fileType.audio=Аудио
+fileManager.fileType.video=Видео
+fileManager.fileType.document=Документ
+fileManager.fileType.presentation=Презентация
+fileManager.fileType.spreadsheet=Электронная таблица
+fileManager.fileType.archive=Архив
+fileManager.fileType.font=Шрифт
+
+fileManager.timeAgo.seconds=Несколько секунд назад
+fileManager.timeAgo.minute=Минуту назад
+fileManager.timeAgo.minutes={0} минут назад
+fileManager.timeAgo.hour=Час назад
+fileManager.timeAgo.hours={0} часов назад
+fileManager.timeAgo.day=День назад
+fileManager.timeAgo.days={0} дней назад
+fileManager.timeAgo.month=Месяц назад
+fileManager.timeAgo.months={0} месяцев назад
+fileManager.timeAgo.year=Год назад
+fileManager.timeAgo.years={0} лет назад
+
+# Recent Files Macro
+fileManager.recentFiles.creator={0}
+fileManager.recentFiles.creationDate={0}
+fileManager.recentFiles.noFiles=Пока нет файлов
+fileManager.recentFiles.addFiles=Добавить файлы
+fileManager.recentFiles.seeAllFiles=Просмотр всех файлов
+
+# Recent Files Panel
+fileManager.panel.RecentFiles.header=Последние файлы
+
+rendering.macro.fileManager.recentFiles.name=Последние файлы
+rendering.macro.fileManager.recentFiles.description=Список файлов, которые недавно были загружены через файловый менеджер.
+rendering.macro.fileManager.recentFiles.parameter.limit.name=ограничение
+rendering.macro.fileManager.recentFiles.parameter.limit.description=Максимальное количество файлов в списке.</content>
   
 </xwikidoc>
