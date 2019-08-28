@@ -31,6 +31,8 @@ import org.xwiki.cache.CacheManager;
 import org.xwiki.cache.config.CacheConfiguration;
 import org.xwiki.cache.eviction.LRUEvictionConfiguration;
 import org.xwiki.component.annotation.Component;
+import org.xwiki.component.manager.ComponentLifecycleException;
+import org.xwiki.component.phase.Disposable;
 import org.xwiki.component.phase.Initializable;
 import org.xwiki.component.phase.InitializationException;
 import org.xwiki.filemanager.reference.UniqueDocumentReferenceGenerator;
@@ -46,7 +48,8 @@ import org.xwiki.model.reference.SpaceReference;
  */
 @Component
 @Singleton
-public class DefaultUniqueDocumentReferenceGenerator implements UniqueDocumentReferenceGenerator, Initializable
+public class DefaultUniqueDocumentReferenceGenerator
+    implements UniqueDocumentReferenceGenerator, Initializable, Disposable
 {
     /**
      * Used to check if a document exists.
@@ -99,6 +102,14 @@ public class DefaultUniqueDocumentReferenceGenerator implements UniqueDocumentRe
             this.documentReferenceCache = this.cacheManager.createNewCache(cacheConfiguration);
         } catch (CacheException e) {
             throw new InitializationException("Failed to initialize the document reference cache.", e);
+        }
+    }
+
+    @Override
+    public void dispose() throws ComponentLifecycleException
+    {
+        if (this.documentReferenceCache != null) {
+            this.documentReferenceCache.dispose();
         }
     }
 }
