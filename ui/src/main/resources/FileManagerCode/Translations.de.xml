@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.1">
+  <web>FileManagerCode</web>
+  <name>Translations</name>
+  <language>de</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1422868958000</creationDate>
+  <parent>FileManagerCode.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1422904236000</date>
+  <contentUpdateDate>1422904112000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>fileManager.tree.allFiles=Alle Dateien
+fileManager.tree.orphanFiles=Unsortierte Dateien
+fileManager.tree.orphanFolders=Unsortierte Verzeichnisse
+fileManager.tree.tasks=Aktionen
+fileManager.tree.pagination.more={0} mehr …
+
+fileManager.action.newFolder=Neues Verzeichnis
+fileManager.action.newFile=Neue Datei
+fileManager.action.newFileHint=Neue Datei in dieses Verzeichnis hochladen
+fileManager.action.open=Öffnen
+fileManager.action.openInNewTab=In Neuem Tab öffnen
+fileManager.action.refresh=Aktualisieren
+fileManager.action.download=Herunterladen
+fileManager.action.download.buildingPackage=Paket wird geschnürt…
+fileManager.action.downloadFilesHint=Ausgewählte Dateien herunterladen
+fileManager.action.recentDownloads=Aktuelle Downloads
+fileManager.action.noRecentDownloads=Keine aktuellen Downloads gefunden
+fileManager.action.cut=Schneiden
+fileManager.action.cutFilesHint=Ausgewählte Dateien ausschneiden
+fileManager.action.copy=Kopieren
+fileManager.action.copyFilesHint=Ausgewählte Dateien kopieren
+fileManager.action.paste=Einfügen
+fileManager.action.pasteHint=In das aktuelle Verzeichnis einfügen
+fileManager.action.pasteIntoFolder=In Verzeichnis einfügen
+fileManager.action.rename=Umbenennen…
+fileManager.action.renameFileHint=Ausgewählte Dateien umbenennen
+fileManager.action.delete=Löschen
+fileManager.action.deleteFilesHint=Ausgewählte Dateien löschen
+fileManager.action.deleteFilesConfirmation=Wollen Sie die ausgewählten Dateien wirklich löschen?
+fileManager.action.deleteFoldersConfirmation=Wollen Sie die ausgewählten Verzeichnisse wirklich löschen?
+fileManager.action.back=Zurück
+fileManager.action.backToFileList=Zurück zum Verzeichnis
+fileManager.action.backToFileManager=Zurück zum Datei-Manager
+fileManager.action.clear=Leeren
+fileManager.action.clearUploadStatus=Die Anzeige an hochgeladenen Dateien leeren
+
+fileManager.action.upload.destinationFolder=Dateien in Verzeichnis "{0}" hochladen
+fileManager.action.upload.destinationPath=in {0}
+fileManager.action.upload.enableFolderSelection=Ganzes Verzeichnis auswählen
+fileManager.action.upload.dropZoneHint=… oder Sie können die Dateien hier ablegen
+fileManager.action.upload.pendingUploadsCount={0} Dateien werden hochgeladen
+fileManager.action.upload.cancelHint=Dieses Hochladen abbrechen
+fileManager.action.upload.estimatedRemainingTime={0} verbleiben
+fileManager.action.upload.bytesSent={0} von {1}
+
+fileManager.liveTable.name=Name
+fileManager.liveTable.size=Größe
+fileManager.liveTable.type=Typ
+fileManager.liveTable.date=Änderungsdatum
+fileManager.liveTable.author=Autor
+
+fileManager.fileType.text=Text
+fileManager.fileType.image=Bild
+fileManager.fileType.audio=Audio
+fileManager.fileType.video=Video
+fileManager.fileType.document=Dokument
+fileManager.fileType.presentation=Präsentation
+fileManager.fileType.spreadsheet=Tabelle
+fileManager.fileType.archive=Archiv
+fileManager.fileType.font=Schrift
+
+fileManager.timeAgo.seconds=Vor wenigen Sekunden
+fileManager.timeAgo.minute=Vor einer Minute
+fileManager.timeAgo.minutes=Vor {0} Minuten
+fileManager.timeAgo.hour=Vor einer Stunde
+fileManager.timeAgo.hours=Vor {0} Stunden
+fileManager.timeAgo.day=Gestern
+fileManager.timeAgo.days=Vor {0} Tagen
+fileManager.timeAgo.month=Vor einem Monat
+fileManager.timeAgo.months=Vor {0} Monaten
+fileManager.timeAgo.year=Vor einem Jahr
+fileManager.timeAgo.years=Vor {0} Jahren
+
+# Recent Files Macro
+fileManager.recentFiles.creator=von {0}
+fileManager.recentFiles.creationDate=am {0}
+fileManager.recentFiles.noFiles=Es sind noch keine Dateien vorhanden
+fileManager.recentFiles.addFiles=Dateien hinzufügen
+fileManager.recentFiles.seeAllFiles=Alle Dateien
+
+# Recent Files Panel
+fileManager.panel.RecentFiles.header=Aktuelle Dateien
+
+rendering.macro.fileManager.recentFiles.name=Aktuelle Dateien
+rendering.macro.fileManager.recentFiles.description=Zeigt die zuletzt im Datei-Manager hochgeladenen Dateien.
+rendering.macro.fileManager.recentFiles.parameter.limit.name=Anzahl
+rendering.macro.fileManager.recentFiles.parameter.limit.description=Die maximale Anzahl an angezeigten Dateien.</content>
+  
+</xwikidoc>
