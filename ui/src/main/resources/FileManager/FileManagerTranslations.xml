@@ -78,8 +78,7 @@ rendering.macro.filemanagerdoc.description=Inserts a file manager document in a 
 rendering.macro.filemanagerdoc.parameter.page.name=Page
 rendering.macro.filemanagerdoc.parameter.page.description=Page name of the FileManager document
 rendering.macro.filemanagerdoc.parameter.preview.name=Preview
-rendering.macro.filemanagerdoc.parameter.preview.description=True if a preview should be included
-</content>
+rendering.macro.filemanagerdoc.parameter.preview.description=True if a preview should be included</content>
   <object>
     <name>FileManager.FileManagerTranslations</name>
     <number>0</number>
