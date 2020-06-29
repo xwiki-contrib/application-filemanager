@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.1">
+  <web>FileManagerCode</web>
+  <name>Translations</name>
+  <language>es</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1422868958000</creationDate>
+  <parent>FileManagerCode.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1422904236000</date>
+  <contentUpdateDate>1422904112000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>fileManager.tree.allFiles=Todos los ficheros
+fileManager.tree.orphanFiles=Ficheros huérfanos
+fileManager.tree.orphanFolders=Carpetas huérfanas
+fileManager.tree.tasks=Tareas
+fileManager.tree.pagination.more={0} más ...
+
+fileManager.action.newFolder=Carpeta nueva
+fileManager.action.newFile=Fichero nuevo
+fileManager.action.newFileHint=Subir un fichero nuevo a la carpeta en curso
+fileManager.action.open=Abrir
+fileManager.action.openInNewTab=Abrir en una pestaña nueva
+fileManager.action.refresh=Refrescar
+fileManager.action.download=Descargar
+fileManager.action.download.buildingPackage=Construyendo paquete...
+fileManager.action.downloadFilesHint=Descargar los ficheros seleccionados
+fileManager.action.recentDownloads=Descargas recientes
+fileManager.action.noRecentDownloads=No hay descargas recientes
+fileManager.action.cut=Cortar
+fileManager.action.cutFilesHint=Cortar los ficheros seleccionados
+fileManager.action.copy=Copiar
+fileManager.action.copyFilesHint=Copiar los ficheros seleccionados
+fileManager.action.paste=Pegar
+fileManager.action.pasteHint=Pegar en la carpeta en curso
+fileManager.action.pasteIntoFolder=Pegar en la carpeta
+fileManager.action.rename=Renombrar...
+fileManager.action.renameFileHint=Renombrar el fichero seleccionado
+fileManager.action.delete=Borrar
+fileManager.action.deleteFilesHint=Borrar los ficheros seleccionados
+fileManager.action.deleteFilesConfirmation=¿Estás seguro de querer borrar los ficheros seleccionados?
+fileManager.action.deleteFoldersConfirmation=¿Estás seguro de querer borrar las carpetas seleccionadas?
+fileManager.action.back=Volver
+fileManager.action.backToFileList=Volver a la lista de ficheros
+fileManager.action.backToFileManager=Volver al Administrador de ficheros
+fileManager.action.clear=Limpiar
+fileManager.action.clearUploadStatus=Limpiar el estado de subida
+
+fileManager.action.upload.destinationFolder=Subir ficheros a la carpeta {0}
+fileManager.action.upload.destinationPath=en {0}
+fileManager.action.upload.enableFolderSelection=Activar la selección de carpetas
+fileManager.action.upload.dropZoneHint=... o puedes soltar los ficheros aquí
+fileManager.action.upload.pendingUploadsCount={0} subidas pendientes
+fileManager.action.upload.cancelHint=Cancela esta subida
+fileManager.action.upload.estimatedRemainingTime={0} pendientes
+fileManager.action.upload.bytesSent={0} de {1}
+
+fileManager.liveTable.name=Nombre
+fileManager.liveTable.size=Tamaño
+fileManager.liveTable.type=Tipo
+fileManager.liveTable.date=Modificado
+fileManager.liveTable.author=Autor
+
+fileManager.fileType.text=Texto
+fileManager.fileType.image=Imagen
+fileManager.fileType.audio=Sonido
+fileManager.fileType.video=Vídeo
+fileManager.fileType.document=Documento
+fileManager.fileType.presentation=Presentación
+fileManager.fileType.spreadsheet=Hoja de cálculo
+fileManager.fileType.archive=Archivo
+fileManager.fileType.font=Fuente
+
+fileManager.timeAgo.seconds=Segundos transcurridos
+fileManager.timeAgo.minute=Hace un minuto
+fileManager.timeAgo.minutes=hace {0} minutos
+fileManager.timeAgo.hour=Hace una hora
+fileManager.timeAgo.hours=hace {0} horas
+fileManager.timeAgo.day=Hace un día
+fileManager.timeAgo.days=hace {0} días
+fileManager.timeAgo.month=Hace un mes
+fileManager.timeAgo.months=hace {0} meses
+fileManager.timeAgo.year=Hace un año
+fileManager.timeAgo.years=hace {0} años
+
+# Recent Files Macro
+fileManager.recentFiles.creator=a las {0}
+fileManager.recentFiles.creationDate=el {0}
+fileManager.recentFiles.noFiles=Todavía no hay ficheros
+fileManager.recentFiles.addFiles=Añadir ficheros
+fileManager.recentFiles.seeAllFiles=Mostrar todos los ficheros
+
+# Recent Files Panel
+fileManager.panel.RecentFiles.header=Ficheros recientes
+
+rendering.macro.fileManager.recentFiles.name=Ficheros recientes
+rendering.macro.fileManager.recentFiles.description=Lista los ficheros que se ha subido recientemente con el Administrador de ficheros.
+rendering.macro.fileManager.recentFiles.parameter.limit.name=límite
+rendering.macro.fileManager.recentFiles.parameter.limit.description=El número máximo de ficheros a listar.</content>
+  
+</xwikidoc>
