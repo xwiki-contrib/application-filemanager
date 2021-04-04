@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 
 <!--
  * See the NOTICE file distributed with this work for additional
@@ -44,7 +44,6 @@ fileManager.tree.orphanFiles=Fichiers orphelins
 fileManager.tree.orphanFolders=Dossiers ophelins
 fileManager.tree.tasks=Tâches
 fileManager.tree.pagination.more={0} autre(s)...
-
 fileManager.action.newFolder=Nouveau dossier
 fileManager.action.newFile=Nouveau fichier
 fileManager.action.newFileHint=Charger un nouveau fichier dans le dossier courant
@@ -74,7 +73,6 @@ fileManager.action.backToFileList=Retour à la liste des fichiers
 fileManager.action.backToFileManager=Retour vers le Gestionnaire de fichiers
 fileManager.action.clear=Effacer
 fileManager.action.clearUploadStatus=Réinitialiser le statut du téléchargement
-
 fileManager.action.upload.destinationFolder=Téléchargement des fichiers vers {0} dossier
 fileManager.action.upload.destinationPath=dans {0}
 fileManager.action.upload.enableFolderSelection=Autoriser la sélection des dossiers
@@ -83,13 +81,11 @@ fileManager.action.upload.pendingUploadsCount={0} téléchargements en attente
 fileManager.action.upload.cancelHint=Annuler ce téléchargement
 fileManager.action.upload.estimatedRemainingTime={0} restant
 fileManager.action.upload.bytesSent={0} sur {1}
-
 fileManager.liveTable.name=Nom
 fileManager.liveTable.size=Taille
 fileManager.liveTable.type=Type
 fileManager.liveTable.date=Modifié
 fileManager.liveTable.author=Auteur
-
 fileManager.fileType.text=Texte
 fileManager.fileType.image=Image
 fileManager.fileType.audio=Audio
@@ -99,9 +95,8 @@ fileManager.fileType.presentation=Présentaton
 fileManager.fileType.spreadsheet=Tableur
 fileManager.fileType.archive=Archiver
 fileManager.fileType.font=Police
-
 fileManager.timeAgo.seconds=Il y a quelques secondes
-fileManager.timeAgo.minute=Il y a une une minute
+fileManager.timeAgo.minute=Il y a une minute
 fileManager.timeAgo.minutes=Il y a {0} minutes
 fileManager.timeAgo.hour=Il y a une heure
 fileManager.timeAgo.hours=Il y a {0} heures
@@ -121,9 +116,9 @@ fileManager.recentFiles.seeAllFiles=Voir tous les fichiers
 
 # Recent Files Panel
 fileManager.panel.RecentFiles.header=Fichiers récents
-
 rendering.macro.fileManager.recentFiles.name=Fichiers récents
 rendering.macro.fileManager.recentFiles.description=Liste les fichiers qui ont été récemment ajoutés via le Gestionnaire de Fichier.
 rendering.macro.fileManager.recentFiles.parameter.limit.name=Limite
-rendering.macro.fileManager.recentFiles.parameter.limit.description=Le nombre maximum de fichiers à lister.</content>
+rendering.macro.fileManager.recentFiles.parameter.limit.description=Le nombre maximum de fichiers à lister.
+</content>
 </xwikidoc>
