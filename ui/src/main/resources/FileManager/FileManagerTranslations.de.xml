@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 
 <!--
  * See the NOTICE file distributed with this work for additional
@@ -66,18 +66,17 @@ filemanager.appname=Datei-Manager
 # Old keys, from the first version of the application.
 contrib.FM.description=Datei-Beschreibung
 contrib.FM.noDescription=Für diese Datei ist keine Beschreibung verfügbar.
-contrib.FM.noAttachment=An dieser Seite ist keine Datei angehängt. Sie können eine Datei anhängen, indem Sie auf „Bearbeiten“ klicken oder die Datei direkt unter  „Anhänge“ hochladen.
+contrib.FM.noAttachment=An dieser Seite ist keine Datei angehängt. Sie können eine Datei anhängen, indem Sie auf „Bearbeiten“ klicken oder die Datei direkt unter „Anhänge“ hochladen.
 contrib.FM.editDescription=Speichern und Ansehen
-### Missing: contrib.FM.change.explanations=You can manage the file(s) to attach to this document using the "Attachments" section below. You can also tag this document with the application at the bottom of this section, so it would be easier to find it.
-
+contrib.FM.change.explanations=Sie können die Datei(en) verwalten, die an dieses Dokument angehängt werden sollen, indem Sie den Abschnitt "Anhänge" unten verwenden. Sie können dieses Dokument auch mit der Anwendung am Ende dieses Abschnitts versehen, damit es leichter zu finden ist.
 rendering.macro.filetagcloud.name=Tag-Wolke des Datei-Managers
 rendering.macro.filetagcloud.description=Zeigt die Datei-Tags als Wolke an, entweder in diesem Wiki oder im angegebenen Bereich an, falls angegeben.
-
 rendering.macro.filemanagerdoc.name=Inhalt aus dem Datei-Manager
 rendering.macro.filemanagerdoc.description=Fügt einen Inhalt aus dem Datei-Manager in einer Seite ein, mit oder ohne Vorschau
 rendering.macro.filemanagerdoc.parameter.page.name=Seite
 rendering.macro.filemanagerdoc.parameter.page.description=Seite, in der der Inhalt abgelegt ist
 rendering.macro.filemanagerdoc.parameter.preview.name=Vorschau
-rendering.macro.filemanagerdoc.parameter.preview.description=„True“, wenn mit Vorschau</content>
+rendering.macro.filemanagerdoc.parameter.preview.description=„True“, wenn mit Vorschau
+</content>
   
 </xwikidoc>
