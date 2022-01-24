@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 
 <!--
  * See the NOTICE file distributed with this work for additional
@@ -40,11 +40,10 @@
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>true</hidden>
   <content>fileManager.tree.allFiles=Alle Dateien
-fileManager.tree.orphanFiles=Unsortierte Dateien
+fileManager.tree.orphanFiles=Verwaiste Dateien
 fileManager.tree.orphanFolders=Unsortierte Verzeichnisse
 fileManager.tree.tasks=Aktionen
 fileManager.tree.pagination.more={0} mehr …
-
 fileManager.action.newFolder=Neues Verzeichnis
 fileManager.action.newFile=Neue Datei
 fileManager.action.newFileHint=Neue Datei in dieses Verzeichnis hochladen
@@ -74,7 +73,6 @@ fileManager.action.backToFileList=Zurück zum Verzeichnis
 fileManager.action.backToFileManager=Zurück zum Datei-Manager
 fileManager.action.clear=Leeren
 fileManager.action.clearUploadStatus=Die Anzeige an hochgeladenen Dateien leeren
-
 fileManager.action.upload.destinationFolder=Dateien in Verzeichnis "{0}" hochladen
 fileManager.action.upload.destinationPath=in {0}
 fileManager.action.upload.enableFolderSelection=Ganzes Verzeichnis auswählen
@@ -83,13 +81,11 @@ fileManager.action.upload.pendingUploadsCount={0} Dateien werden hochgeladen
 fileManager.action.upload.cancelHint=Dieses Hochladen abbrechen
 fileManager.action.upload.estimatedRemainingTime={0} verbleiben
 fileManager.action.upload.bytesSent={0} von {1}
-
 fileManager.liveTable.name=Name
 fileManager.liveTable.size=Größe
 fileManager.liveTable.type=Typ
 fileManager.liveTable.date=Änderungsdatum
 fileManager.liveTable.author=Autor
-
 fileManager.fileType.text=Text
 fileManager.fileType.image=Bild
 fileManager.fileType.audio=Audio
@@ -99,7 +95,6 @@ fileManager.fileType.presentation=Präsentation
 fileManager.fileType.spreadsheet=Tabelle
 fileManager.fileType.archive=Archiv
 fileManager.fileType.font=Schrift
-
 fileManager.timeAgo.seconds=Vor wenigen Sekunden
 fileManager.timeAgo.minute=Vor einer Minute
 fileManager.timeAgo.minutes=Vor {0} Minuten
@@ -121,10 +116,10 @@ fileManager.recentFiles.seeAllFiles=Alle Dateien
 
 # Recent Files Panel
 fileManager.panel.RecentFiles.header=Aktuelle Dateien
-
 rendering.macro.fileManager.recentFiles.name=Aktuelle Dateien
 rendering.macro.fileManager.recentFiles.description=Zeigt die zuletzt im Datei-Manager hochgeladenen Dateien.
 rendering.macro.fileManager.recentFiles.parameter.limit.name=Anzahl
-rendering.macro.fileManager.recentFiles.parameter.limit.description=Die maximale Anzahl an angezeigten Dateien.</content>
+rendering.macro.fileManager.recentFiles.parameter.limit.description=Die maximale Anzahl an angezeigten Dateien.
+</content>
   
 </xwikidoc>
