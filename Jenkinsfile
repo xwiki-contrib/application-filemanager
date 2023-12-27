@@ -27,4 +27,6 @@
 xwikiModule {
   // Use install instead of deploy FTM since the module is wrongly configured to use scp to deploy to nexus.xwiki.org
   goals = 'clean install'
+  // Currently doesn't build with java > 11
+  javaTool = 'java11'
 }
