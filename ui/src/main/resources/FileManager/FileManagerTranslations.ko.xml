@@ -51,7 +51,7 @@ filemanager.livetable.doc.author=마지막 저자
 filemanager.livetable.doc.creator=창조자
 filemanager.livetable.doc.date=업데이트 날짜
 filemanager.livetable.doc.creationDate=생산 일
-filemanager.livetable._avatar=여기에 사용자의 식별자를 입력하세요.
+filemanager.livetable._avatar=아바타
 filemanager.livetable._images=이미지
 filemanager.livetable._attachments=첨부파일
 filemanager.livetable._actions=행위
@@ -72,10 +72,10 @@ contrib.FM.change.explanations=아래의 "첨부 파일" 섹션을 사용하여 
 rendering.macro.filetagcloud.name=FileManager 태그 클라우드
 rendering.macro.filetagcloud.description=이 Wiki 또는 지정된 공간(있는 경우)에 파일 태그 클라우드를 표시합니다.
 rendering.macro.filemanagerdoc.name=파일 관리자 문서
-rendering.macro.filemanagerdoc.description=역이 저장되었지만, 일부 새롭게 실패한 검사가 있습니다: 일치하지 않는 마침표(.)
+rendering.macro.filemanagerdoc.description=미리보기 유무에 관계없이 페이지에 파일 관리자 문서를 삽입합니다
 rendering.macro.filemanagerdoc.parameter.page.name=페이지
-rendering.macro.filemanagerdoc.parameter.page.description=삭제 진행 중...
-rendering.macro.filemanagerdoc.parameter.preview.name=삭제 진행 중...
-rendering.macro.filemanagerdoc.parameter.preview.description=삭제 진행 중...
+rendering.macro.filemanagerdoc.parameter.page.description=FileManager 문서의 페이지 이름
+rendering.macro.filemanagerdoc.parameter.preview.name=시사
+rendering.macro.filemanagerdoc.parameter.preview.description=미리보기를 포함해야 하는 경우 True입니다
 </content>
   </xwikidoc>
