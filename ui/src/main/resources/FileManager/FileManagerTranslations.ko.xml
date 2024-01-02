@@ -1,0 +1,81 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.1" locale="ko">
+  <web>FileManager</web>
+  <name>FileManagerTranslations</name>
+  <language>ko</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1355094000000</creationDate>
+  <parent>FileManagerClass</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1422887940000</date>
+  <contentUpdateDate>1422887940000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content># Class fields
+FileManager.FileManagerClass_description=설명
+
+# Live table generic keys
+filemanager.livetable.doc.title=페이지 제목
+filemanager.livetable.doc.name=페이지 이름
+filemanager.livetable.doc.space=공간
+filemanager.livetable.doc.fullname=페이지 전체 이름
+filemanager.livetable.doc.author=마지막 저자
+filemanager.livetable.doc.creator=창조자
+filemanager.livetable.doc.date=업데이트 날짜
+filemanager.livetable.doc.creationDate=생산 일
+filemanager.livetable._avatar=여기에 사용자의 식별자를 입력하세요.
+filemanager.livetable._images=이미지
+filemanager.livetable._attachments=첨부파일
+filemanager.livetable._actions=행위
+filemanager.livetable._actions.edit=편집하다
+filemanager.livetable._actions.delete=삭제
+filemanager.livetable.emptyvalue=-
+
+# Live table specific keys
+filemanager.livetable.description=설명
+filemanager.appname=파일 관리자
+
+# Old keys, from the first version of the application.
+contrib.FM.description=파일 설명
+contrib.FM.noDescription=이 파일에 대한 설명이 없습니다.
+contrib.FM.noAttachment=이 문서에는 첨부된 파일이 없습니다. "편집"을 클릭하거나 첨부 파일로 직접 추가하여 추가하세요.
+contrib.FM.editDescription=저장하고 보기
+contrib.FM.change.explanations=아래의 "첨부 파일" 섹션을 사용하여 이 문서에 첨부할 파일을 관리할 수 있습니다. 또한 이 섹션 하단에 있는 애플리케이션으로 이 문서에 태그를 지정할 수 있으므로 더 쉽게 찾을 수 있습니다.
+rendering.macro.filetagcloud.name=FileManager 태그 클라우드
+rendering.macro.filetagcloud.description=이 Wiki 또는 지정된 공간(있는 경우)에 파일 태그 클라우드를 표시합니다.
+rendering.macro.filemanagerdoc.name=파일 관리자 문서
+rendering.macro.filemanagerdoc.description=역이 저장되었지만, 일부 새롭게 실패한 검사가 있습니다: 일치하지 않는 마침표(.)
+rendering.macro.filemanagerdoc.parameter.page.name=페이지
+rendering.macro.filemanagerdoc.parameter.page.description=삭제 진행 중...
+rendering.macro.filemanagerdoc.parameter.preview.name=삭제 진행 중...
+rendering.macro.filemanagerdoc.parameter.preview.description=삭제 진행 중...
+</content>
+  </xwikidoc>
