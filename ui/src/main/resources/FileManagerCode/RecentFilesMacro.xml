@@ -308,7 +308,8 @@
   #set ($fileDoc = $xwiki.getDocument($result))
   #if ($fileDoc)
     #getFile($fileDoc $file)
-    * {{html}}#mimetypeimg($file.mediaType.toLowerCase() $file.name.toLowerCase()){{/html}} [[$file.name&gt;&gt;$result]] $services.localization.render('fileManager.recentFiles.creator', ["[[$xwiki.getUserName($file.creator, false)&gt;&gt;$file.creator]]"]) $services.localization.render('fileManager.recentFiles.creationDate', [$xwiki.formatDate($file.creationDate)])
+    #set ($escapedFileName = $services.rendering.escape($services.rendering.escape($file.name, 'xwiki/2.1')))
+    * {{html}}#mimetypeimg($file.mediaType.toLowerCase() $file.name.toLowerCase()){{/html}} [[$$escapedFileName&gt;&gt;$result]] $services.localization.render('fileManager.recentFiles.creator', ["[[$xwiki.getUserName($file.creator, false)&gt;&gt;$file.creator]]"]) $services.localization.render('fileManager.recentFiles.creationDate', [$xwiki.formatDate($file.creationDate)])
     #set ($i = $i + 1)
     #if ($i &gt;= $viewLimit)
       #break
