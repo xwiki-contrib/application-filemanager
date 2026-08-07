@@ -1,0 +1,81 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.1" locale="pt-BR">
+  <web>FileManager</web>
+  <name>FileManagerTranslations</name>
+  <language>pt-BR</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1355094000000</creationDate>
+  <parent>FileManagerClass</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1422887940000</date>
+  <contentUpdateDate>1422887940000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content># Class fields
+FileManager.FileManagerClass_description=Descrição
+
+# Live table generic keys
+filemanager.livetable.doc.title=Título da página
+filemanager.livetable.doc.name=Nome da página
+filemanager.livetable.doc.space=Espaço
+filemanager.livetable.doc.fullname=Nome completo da página
+filemanager.livetable.doc.author=Último autor
+filemanager.livetable.doc.creator=Criador
+filemanager.livetable.doc.date=Data de atualização
+filemanager.livetable.doc.creationDate=Data de criação
+filemanager.livetable._avatar=Avatar
+filemanager.livetable._images=Imagens
+filemanager.livetable._attachments=Anexos
+filemanager.livetable._actions=Ações
+filemanager.livetable._actions.edit=Editar
+filemanager.livetable._actions.delete=Excluir
+filemanager.livetable.emptyvalue=-
+
+# Live table specific keys
+filemanager.livetable.description=Descrição
+filemanager.appname=Gerenciador de arquivos
+
+# Old keys, from the first version of the application.
+contrib.FM.description=Descrição do arquivo
+contrib.FM.noDescription=Nenhuma descrição deste arquivo está disponível.
+contrib.FM.noAttachment=Nenhum arquivo está anexado a este documento. Adicione um clicando em "editar" ou adicionando-o diretamente como anexo.
+contrib.FM.editDescription=Salvar e visualizar
+contrib.FM.change.explanations=Você pode gerenciar os arquivos a serem anexados a este documento usando a seção "Anexos" abaixo. Você também pode marcar este documento com o aplicativo na parte inferior desta seção, para que seja mais fácil encontrá-lo.
+rendering.macro.filetagcloud.name=Nuvem de tags do FileManager
+rendering.macro.filetagcloud.description=Exibe a nuvem de tags de arquivo neste wiki ou no espaço especificado, se houver.
+rendering.macro.filemanagerdoc.name=Documento do gerenciador de arquivos
+rendering.macro.filemanagerdoc.description=Insere um documento do gerenciador de arquivos em uma página, com ou sem visualização
+rendering.macro.filemanagerdoc.parameter.page.name=Página
+rendering.macro.filemanagerdoc.parameter.page.description=Nome da página do documento FileManager
+rendering.macro.filemanagerdoc.parameter.preview.name=Visualização
+rendering.macro.filemanagerdoc.parameter.preview.description=Verdadeiro se uma visualização precisar ser incluída
+</content>
+  </xwikidoc>
