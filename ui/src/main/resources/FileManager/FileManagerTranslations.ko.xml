@@ -27,12 +27,9 @@
   <defaultLanguage>en</defaultLanguage>
   <translation>1</translation>
   <creator>xwiki:XWiki.Admin</creator>
-  <creationDate>1355094000000</creationDate>
   <parent>FileManagerClass</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <date>1422887940000</date>
-  <contentUpdateDate>1422887940000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <comment/>
@@ -78,4 +75,4 @@ rendering.macro.filemanagerdoc.parameter.page.description=FileManager 문서의 
 rendering.macro.filemanagerdoc.parameter.preview.name=시사
 rendering.macro.filemanagerdoc.parameter.preview.description=미리보기를 포함해야 하는 경우 True입니다
 </content>
-  </xwikidoc>
+</xwikidoc>

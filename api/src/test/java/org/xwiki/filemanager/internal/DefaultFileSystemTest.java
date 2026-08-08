@@ -21,93 +21,100 @@ package org.xwiki.filemanager.internal;
 
 import javax.inject.Provider;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.xwiki.component.manager.ComponentManager;
-import org.xwiki.component.util.DefaultParameterizedType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.xwiki.filemanager.File;
-import org.xwiki.filemanager.FileSystem;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.test.mockito.MockitoComponentMockingRule;
+import org.xwiki.test.junit5.mockito.ComponentTest;
+import org.xwiki.test.junit5.mockito.InjectComponentManager;
+import org.xwiki.test.junit5.mockito.InjectMockComponents;
+import org.xwiki.test.junit5.mockito.MockComponent;
+import org.xwiki.test.mockito.MockitoComponentManager;
 
 import com.xpn.xwiki.XWiki;
 import com.xpn.xwiki.XWikiContext;
 import com.xpn.xwiki.doc.XWikiDocument;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link DefaultFileSystem}.
- * 
+ *
  * @version $Id$
  * @since 2.0M1
  */
-public class DefaultFileSystemTest
+@ComponentTest
+class DefaultFileSystemTest
 {
-    @Rule
-    public MockitoComponentMockingRule<FileSystem> mocker = new MockitoComponentMockingRule<FileSystem>(
-        DefaultFileSystem.class);
+    @InjectMockComponents
+    private DefaultFileSystem fileSystem;
+
+    @MockComponent
+    private Provider<XWikiContext> xcontextProvider;
+
+    /**
+     * {@link DefaultFileSystem} looks up the {@link File} and {@link Folder} implementations from the component
+     * manager, so we register them here.
+     */
+    @InjectComponentManager
+    private MockitoComponentManager componentManager;
 
     private XWikiContext xcontext;
 
-    private ComponentManager componentManager;
+    private XWiki wiki;
 
-    @Before
-    public void configure() throws Exception
+    @BeforeEach
+    void configure()
     {
-        xcontext = mock(XWikiContext.class);
-        Provider<XWikiContext> xcontextProvider = mocker.getInstance(XWikiContext.TYPE_PROVIDER);
-        when(xcontextProvider.get()).thenReturn(xcontext);
+        this.xcontext = mock(XWikiContext.class);
+        when(this.xcontextProvider.get()).thenReturn(this.xcontext);
 
-        XWiki wiki = mock(XWiki.class);
-        when(xcontext.getWiki()).thenReturn(wiki);
-        when(xcontext.getUserReference()).thenReturn(new DocumentReference("wiki", "Users", "mflorea"));
-
-        componentManager = mock(ComponentManager.class);
-        Provider<ComponentManager> componentManagerProvider =
-            mocker.getInstance(new DefaultParameterizedType(null, Provider.class, ComponentManager.class));
-        when(componentManagerProvider.get()).thenReturn(componentManager);
+        this.wiki = mock(XWiki.class);
+        when(this.xcontext.getWiki()).thenReturn(this.wiki);
+        when(this.xcontext.getUserReference()).thenReturn(new DocumentReference("wiki", "Users", "mflorea"));
     }
 
     @Test
-    public void getFolder() throws Exception
+    void getFolder() throws Exception
     {
         DocumentReference folderReference = new DocumentReference("wiki", "Drive", "Folder");
         XWikiDocument folderDocument = mock(XWikiDocument.class);
-        when(xcontext.getWiki().getDocument(folderReference, xcontext)).thenReturn(folderDocument);
+        when(this.wiki.getDocument(folderReference, this.xcontext)).thenReturn(folderDocument);
         when(folderDocument.isNew()).thenReturn(false);
 
         DefaultFolder expectedFolder = spy(new DefaultFolder());
-        when(componentManager.getInstance(Folder.class)).thenReturn(expectedFolder);
+        this.componentManager.registerComponent(Folder.class, expectedFolder);
 
-        Folder actualFolder = mocker.getComponentUnderTest().getFolder(folderReference);
+        Folder actualFolder = this.fileSystem.getFolder(folderReference);
 
         assertSame(expectedFolder, actualFolder);
         verify(expectedFolder).setDocument(folderDocument);
     }
 
     @Test
-    public void getFile() throws Exception
+    void getFile() throws Exception
     {
         DocumentReference fileReference = new DocumentReference("wiki", "Drive", "file.txt");
         XWikiDocument fileDocument = mock(XWikiDocument.class);
-        when(xcontext.getWiki().getDocument(fileReference, xcontext)).thenReturn(fileDocument);
+        when(this.wiki.getDocument(fileReference, this.xcontext)).thenReturn(fileDocument);
         when(fileDocument.isNew()).thenReturn(false);
 
         DefaultFile expectedFile = spy(new DefaultFile());
-        when(componentManager.getInstance(File.class)).thenReturn(expectedFile);
+        this.componentManager.registerComponent(File.class, expectedFile);
 
-        File actualFile = mocker.getComponentUnderTest().getFile(fileReference);
+        File actualFile = this.fileSystem.getFile(fileReference);
 
         assertSame(expectedFile, actualFile);
         verify(expectedFile).setDocument(fileDocument);
     }
 
     @Test
-    public void saveFile() throws Exception
+    void saveFile() throws Exception
     {
         XWikiDocument xdoc = mock(XWikiDocument.class);
         when(xdoc.clone()).thenReturn(xdoc);
@@ -117,57 +124,57 @@ public class DefaultFileSystemTest
         DefaultFile file = spy(new DefaultFile());
         file.setDocument(xdoc);
 
-        mocker.getComponentUnderTest().save(file);
+        this.fileSystem.save(file);
 
         verify(file).updateParentReferences();
-        verify(xdoc).setAuthorReference(xcontext.getUserReference());
-        verify(xcontext.getWiki()).saveDocument(xdoc, "", false, xcontext);
+        verify(xdoc).setAuthorReference(this.xcontext.getUserReference());
+        verify(this.wiki).saveDocument(xdoc, "", false, this.xcontext);
     }
 
     /**
      * @see "FILEMAN-105: Files from File manager disappear after renaming the folder"
      */
     @Test
-    public void rename() throws Exception
+    void rename() throws Exception
     {
         DocumentReference oldReference = new DocumentReference("wiki", "Space", "OldPage");
         DocumentReference newReference = new DocumentReference("wiki", "Space", "NewPage");
 
         XWikiDocument oldDocument = mock(XWikiDocument.class, "old");
-        when(xcontext.getWiki().getDocument(oldReference, xcontext)).thenReturn(oldDocument);
+        when(this.wiki.getDocument(oldReference, this.xcontext)).thenReturn(oldDocument);
 
         XWikiDocument clonedDocument = mock(XWikiDocument.class, "cloned");
         when(oldDocument.clone()).thenReturn(clonedDocument);
 
-        mocker.getComponentUnderTest().rename(oldReference, newReference);
+        this.fileSystem.rename(oldReference, newReference);
 
-        verify(clonedDocument).rename(newReference, xcontext);
+        verify(clonedDocument).rename(newReference, this.xcontext);
     }
 
     @Test
-    public void delete() throws Exception
+    void delete() throws Exception
     {
         DocumentReference reference = new DocumentReference("wiki", "Drive", "File");
 
         XWikiDocument cachedDocument = mock(XWikiDocument.class, "cached");
-        when(xcontext.getWiki().getDocument(reference, xcontext)).thenReturn(cachedDocument);
+        when(this.wiki.getDocument(reference, this.xcontext)).thenReturn(cachedDocument);
 
         XWikiDocument clonedDocument = mock(XWikiDocument.class, "cloned");
         when(cachedDocument.clone()).thenReturn(clonedDocument);
 
-        mocker.getComponentUnderTest().delete(reference);
+        this.fileSystem.delete(reference);
 
-        verify(xcontext.getWiki()).deleteDocument(clonedDocument, xcontext);
+        verify(this.wiki).deleteDocument(clonedDocument, this.xcontext);
     }
 
     @Test
-    public void copy() throws Exception
+    void copy() throws Exception
     {
         DocumentReference source = new DocumentReference("wiki", "Source", "Page");
         DocumentReference target = new DocumentReference("wiki", "Target", "Page");
 
-        mocker.getComponentUnderTest().copy(source, target);
+        this.fileSystem.copy(source, target);
 
-        verify(xcontext.getWiki()).copyDocument(source, target, null, false, true, true, xcontext);
+        verify(this.wiki).copyDocument(source, target, null, false, true, true, this.xcontext);
     }
 }

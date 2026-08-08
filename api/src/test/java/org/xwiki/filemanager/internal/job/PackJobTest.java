@@ -21,6 +21,7 @@ package org.xwiki.filemanager.internal.job;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,60 +33,64 @@ import java.util.Map;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.xwiki.environment.Environment;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.xwiki.filemanager.File;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
+import org.xwiki.filemanager.internal.PackFileResolver;
+import org.xwiki.filemanager.job.PackJobStatus;
 import org.xwiki.filemanager.job.PackRequest;
 import org.xwiki.job.Job;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.test.mockito.MockitoComponentMockingRule;
+import org.xwiki.test.junit5.mockito.ComponentTest;
+import org.xwiki.test.junit5.mockito.InjectMockComponents;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link PackJob}.
- * 
+ *
  * @version $Id$
  * @since 2.0M2
  */
-public class PackJobTest extends AbstractJobTest
+@ComponentTest
+class PackJobTest extends AbstractJobTest
 {
-    @Rule
-    public MockitoComponentMockingRule<Job> mocker = new MockitoComponentMockingRule<Job>(PackJob.class);
+    @InjectMockComponents
+    private PackJob packJob;
 
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
+    @TempDir
+    private java.io.File testFolder;
 
     @Override
-    protected MockitoComponentMockingRule<Job> getMocker()
+    protected Job getJob()
     {
-        return mocker;
+        return this.packJob;
     }
 
-    @Override
-    public void configure() throws Exception
+    @BeforeEach
+    void configurePackFileResolver() throws Exception
     {
-        super.configure();
-
-        Environment environment = mocker.getInstance(Environment.class);
-        when(environment.getTemporaryDirectory()).thenReturn(testFolder.getRoot());
+        PackFileResolver packFileResolver = this.componentManager.getInstance(PackFileResolver.class);
+        when(packFileResolver.getTemporaryFile(any(AttachmentReference.class))).thenAnswer(
+            invocation -> new java.io.File(this.testFolder, invocation.<AttachmentReference>getArgument(0).getName()));
     }
 
     @Test
-    public void pack() throws Exception
+    void pack() throws Exception
     {
         Folder projects = mockFolder("Projects", "Pr\u00F4j\u00EA\u00E7\u021B\u0219", null,
             Arrays.asList("Concerto", "Resilience"), Arrays.asList("key.pub"));
         File key = mockFile("key.pub", "Projects");
         when(fileSystem.canView(key.getReference())).thenReturn(false);
 
-        mockFolder("Concerto", "Projects", Collections.<String> emptyList(), Arrays.asList("pom.xml"));
+        mockFolder("Concerto", "Projects", Collections.emptyList(), Arrays.asList("pom.xml"));
         File pom = mockFile("pom.xml", "m&y p?o#m.x=m$l", "Concerto");
         setFileContent(pom, "foo");
 
@@ -104,9 +109,9 @@ public class PackJobTest extends AbstractJobTest
 
         PackJob job = (PackJob) execute(request);
 
-        ZipFile zip = new ZipFile(new java.io.File(testFolder.getRoot(), "temp/filemanager/wiki/Space/Page/out.zip"));
-        List<String> folders = new ArrayList<String>();
-        Map<String, String> files = new HashMap<String, String>();
+        ZipFile zip = ZipFile.builder().setFile(new java.io.File(this.testFolder, "out.zip")).get();
+        List<String> folders = new ArrayList<>();
+        Map<String, String> files = new HashMap<>();
         Enumeration<ZipArchiveEntry> entries = zip.getEntries();
         while (entries.hasMoreElements()) {
             ZipArchiveEntry entry = entries.nextElement();
@@ -114,7 +119,7 @@ public class PackJobTest extends AbstractJobTest
                 folders.add(entry.getName());
             } else if (zip.canReadEntryData(entry)) {
                 StringWriter writer = new StringWriter();
-                IOUtils.copy(zip.getInputStream(entry), writer);
+                IOUtils.copy(zip.getInputStream(entry), writer, StandardCharsets.UTF_8);
                 files.put(entry.getName(), writer.toString());
             }
         }
@@ -124,8 +129,15 @@ public class PackJobTest extends AbstractJobTest
         assertEquals(2, files.size());
         assertEquals("blah", files.get(readme.getName()));
         assertEquals("foo", files.get(projects.getName() + "/Concerto/" + pom.getName()));
-        assertEquals(("blah" + "foo").getBytes().length, job.getPackStatus().getBytesWritten());
-        assertTrue(job.getPackStatus().getOutputFileSize() > 0);
+
+        PackJobStatus status = job.getPackStatus();
+        // The number of bytes written is read from the ZIP output stream after the last entry has been added but
+        // before the archive is closed, i.e. before the ZIP central directory is written, which is why it is less than
+        // the final size of the output file.
+        assertTrue(status.getBytesWritten() > 0, "No bytes written");
+        assertTrue(status.getBytesWritten() < status.getOutputFileSize(),
+            String.format("Bytes written [%s] should be less than the output file size [%s]", status.getBytesWritten(),
+                status.getOutputFileSize()));
     }
 
     private void setFileContent(File file, String content)

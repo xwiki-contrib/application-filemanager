@@ -35,8 +35,8 @@ import org.xwiki.filemanager.internal.reference.DocumentNameSequence;
 import org.xwiki.filemanager.job.MoveRequest;
 import org.xwiki.filemanager.job.OverwriteQuestion;
 import org.xwiki.filemanager.reference.UniqueDocumentReferenceGenerator;
-import org.xwiki.job.internal.AbstractJob;
-import org.xwiki.job.internal.DefaultJobStatus;
+import org.xwiki.job.AbstractJob;
+import org.xwiki.job.DefaultJobStatus;
 import org.xwiki.model.reference.DocumentReference;
 
 /**
@@ -108,15 +108,15 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
      */
     private void move(Collection<Path> paths, DocumentReference destination)
     {
-        notifyPushLevelProgress(paths.size());
+        this.progressManager.pushLevelProgress(paths.size(), this);
 
         try {
             for (Path path : paths) {
                 move(path, destination);
-                notifyStepPropress();
+                this.progressManager.stepPropress(this);
             }
         } finally {
-            notifyPopLevelProgress();
+            this.progressManager.popLevelProgress(this);
         }
     }
 
@@ -230,17 +230,17 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
     {
         List<DocumentReference> childFolderReferences = source.getChildFolderReferences();
         List<DocumentReference> childFileReferences = source.getChildFileReferences();
-        notifyPushLevelProgress(childFolderReferences.size() + childFileReferences.size() + 1);
+        this.progressManager.pushLevelProgress(childFolderReferences.size() + childFileReferences.size() + 1, this);
 
         try {
             for (DocumentReference childReference : childFolderReferences) {
                 moveFolder(childReference, destination);
-                notifyStepPropress();
+                this.progressManager.stepPropress(this);
             }
 
             for (DocumentReference childReference : childFileReferences) {
                 moveFile(childReference, source.getReference(), destination);
-                notifyStepPropress();
+                this.progressManager.stepPropress(this);
             }
 
             // Delete the source folder if it's empty.
@@ -251,9 +251,9 @@ public class MoveJob extends AbstractJob<MoveRequest, DefaultJobStatus<MoveReque
                     this.logger.error("You are not allowed to delete the folder [{}].", source.getReference());
                 }
             }
-            notifyStepPropress();
+            this.progressManager.stepPropress(this);
         } finally {
-            notifyPopLevelProgress();
+            this.progressManager.popLevelProgress(this);
         }
     }
 

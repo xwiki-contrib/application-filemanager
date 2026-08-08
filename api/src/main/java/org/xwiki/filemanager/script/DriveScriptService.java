@@ -27,12 +27,14 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
 import org.xwiki.bridge.DocumentAccessBridge;
 import org.xwiki.component.annotation.Component;
 import org.xwiki.context.Execution;
 import org.xwiki.filemanager.Path;
+import org.xwiki.filemanager.internal.PackFileResolver;
 import org.xwiki.filemanager.internal.reference.DocumentNameSequence;
 import org.xwiki.filemanager.job.BatchPathRequest;
 import org.xwiki.filemanager.job.FileManager;
@@ -42,6 +44,7 @@ import org.xwiki.job.event.status.JobStatus;
 import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
 import org.xwiki.model.reference.SpaceReference;
+import org.xwiki.resource.temporary.TemporaryResourceReference;
 import org.xwiki.script.service.ScriptService;
 
 /**
@@ -58,6 +61,7 @@ import org.xwiki.script.service.ScriptService;
  */
 @Component
 @Named("drive")
+@Singleton
 public class DriveScriptService implements ScriptService
 {
     /**
@@ -93,6 +97,12 @@ public class DriveScriptService implements ScriptService
      */
     @Inject
     private UniqueDocumentReferenceGenerator uniqueDocRefGenerator;
+
+    /**
+     * Used to resolve the temporary resource that holds a packed file.
+     */
+    @Inject
+    private PackFileResolver packFileResolver;
 
     /**
      * Schedules a job to move the specified files and folders to the given destination.
@@ -158,9 +168,10 @@ public class DriveScriptService implements ScriptService
      * on this document can access the output file. The {@code name} property of the given {@link AttachmentReference}
      * will be used as the name of the output ZIP file.
      * <p>
-     * The output file is a temporary file (deleted automatically when the server is stopped) that can be accessed
-     * through the 'temp' action, e.g.: {@code /xwiki/temp/Space/Page/filemanager/file.zip} .
-     * 
+     * The output file is a temporary resource (deleted automatically when the server is restarted) that can be
+     * downloaded from the URL associated to the reference returned by
+     * {@link #getPackedFileReference(AttachmentReference)}.
+     *
      * @param paths the files and folders to be packed
      * @param outputFileReference the reference to the output ZIP file
      * @return the id of the pack job that has been scheduled
@@ -176,6 +187,19 @@ public class DriveScriptService implements ScriptService
             setError(e);
             return null;
         }
+    }
+
+    /**
+     * The returned reference can be passed to the {@code resource.temporary} script service in order to get the URL
+     * from where the packed file can be downloaded.
+     *
+     * @param outputFileReference the reference to the output ZIP file of a pack job
+     * @return the reference to the temporary resource that holds the specified packed file
+     * @since 2.1
+     */
+    public TemporaryResourceReference getPackedFileReference(AttachmentReference outputFileReference)
+    {
+        return this.packFileResolver.getTemporaryResourceReference(outputFileReference);
     }
 
     /**

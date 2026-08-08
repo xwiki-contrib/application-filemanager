@@ -19,21 +19,24 @@
  */
 package org.xwiki.filemanager.internal.job;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xwiki.filemanager.File;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
 import org.xwiki.filemanager.job.BatchPathRequest;
 import org.xwiki.job.Job;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.test.mockito.MockitoComponentMockingRule;
+import org.xwiki.test.junit5.mockito.ComponentTest;
+import org.xwiki.test.junit5.mockito.InjectMockComponents;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link DeleteJob}.
@@ -41,19 +44,20 @@ import org.xwiki.test.mockito.MockitoComponentMockingRule;
  * @version $Id$
  * @since 2.0M1
  */
-public class DeleteJobTest extends AbstractJobTest
+@ComponentTest
+class DeleteJobTest extends AbstractJobTest
 {
-    @Rule
-    public MockitoComponentMockingRule<Job> mocker = new MockitoComponentMockingRule<Job>(DeleteJob.class);
+    @InjectMockComponents
+    private DeleteJob deleteJob;
 
     @Override
-    protected MockitoComponentMockingRule<Job> getMocker()
+    protected Job getJob()
     {
-        return mocker;
+        return this.deleteJob;
     }
 
     @Test
-    public void deleteFolder() throws Exception
+    void deleteFolder() throws Exception
     {
         Folder specs = mockFolder("Specs", "Resilience");
         File readme = mockFile("readme.txt", "Resilience");
@@ -81,7 +85,7 @@ public class DeleteJobTest extends AbstractJobTest
     }
 
     @Test
-    public void deleteProtectedFolder() throws Exception
+    void deleteProtectedFolder() throws Exception
     {
         File childFile = mockFile("readme.txt", "Projects");
         Folder childFolder = mockFolder("src", "Projects");
@@ -97,11 +101,12 @@ public class DeleteJobTest extends AbstractJobTest
         verify(fileSystem, never()).delete(childFile.getReference());
         verify(fileSystem, never()).delete(childFolder.getReference());
         verify(fileSystem, never()).delete(folder.getReference());
-        verify(mocker.getMockedLogger()).error("You are not allowed to delete the folder [{}].", folder.getReference());
+        assertEquals("You are not allowed to delete the folder [" + folder.getReference() + "].",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void deleteFile() throws Exception
+    void deleteFile() throws Exception
     {
         File file = mockFile("readme.txt", "Resilience", "Concerto");
 
@@ -115,7 +120,7 @@ public class DeleteJobTest extends AbstractJobTest
     }
 
     @Test
-    public void deleteFileFromAllParentFolders() throws Exception
+    void deleteFileFromAllParentFolders() throws Exception
     {
         File file = mockFile("readme.txt", "Resilience", "Concerto");
 
@@ -128,7 +133,7 @@ public class DeleteJobTest extends AbstractJobTest
     }
 
     @Test
-    public void deleteProtectedFiles() throws Exception
+    void deleteProtectedFiles() throws Exception
     {
         File readme = mockFile("readme.txt", "Resilience", "Concerto");
         when(fileSystem.canEdit(readme.getReference())).thenReturn(false);
@@ -145,10 +150,12 @@ public class DeleteJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).save(readme);
-        verify(mocker.getMockedLogger()).error("You are not allowed to edit the file [{}].", readme.getReference());
+        assertEquals("You are not allowed to edit the file [" + readme.getReference() + "].",
+            this.logCapture.getMessage(0));
 
         verify(fileSystem, never()).delete(pom.getReference());
-        verify(mocker.getMockedLogger()).error("You are not allowed to delete the file [{}].", pom.getReference());
+        assertEquals("You are not allowed to delete the file [" + pom.getReference() + "].",
+            this.logCapture.getMessage(1));
 
         verify(fileSystem).delete(index.getReference());
     }

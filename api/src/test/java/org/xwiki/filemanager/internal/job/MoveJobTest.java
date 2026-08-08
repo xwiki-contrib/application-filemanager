@@ -22,19 +22,23 @@ package org.xwiki.filemanager.internal.job;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xwiki.filemanager.File;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
 import org.xwiki.filemanager.job.MoveRequest;
 import org.xwiki.job.Job;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.test.mockito.MockitoComponentMockingRule;
+import org.xwiki.test.junit5.mockito.ComponentTest;
+import org.xwiki.test.junit5.mockito.InjectMockComponents;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link MoveJob}.
@@ -42,19 +46,20 @@ import static org.mockito.Mockito.*;
  * @version $Id$
  * @since 2.0M1
  */
-public class MoveJobTest extends AbstractJobTest
+@ComponentTest
+class MoveJobTest extends AbstractJobTest
 {
-    @Rule
-    public MockitoComponentMockingRule<Job> mocker = new MockitoComponentMockingRule<Job>(MoveJob.class);
+    @InjectMockComponents
+    private MoveJob moveJob;
 
     @Override
-    protected MockitoComponentMockingRule<Job> getMocker()
+    protected Job getJob()
     {
-        return mocker;
+        return this.moveJob;
     }
 
     @Test
-    public void moveFolder() throws Exception
+    void moveFolder() throws Exception
     {
         Folder folder = mockFolder("Concerto", "Projects");
         Folder newParent = mockFolder("Retired Projects");
@@ -70,7 +75,7 @@ public class MoveJobTest extends AbstractJobTest
     }
 
     @Test
-    public void moveFolderInItself() throws Exception
+    void moveFolderInItself() throws Exception
     {
         Folder child = mockFolder("Specs", "Resilience");
         mockFolder("Resilience", "Projects");
@@ -83,12 +88,12 @@ public class MoveJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).save(grandParent);
-        verify(mocker.getMockedLogger()).error("Cannot move [{}] to a sub-folder of itself.",
-            grandParent.getReference());
+        assertEquals("Cannot move [" + grandParent.getReference() + "] to a sub-folder of itself.",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void moveProtectedFolder() throws Exception
+    void moveProtectedFolder() throws Exception
     {
         Folder source = mockFolder("Source");
         when(fileSystem.canEdit(source.getReference())).thenReturn(false);
@@ -102,11 +107,12 @@ public class MoveJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).save(source);
-        verify(mocker.getMockedLogger()).error("You are not allowed to move the folder [{}].", source.getReference());
+        assertEquals("You are not allowed to move the folder [" + source.getReference() + "].",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void mergeFolder() throws Exception
+    void mergeFolder() throws Exception
     {
         mockFolder("Tests", "Concerto");
         mockFolder("Specs", "Concerto");
@@ -144,7 +150,7 @@ public class MoveJobTest extends AbstractJobTest
     }
 
     @Test
-    public void moveFile() throws Exception
+    void moveFile() throws Exception
     {
         File file = mockFile("readme.txt", "Concerto", "Resilience");
         Folder newParent = mockFolder("Projects");
@@ -162,7 +168,7 @@ public class MoveJobTest extends AbstractJobTest
     }
 
     @Test
-    public void moveProtectedFile() throws Exception
+    void moveProtectedFile() throws Exception
     {
         File file = mockFile("readme.txt", "Concerto", "Resilience");
         when(fileSystem.canEdit(file.getReference())).thenReturn(false);
@@ -177,11 +183,12 @@ public class MoveJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).save(file);
-        verify(mocker.getMockedLogger()).error("You are not allowed to move the file [{}].", file.getReference());
+        assertEquals("You are not allowed to move the file [" + file.getReference() + "].",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void overwriteFile() throws Exception
+    void overwriteFile() throws Exception
     {
         File pom = mockFile("pom.xml", "api");
         Folder api = mockFolder("api", null, Collections.<String>emptyList(), Arrays.asList("pom.xml"));
@@ -194,7 +201,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setDestination(new Path(api.getReference()));
 
         request.setInteractive(true);
-        Job job = mocker.getComponentUnderTest();
+        Job job = getJob();
         answerOverwriteQuestion(job, true, false);
 
         job.initialize(request);
@@ -204,7 +211,7 @@ public class MoveJobTest extends AbstractJobTest
     }
 
     @Test
-    public void overwriteProtectedFile() throws Exception
+    void overwriteProtectedFile() throws Exception
     {
         File pom = mockFile("pom.xml", "api");
         when(fileSystem.canDelete(pom.getReference())).thenReturn(false);
@@ -218,7 +225,7 @@ public class MoveJobTest extends AbstractJobTest
         request.setDestination(new Path(api.getReference()));
 
         request.setInteractive(true);
-        Job job = mocker.getComponentUnderTest();
+        Job job = getJob();
         // Make sure the test doesn't hang waiting for the answer.
         answerOverwriteQuestion(job, true, false);
 
@@ -227,10 +234,12 @@ public class MoveJobTest extends AbstractJobTest
 
         verify(fileSystem, never()).delete(pom.getReference());
         verify(fileSystem, never()).save(otherPom);
+        assertEquals("You are not allowed to overwrite the file [" + pom.getReference() + "].",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void renameFolder() throws Exception
+    void renameFolder() throws Exception
     {
         mockFolder("Projects");
         Folder folder = mockFolder("Concerto", "Projects", Arrays.asList("Specs"), Arrays.asList("readme.txt"));
@@ -262,7 +271,7 @@ public class MoveJobTest extends AbstractJobTest
     }
 
     @Test
-    public void renameProtectedFolder() throws Exception
+    void renameProtectedFolder() throws Exception
     {
         mockFolder("Projects", null, Arrays.asList("Concerto"), Collections.<String>emptyList());
         Folder folder = mockFolder("Concerto", "Projects", Arrays.asList("Specs"), Arrays.asList("readme.txt"));
@@ -279,14 +288,15 @@ public class MoveJobTest extends AbstractJobTest
 
         execute(request);
 
-        verify(mocker.getMockedLogger()).error("You are not allowed to rename the folder [{}].", folder.getReference());
+        assertEquals("You are not allowed to rename the folder [" + folder.getReference() + "].",
+            this.logCapture.getMessage(0));
         verify(fileSystem, never()).rename(folder.getReference(), newReference);
         verify(fileSystem, never()).save(childFolder);
         verify(fileSystem, never()).save(childFile);
     }
 
     @Test
-    public void renameFolderUsingProtectedReference() throws Exception
+    void renameFolderUsingProtectedReference() throws Exception
     {
         mockFolder("Projects", null, Arrays.asList("Concerto"), Collections.<String>emptyList());
         Folder folder = mockFolder("Concerto", "Projects", Arrays.asList("Specs"), Arrays.asList("readme.txt"));
@@ -303,14 +313,15 @@ public class MoveJobTest extends AbstractJobTest
 
         execute(request);
 
-        verify(mocker.getMockedLogger()).error("You are not allowed to create the folder [{}].", newReference);
+        assertEquals("You are not allowed to create the folder [" + newReference + "].",
+            this.logCapture.getMessage(0));
         verify(fileSystem, never()).rename(eq(folder.getReference()), any(DocumentReference.class));
         verify(fileSystem, never()).save(childFolder);
         verify(fileSystem, never()).save(childFile);
     }
 
     @Test
-    public void renameFolderUsingExistingName() throws Exception
+    void renameFolderUsingExistingName() throws Exception
     {
         Folder projects =
             mockFolder("Projects", null, Arrays.asList("Concerto", "Resilience"), Collections.<String>emptyList());
@@ -323,13 +334,13 @@ public class MoveJobTest extends AbstractJobTest
 
         execute(request);
 
-        verify(mocker.getMockedLogger()).error("A folder with the same name [{}] already exists under [{}]",
-            resilience.getName(), projects.getReference());
+        assertEquals("A folder with the same name [" + resilience.getName() + "] already exists under ["
+            + projects.getReference() + "]", this.logCapture.getMessage(0));
         verify(fileSystem, never()).rename(concerto.getReference(), resilience.getReference());
     }
 
     @Test
-    public void renameFile() throws Exception
+    void renameFile() throws Exception
     {
         mockFolder("Concerto");
         mockFolder("Resilience");
@@ -352,7 +363,7 @@ public class MoveJobTest extends AbstractJobTest
     }
 
     @Test
-    public void renameProtectedFile() throws Exception
+    void renameProtectedFile() throws Exception
     {
         File file = mockFile("readme.txt", "Concerto", "Resilience");
         when(fileSystem.canDelete(file.getReference())).thenReturn(false);
@@ -366,11 +377,12 @@ public class MoveJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).rename(file.getReference(), newReference);
-        verify(mocker.getMockedLogger()).error("You are not allowed to rename the file [{}].", file.getReference());
+        assertEquals("You are not allowed to rename the file [" + file.getReference() + "].",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void renameFileUsingProtectedReference() throws Exception
+    void renameFileUsingProtectedReference() throws Exception
     {
         File file = mockFile("readme.txt", "Concerto", "Resilience");
 
@@ -385,11 +397,12 @@ public class MoveJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).rename(eq(file.getReference()), any(DocumentReference.class));
-        verify(mocker.getMockedLogger()).error("You are not allowed to create the file [{}].", newReference);
+        assertEquals("You are not allowed to create the file [" + newReference + "].",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void renameFileUsingExistingName() throws Exception
+    void renameFileUsingExistingName() throws Exception
     {
         File file = mockFile("readme.txt", "Concerto");
         File readme = mockFile("README", "Concerto");
@@ -403,12 +416,12 @@ public class MoveJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).rename(file.getReference(), readme.getReference());
-        verify(mocker.getMockedLogger()).error("A file with the same name [{}] already exists under [{}]",
-            readme.getName(), folder.getReference());
+        assertEquals("A file with the same name [" + readme.getName() + "] already exists under ["
+            + folder.getReference() + "]", this.logCapture.getMessage(0));
     }
 
     @Test
-    public void moveAndRenameFile() throws Exception
+    void moveAndRenameFile() throws Exception
     {
         File readme = mockFile("README", "Concerto");
         File file = mockFile("readme.txt", "Concerto", "Resilience");

@@ -27,12 +27,9 @@
   <defaultLanguage>en</defaultLanguage>
   <translation>1</translation>
   <creator>xwiki:XWiki.Admin</creator>
-  <creationDate>1422868958000</creationDate>
   <parent>FileManagerCode.WebHome</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <date>1422904236000</date>
-  <contentUpdateDate>1422904112000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <comment/>
@@ -121,4 +118,4 @@ rendering.macro.fileManager.recentFiles.description=파일 관리자를 통해 �
 rendering.macro.fileManager.recentFiles.parameter.limit.name=한계
 rendering.macro.fileManager.recentFiles.parameter.limit.description=나열할 최대 파일 수입니다.
 </content>
-  </xwikidoc>
+</xwikidoc>

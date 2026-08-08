@@ -21,7 +21,6 @@ package org.xwiki.filemanager.internal.job;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.List;
 
@@ -32,17 +31,16 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.xwiki.component.annotation.Component;
-import org.xwiki.environment.Environment;
 import org.xwiki.filemanager.FileSystem;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
+import org.xwiki.filemanager.internal.PackFileResolver;
 import org.xwiki.filemanager.job.PackJobStatus;
 import org.xwiki.filemanager.job.PackRequest;
+import org.xwiki.job.AbstractJob;
+import org.xwiki.job.DefaultJobStatus;
 import org.xwiki.job.Job;
 import org.xwiki.job.event.status.JobStatus;
-import org.xwiki.job.internal.AbstractJob;
-import org.xwiki.job.internal.DefaultJobStatus;
-import org.xwiki.model.reference.AttachmentReference;
 import org.xwiki.model.reference.DocumentReference;
 
 /**
@@ -61,31 +59,21 @@ public class PackJob extends AbstractJob<PackRequest, DefaultJobStatus<PackReque
     public static final String JOB_TYPE = "fileManager/pack";
 
     /**
-     * The default URL encoding.
-     */
-    private static final String UTF8 = "UTF-8";
-
-    /**
-     * The module name used when creating temporary files.
-     */
-    private static final String MODULE_NAME = "filemanager";
-
-    /**
      * The pseudo file system.
      */
     @Inject
     private FileSystem fileSystem;
 
     /**
-     * Used to access the temporary directory.
+     * Used to access the temporary file where the output ZIP archive is written.
      */
     @Inject
-    private Environment environment;
+    private PackFileResolver packFileResolver;
 
     /**
-     * Wraps the internal {@link DefaultJobStatus} and adds custom data such as the number of bytes written and the size
-     * of the output file. We wrap {@link DefaultJobStatus} instead of extending the class because the constructor of
-     * {@link DefaultJobStatus} has suffered a breaking change in XCOMMONS-811.
+     * Wraps the {@link DefaultJobStatus} created by this job and adds custom data such as the number of bytes written
+     * and the size of the output file. We wrap the status instead of extending {@link DefaultJobStatus} in order to not
+     * depend on its constructor signature.
      */
     private PackJobStatus packJobStatus;
 
@@ -103,54 +91,24 @@ public class PackJob extends AbstractJob<PackRequest, DefaultJobStatus<PackReque
             return;
         }
 
-        File outputFile = getTemporaryFile(getRequest().getOutputFileReference());
+        File outputFile = this.packFileResolver.getTemporaryFile(getRequest().getOutputFileReference());
         // TODO: Use java.util.zip.ZipOutputStream when moving to Java 7.
         // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4244499
         ZipArchiveOutputStream zip = new ZipArchiveOutputStream(outputFile);
         String pathPrefix = "";
 
-        notifyPushLevelProgress(paths.size());
+        this.progressManager.pushLevelProgress(paths.size(), this);
 
         try {
             for (Path path : paths) {
                 pack(path, zip, pathPrefix);
-                notifyStepPropress();
+                this.progressManager.stepPropress(this);
             }
         } finally {
             IOUtils.closeQuietly(zip);
             getPackStatus().setOutputFileSize(outputFile.length());
-            notifyPopLevelProgress();
+            this.progressManager.popLevelProgress(this);
         }
-    }
-
-    /**
-     * Creates a temporary file that can be accessed through the 'temp' action, e.g.:
-     * {@code /xwiki/temp/Space/Page/filemanager/file.zip} .
-     * 
-     * @param fileReference the reference to the temporary file to create
-     * @return the temporary file
-     * @throws Exception if it fails to create the temporary file
-     */
-    private File getTemporaryFile(AttachmentReference fileReference) throws Exception
-    {
-        // Encode to avoid illegal characters in file paths.
-        DocumentReference accessDocRef = fileReference.getDocumentReference();
-        String encodedWiki = URLEncoder.encode(accessDocRef.getWikiReference().getName(), UTF8);
-        String encodedSpace = URLEncoder.encode(accessDocRef.getLastSpaceReference().getName(), UTF8);
-        String encodedPage = URLEncoder.encode(accessDocRef.getName(), UTF8);
-        String encodedFileName = URLEncoder.encode(fileReference.getName(), UTF8);
-
-        // Create a temporary directory to hold the file.
-        String path = String.format("temp/%s/%s/%s/%s/", MODULE_NAME, encodedWiki, encodedSpace, encodedPage);
-        File tempDir = new File(this.environment.getTemporaryDirectory(), path);
-        if (!((tempDir.exists() || tempDir.mkdirs()) && tempDir.isDirectory() && tempDir.canWrite())) {
-            String message = "Failed to create temporary directory [%s].";
-            throw new Exception(String.format(message, path));
-        }
-
-        File file = new File(tempDir, encodedFileName);
-        file.deleteOnExit();
-        return file;
     }
 
     /**
@@ -206,28 +164,28 @@ public class PackJob extends AbstractJob<PackRequest, DefaultJobStatus<PackReque
         if (folder != null && fileSystem.canView(folderReference)) {
             List<DocumentReference> childFolderReferences = folder.getChildFolderReferences();
             List<DocumentReference> childFileReferences = folder.getChildFileReferences();
-            notifyPushLevelProgress(childFolderReferences.size() + childFileReferences.size() + 1);
+            this.progressManager.pushLevelProgress(childFolderReferences.size() + childFileReferences.size() + 1, this);
 
             try {
                 String path = pathPrefix + folder.getName() + '/';
                 this.logger.info("Packing folder [{}]", path);
                 zip.putArchiveEntry(new ZipArchiveEntry(path));
                 zip.closeArchiveEntry();
-                notifyStepPropress();
+                this.progressManager.stepPropress(this);
 
                 for (DocumentReference childFolderReference : childFolderReferences) {
                     packFolder(childFolderReference, zip, path);
-                    notifyStepPropress();
+                    this.progressManager.stepPropress(this);
                 }
 
                 for (DocumentReference childFileReference : childFileReferences) {
                     packFile(childFileReference, zip, path);
-                    notifyStepPropress();
+                    this.progressManager.stepPropress(this);
                 }
             } catch (IOException e) {
                 this.logger.warn("Failed to pack folder [{}].", folderReference, e);
             } finally {
-                notifyPopLevelProgress();
+                this.progressManager.popLevelProgress(this);
             }
         }
     }

@@ -20,7 +20,7 @@
 package org.xwiki.filemanager.internal.job;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;

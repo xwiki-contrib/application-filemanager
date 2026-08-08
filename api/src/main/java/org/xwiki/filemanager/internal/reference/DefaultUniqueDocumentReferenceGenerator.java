@@ -78,12 +78,21 @@ public class DefaultUniqueDocumentReferenceGenerator
             if (this.documentReferenceCache.get(key) == null) {
                 // The reference is not reserved.
                 this.documentReferenceCache.set(key, true);
-                if (!this.documentAccessBridge.exists(reference)) {
+                if (!exists(reference)) {
                     return reference;
                 }
             }
         }
         return null;
+    }
+
+    private boolean exists(DocumentReference documentReference)
+    {
+        try {
+            return this.documentAccessBridge.exists(documentReference);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 
 <!--
  * See the NOTICE file distributed with this work for additional
@@ -27,12 +27,9 @@
   <defaultLanguage/>
   <translation>0</translation>
   <creator>xwiki:XWiki.Admin</creator>
-  <creationDate>1409669727000</creationDate>
   <parent>FileManagerCode.DownloadClass</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <date>1409752737000</date>
-  <contentUpdateDate>1409752737000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <comment/>
@@ -66,7 +63,8 @@
     {{info}}$message{{/info}}
   #end
 #else
-  #set ($downloadURL = "$doc.getAttachmentURL('filemanager', 'temp')/$escapetool.url($fileName)")
+  #set ($packedFileReference = $services.drive.getPackedFileReference($jobStatus.request.outputFileReference))
+  #set ($downloadURL = $services.resource.temporary.getURL($packedFileReference))
   #if ($xcontext.action == 'get')
     $response.sendRedirect($downloadURL)
   #else

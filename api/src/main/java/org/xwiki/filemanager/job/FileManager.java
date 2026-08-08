@@ -81,9 +81,9 @@ public interface FileManager
      * on this document can access the output file. The {@code name} property of the given {@link AttachmentReference}
      * will be used as the name of the output ZIP file.
      * <p>
-     * The output file is a temporary file (deleted automatically when the server is stopped) that can be accessed
-     * through the 'temp' action, e.g.: {@code /xwiki/temp/Space/Page/filemanager/file.zip} .
-     * 
+     * The output file is a temporary resource (deleted automatically when the server is restarted) that can be
+     * downloaded from the URL associated to its {@link org.xwiki.resource.temporary.TemporaryResourceReference}.
+     *
      * @param paths the files and folders to be packed
      * @param outputFileReference the reference to the temporary output file
      * @return the id of the pack job that has been scheduled

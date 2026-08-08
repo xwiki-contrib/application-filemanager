@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 
 <!--
  * See the NOTICE file distributed with this work for additional
@@ -27,12 +27,9 @@
   <defaultLanguage>en</defaultLanguage>
   <translation>1</translation>
   <creator>xwiki:XWiki.Admin</creator>
-  <creationDate>1422868958000</creationDate>
   <parent>FileManagerCode.WebHome</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <date>1422904236000</date>
-  <contentUpdateDate>1422904112000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <comment/>
@@ -126,5 +123,4 @@ rendering.macro.fileManager.recentFiles.name=Последние файлы
 rendering.macro.fileManager.recentFiles.description=Список файлов, которые недавно были загружены через файловый менеджер.
 rendering.macro.fileManager.recentFiles.parameter.limit.name=ограничение
 rendering.macro.fileManager.recentFiles.parameter.limit.description=Максимальное количество файлов в списке.</content>
-  
 </xwikidoc>

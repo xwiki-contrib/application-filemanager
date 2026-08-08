@@ -31,8 +31,8 @@ import org.xwiki.filemanager.FileSystem;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
 import org.xwiki.filemanager.job.BatchPathRequest;
-import org.xwiki.job.internal.AbstractJob;
-import org.xwiki.job.internal.DefaultJobStatus;
+import org.xwiki.job.AbstractJob;
+import org.xwiki.job.DefaultJobStatus;
 import org.xwiki.model.reference.DocumentReference;
 
 /**
@@ -70,15 +70,15 @@ public class DeleteJob extends AbstractJob<BatchPathRequest, DefaultJobStatus<Ba
             return;
         }
 
-        notifyPushLevelProgress(paths.size());
+        this.progressManager.pushLevelProgress(paths.size(), this);
 
         try {
             for (Path path : paths) {
                 delete(path);
-                notifyStepPropress();
+                this.progressManager.stepPropress(this);
             }
         } finally {
-            notifyPopLevelProgress();
+            this.progressManager.popLevelProgress(this);
         }
     }
 
@@ -141,26 +141,26 @@ public class DeleteJob extends AbstractJob<BatchPathRequest, DefaultJobStatus<Ba
 
             List<DocumentReference> childFolderReferences = folder.getChildFolderReferences();
             List<DocumentReference> childFileReferences = folder.getChildFileReferences();
-            notifyPushLevelProgress(childFolderReferences.size() + childFileReferences.size() + 1);
+            this.progressManager.pushLevelProgress(childFolderReferences.size() + childFileReferences.size() + 1, this);
 
             try {
                 for (DocumentReference childFolderReference : childFolderReferences) {
                     deleteFolder(childFolderReference);
-                    notifyStepPropress();
+                    this.progressManager.stepPropress(this);
                 }
 
                 for (DocumentReference childFileReference : childFileReferences) {
                     deleteFile(childFileReference, folderReference);
-                    notifyStepPropress();
+                    this.progressManager.stepPropress(this);
                 }
 
                 // Delete the folder if it's empty.
                 if (folder.getChildFolderReferences().isEmpty() && folder.getChildFileReferences().isEmpty()) {
                     fileSystem.delete(folderReference);
                 }
-                notifyStepPropress();
+                this.progressManager.stepPropress(this);
             } finally {
-                notifyPopLevelProgress();
+                this.progressManager.popLevelProgress(this);
             }
         } else {
             this.logger.error("You are not allowed to delete the folder [{}].", folderReference);

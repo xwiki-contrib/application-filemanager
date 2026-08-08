@@ -118,7 +118,11 @@ public class DefaultFileSystem implements FileSystem
     public boolean exists(DocumentReference reference)
     {
         XWikiContext context = xcontextProvider.get();
-        return context.getWiki().exists(reference, context);
+        try {
+            return context.getWiki().exists(reference, context);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override

@@ -22,19 +22,22 @@ package org.xwiki.filemanager.internal.job;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.xwiki.filemanager.File;
 import org.xwiki.filemanager.Folder;
 import org.xwiki.filemanager.Path;
 import org.xwiki.filemanager.job.MoveRequest;
 import org.xwiki.job.Job;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.test.mockito.MockitoComponentMockingRule;
+import org.xwiki.test.junit5.mockito.ComponentTest;
+import org.xwiki.test.junit5.mockito.InjectMockComponents;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link CopyJob}.
@@ -42,19 +45,20 @@ import static org.mockito.Mockito.*;
  * @version $Id$
  * @since 2.0M1
  */
-public class CopyJobTest extends AbstractJobTest
+@ComponentTest
+class CopyJobTest extends AbstractJobTest
 {
-    @Rule
-    public MockitoComponentMockingRule<Job> mocker = new MockitoComponentMockingRule<Job>(CopyJob.class);
+    @InjectMockComponents
+    private CopyJob copyJob;
 
     @Override
-    protected MockitoComponentMockingRule<Job> getMocker()
+    protected Job getJob()
     {
-        return mocker;
+        return this.copyJob;
     }
 
     @Test
-    public void copyFolder() throws Exception
+    void copyFolder() throws Exception
     {
         File pom = mockFile("pom.xml", "Concerto1");
         Folder specs = mockFolder("Specs", "Concerto1");
@@ -99,7 +103,7 @@ public class CopyJobTest extends AbstractJobTest
     }
 
     @Test
-    public void copyFolderAs() throws Exception
+    void copyFolderAs() throws Exception
     {
         Folder projects = mockFolder("Projects");
         Folder concerto = mockFolder("Concerto", "Projects");
@@ -122,7 +126,7 @@ public class CopyJobTest extends AbstractJobTest
     }
 
     @Test
-    public void copyFolderInItself() throws Exception
+    void copyFolderInItself() throws Exception
     {
         Folder projects = mockFolder("Projects");
         mockFolder("Resilience", "Projects");
@@ -135,11 +139,12 @@ public class CopyJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).copy(eq(projects.getReference()), any(DocumentReference.class));
-        verify(mocker.getMockedLogger()).error("Cannot copy [{}] to a sub-folder of itself.", projects.getReference());
+        assertEquals("Cannot copy [" + projects.getReference() + "] to a sub-folder of itself.",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void copyProtectedFolder() throws Exception
+    void copyProtectedFolder() throws Exception
     {
         Folder projects = mockFolder("Projects");
         Folder resilience = mockFolder("Resilience");
@@ -153,12 +158,12 @@ public class CopyJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).copy(eq(resilience.getReference()), any(DocumentReference.class));
-        verify(mocker.getMockedLogger()).error("You are not allowed to copy the folder [{}].",
-            resilience.getReference());
+        assertEquals("You are not allowed to copy the folder [" + resilience.getReference() + "].",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void copyFolderToProtectedDestination() throws Exception
+    void copyFolderToProtectedDestination() throws Exception
     {
         Folder projects = mockFolder("Projects");
         Folder resilience = mockFolder("Resilience");
@@ -174,11 +179,12 @@ public class CopyJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).copy(eq(resilience.getReference()), any(DocumentReference.class));
-        verify(mocker.getMockedLogger()).error("You are not allowed to create the folder [{}].", resilienceCopyRef);
+        assertEquals("You are not allowed to create the folder [" + resilienceCopyRef + "].",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void mergeFolder() throws Exception
+    void mergeFolder() throws Exception
     {
         File pom = mockFile("pom.xml", "Concerto");
         Folder specs = mockFolder("Specs", "Concerto");
@@ -210,7 +216,7 @@ public class CopyJobTest extends AbstractJobTest
     }
 
     @Test
-    public void copyFile() throws Exception
+    void copyFile() throws Exception
     {
         File readme = mockFile("README", "Projects");
         Folder concerto = mockFolder("Concerto", "Projects");
@@ -234,7 +240,7 @@ public class CopyJobTest extends AbstractJobTest
     }
 
     @Test
-    public void copyFileAs() throws Exception
+    void copyFileAs() throws Exception
     {
         File readme = mockFile("README", "Projects");
         Folder projects = mockFolder("Projects", null, Collections.<String>emptyList(), Arrays.asList("README"));
@@ -257,7 +263,7 @@ public class CopyJobTest extends AbstractJobTest
     }
 
     @Test
-    public void copyProtectedFile() throws Exception
+    void copyProtectedFile() throws Exception
     {
         File readme = mockFile("README");
         Folder concerto = mockFolder("Concerto");
@@ -271,11 +277,12 @@ public class CopyJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).copy(eq(readme.getReference()), any(DocumentReference.class));
-        verify(mocker.getMockedLogger()).error("You are not allowed to copy the file [{}].", readme.getReference());
+        assertEquals("You are not allowed to copy the file [" + readme.getReference() + "].",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void copyFileToProtectedDestination() throws Exception
+    void copyFileToProtectedDestination() throws Exception
     {
         File readme = mockFile("README");
         Folder concerto = mockFolder("Concerto");
@@ -291,11 +298,12 @@ public class CopyJobTest extends AbstractJobTest
         execute(request);
 
         verify(fileSystem, never()).copy(eq(readme.getReference()), any(DocumentReference.class));
-        verify(mocker.getMockedLogger()).error("You are not allowed to create the file [{}].", readmeCopyRef);
+        assertEquals("You are not allowed to create the file [" + readmeCopyRef + "].",
+            this.logCapture.getMessage(0));
     }
 
     @Test
-    public void overwriteFile() throws Exception
+    void overwriteFile() throws Exception
     {
         File pom = mockFile("pom.xml", "Resilience");
         Folder resilience = mockFolder("Resilience", null, Collections.<String>emptyList(), Arrays.asList("pom.xml"));
@@ -309,7 +317,7 @@ public class CopyJobTest extends AbstractJobTest
         request.setDestination(new Path(resilience.getReference()));
 
         request.setInteractive(true);
-        Job job = mocker.getComponentUnderTest();
+        Job job = getJob();
         answerOverwriteQuestion(job, true, false);
 
         job.initialize(request);
@@ -325,7 +333,7 @@ public class CopyJobTest extends AbstractJobTest
     }
 
     @Test
-    public void overwriteProtectedFile() throws Exception
+    void overwriteProtectedFile() throws Exception
     {
         File pom = mockFile("pom.xml", "Resilience");
         Folder resilience = mockFolder("Resilience", null, Collections.<String>emptyList(), Arrays.asList("pom.xml"));
@@ -338,7 +346,7 @@ public class CopyJobTest extends AbstractJobTest
         request.setDestination(new Path(resilience.getReference()));
 
         request.setInteractive(true);
-        Job job = mocker.getComponentUnderTest();
+        Job job = getJob();
         answerOverwriteQuestion(job, true, false);
 
         job.initialize(request);
@@ -346,5 +354,7 @@ public class CopyJobTest extends AbstractJobTest
 
         verify(fileSystem, never()).delete(pom.getReference());
         verify(fileSystem, never()).copy(eq(otherPom.getReference()), any(DocumentReference.class));
+        assertEquals("You are not allowed to overwrite the file [" + pom.getReference() + "].",
+            this.logCapture.getMessage(0));
     }
 }

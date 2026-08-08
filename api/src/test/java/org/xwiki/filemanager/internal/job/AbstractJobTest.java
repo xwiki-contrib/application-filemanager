@@ -25,9 +25,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.xwiki.component.manager.ComponentLookupException;
 import org.xwiki.filemanager.File;
 import org.xwiki.filemanager.FileSystem;
 import org.xwiki.filemanager.Folder;
@@ -39,14 +41,19 @@ import org.xwiki.job.Request;
 import org.xwiki.job.event.status.JobStatus;
 import org.xwiki.job.event.status.JobStatus.State;
 import org.xwiki.model.reference.DocumentReference;
-import org.xwiki.test.mockito.MockitoComponentMockingRule;
+import org.xwiki.test.LogLevel;
+import org.xwiki.test.junit5.LogCaptureExtension;
+import org.xwiki.test.junit5.mockito.InjectComponentManager;
+import org.xwiki.test.mockito.MockitoComponentManager;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Base class for file manager job tests.
- * 
+ *
  * @version $Id$
  * @since 2.0M1
  */
@@ -67,7 +74,7 @@ public abstract class AbstractJobTest
         @Override
         public Void answer(InvocationOnMock invocation) throws Throwable
         {
-            when(folder.getChildFileReferences()).thenReturn(childFiles);
+            when(this.folder.getChildFileReferences()).thenReturn(this.childFiles);
             return null;
         }
     }
@@ -87,17 +94,28 @@ public abstract class AbstractJobTest
         @Override
         public Void answer(InvocationOnMock invocation) throws Throwable
         {
-            when(folder.getChildFolderReferences()).thenReturn(childFolders);
+            when(this.folder.getChildFolderReferences()).thenReturn(this.childFolders);
             return null;
         }
     }
 
+    /**
+     * The jobs log at INFO level the files and folders they process. We capture the logs from WARN level so that
+     * nothing is printed on the console and so that any unexpected problem reported by the job (jobs catch and log
+     * their errors instead of propagating them) fails the test.
+     */
+    @RegisterExtension
+    protected LogCaptureExtension logCapture = new LogCaptureExtension(LogLevel.WARN);
+
+    @InjectComponentManager
+    protected MockitoComponentManager componentManager;
+
     protected FileSystem fileSystem;
 
-    @Before
-    public void configure() throws Exception
+    @BeforeEach
+    void configureFileSystem() throws ComponentLookupException
     {
-        fileSystem = getMocker().getInstance(FileSystem.class);
+        this.fileSystem = this.componentManager.getInstance(FileSystem.class);
 
         doAnswer(new Answer<Void>()
         {
@@ -106,21 +124,24 @@ public abstract class AbstractJobTest
             {
                 DocumentReference source = (DocumentReference) invocation.getArguments()[0];
                 DocumentReference destination = (DocumentReference) invocation.getArguments()[1];
-                File file = fileSystem.getFile(source);
-                Folder folder = fileSystem.getFolder(source);
+                File file = AbstractJobTest.this.fileSystem.getFile(source);
+                Folder folder = AbstractJobTest.this.fileSystem.getFolder(source);
                 if (file != null) {
-                    mockFile(destination, file.getName(), new ArrayList<DocumentReference>(file.getParentReferences()));
+                    mockFile(destination, file.getName(), new ArrayList<>(file.getParentReferences()));
                 } else if (folder != null) {
-                    mockFolder(destination, folder.getName(), folder.getParentReference(),
-                        Collections.<DocumentReference>emptyList(), Collections.<DocumentReference>emptyList());
+                    mockFolder(destination, folder.getName(), folder.getParentReference(), Collections.emptyList(),
+                        Collections.emptyList());
                 }
                 return null;
             }
 
-        }).when(fileSystem).copy(any(DocumentReference.class), any(DocumentReference.class));
+        }).when(this.fileSystem).copy(any(DocumentReference.class), any(DocumentReference.class));
     }
 
-    protected abstract MockitoComponentMockingRule<Job> getMocker();
+    /**
+     * @return the job under test
+     */
+    protected abstract Job getJob();
 
     protected Folder mockFolder(String name)
     {
@@ -129,7 +150,7 @@ public abstract class AbstractJobTest
 
     protected Folder mockFolder(String name, String parentName)
     {
-        return mockFolder(name, parentName, Collections.<String>emptyList(), Collections.<String>emptyList());
+        return mockFolder(name, parentName, Collections.emptyList(), Collections.emptyList());
     }
 
     protected Folder mockFolder(String name, String parentId, List<String> childFolders, List<String> childFiles)
@@ -154,11 +175,11 @@ public abstract class AbstractJobTest
         when(folder.getChildFolderReferences()).thenReturn(childFolderReferences);
         when(folder.getChildFileReferences()).thenReturn(childFileReferences);
 
-        when(fileSystem.exists(reference)).thenReturn(true);
-        when(fileSystem.getFolder(reference)).thenReturn(folder);
-        when(fileSystem.canView(reference)).thenReturn(true);
-        when(fileSystem.canEdit(reference)).thenReturn(true);
-        when(fileSystem.canDelete(reference)).thenReturn(true);
+        when(this.fileSystem.exists(reference)).thenReturn(true);
+        when(this.fileSystem.getFolder(reference)).thenReturn(folder);
+        when(this.fileSystem.canView(reference)).thenReturn(true);
+        when(this.fileSystem.canEdit(reference)).thenReturn(true);
+        when(this.fileSystem.canDelete(reference)).thenReturn(true);
 
         return folder;
     }
@@ -180,18 +201,18 @@ public abstract class AbstractJobTest
         when(file.getName()).thenReturn(name);
         when(file.getParentReferences()).thenReturn(parentReferences);
 
-        when(fileSystem.exists(reference)).thenReturn(true);
-        when(fileSystem.getFile(reference)).thenReturn(file);
-        when(fileSystem.canView(reference)).thenReturn(true);
-        when(fileSystem.canEdit(reference)).thenReturn(true);
-        when(fileSystem.canDelete(reference)).thenReturn(true);
+        when(this.fileSystem.exists(reference)).thenReturn(true);
+        when(this.fileSystem.getFile(reference)).thenReturn(file);
+        when(this.fileSystem.canView(reference)).thenReturn(true);
+        when(this.fileSystem.canEdit(reference)).thenReturn(true);
+        when(this.fileSystem.canDelete(reference)).thenReturn(true);
 
         return file;
     }
 
     protected Collection<String> getParents(File file)
     {
-        Collection<String> parents = new ArrayList<String>();
+        Collection<String> parents = new ArrayList<>();
         for (DocumentReference parentReference : file.getParentReferences()) {
             parents.add(parentReference.getName());
         }
@@ -200,7 +221,7 @@ public abstract class AbstractJobTest
 
     protected List<DocumentReference> ref(Collection<String> names)
     {
-        List<DocumentReference> references = new ArrayList<DocumentReference>();
+        List<DocumentReference> references = new ArrayList<>();
         for (String name : names) {
             references.add(ref(name));
         }
@@ -213,26 +234,21 @@ public abstract class AbstractJobTest
     }
 
     protected void answerOverwriteQuestion(final Job job, final boolean overwrite, final boolean askAgain)
-        throws Exception
     {
-        new Thread(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                for (int i = 0; i < 5; i++) {
-                    try {
-                        Thread.sleep(20);
-                        JobStatus status = job.getStatus();
-                        if (status != null && status.getState() == State.WAITING) {
-                            OverwriteQuestion question = (OverwriteQuestion) status.getQuestion();
-                            question.setOverwrite(overwrite);
-                            question.setAskAgain(askAgain);
-                            status.answered();
-                            return;
-                        }
-                    } catch (Exception e) {
+        new Thread(() -> {
+            for (int i = 0; i < 5; i++) {
+                try {
+                    Thread.sleep(20);
+                    JobStatus status = job.getStatus();
+                    if (status != null && status.getState() == State.WAITING) {
+                        OverwriteQuestion question = (OverwriteQuestion) status.getQuestion();
+                        question.setOverwrite(overwrite);
+                        question.setAskAgain(askAgain);
+                        status.answered();
+                        return;
                     }
+                } catch (Exception e) {
+                    // Try again.
                 }
             }
         }, "Answer Overwrite Question").start();
@@ -250,18 +266,19 @@ public abstract class AbstractJobTest
 
     protected Job execute(Request request) throws Exception
     {
-        Job job = getMocker().getComponentUnderTest();
+        Job job = getJob();
         job.initialize(request);
         job.run();
         return job;
     }
 
-    protected void generateReference(DocumentReference base, DocumentReference result) throws Exception
+    protected void generateReference(DocumentReference base, DocumentReference result) throws ComponentLookupException
     {
-        UniqueDocumentReferenceGenerator generator = getMocker().getInstance(UniqueDocumentReferenceGenerator.class);
-        when(generator.generate(base.getLastSpaceReference(), new DocumentNameSequence(base.getName()))).thenReturn(
-            result);
+        UniqueDocumentReferenceGenerator generator =
+            this.componentManager.getInstance(UniqueDocumentReferenceGenerator.class);
+        when(generator.generate(base.getLastSpaceReference(), new DocumentNameSequence(base.getName())))
+            .thenReturn(result);
         // We suppose the new reference can be used.
-        when(fileSystem.canEdit(result)).thenReturn(true);
+        when(this.fileSystem.canEdit(result)).thenReturn(true);
     }
 }

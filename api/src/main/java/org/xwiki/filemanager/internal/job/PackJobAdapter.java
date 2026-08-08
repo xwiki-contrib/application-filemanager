@@ -27,10 +27,10 @@ import org.xwiki.job.Job;
 import org.xwiki.job.event.status.JobStatus;
 
 /**
- * Wraps the actual {@link PackJob} in order to add custom data to the {@link org.xwiki.job.internal.DefaultJobStatus}
- * without extending the class. We still need to use {@link org.xwiki.job.internal.DefaultJobStatus} because
- * {@link org.xwiki.job.internal.AbstractJob} uses it and it implements a lot of helper methods that simplify the
- * creation of a job.
+ * Wraps the actual {@link PackJob} in order to add custom data to the {@link org.xwiki.job.DefaultJobStatus} without
+ * extending the class. We still need to use {@link org.xwiki.job.DefaultJobStatus} because
+ * {@link org.xwiki.job.AbstractJob} uses it and it implements a lot of helper methods that simplify the creation of a
+ * job.
  * 
  * @version $Id$
  * @since 2.0.5
