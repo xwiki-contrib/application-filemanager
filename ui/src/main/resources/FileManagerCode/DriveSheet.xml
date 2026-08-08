@@ -562,33 +562,13 @@
       <cache>long</cache>
     </property>
     <property>
-      <code>/*
-#set ($angularVersion = '1.3.8')
-#set ($angularFileUploadVersion = '1.6.1')
-#set ($angularUIBootstrapVersion = '0.12.0')
-*/
-require.config({
+      <code>require.config({
   paths: {
-    angular: [
-      '//ajax.googleapis.com/ajax/libs/angularjs/$angularVersion/angular.min',
-      "$!services.webjars.url('angularjs', 'angular.min.js')"
-    ],
-    'angular-resource': [
-      '//ajax.googleapis.com/ajax/libs/angularjs/$angularVersion/angular-resource.min',
-      "$!services.webjars.url('angularjs', 'angular-resource.min.js')"
-    ],
-    'angular-ui-bootstrap': [
-      '//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/$angularUIBootstrapVersion/ui-bootstrap-tpls.min',
-      "$!services.webjars.url('angular-ui-bootstrap', 'ui-bootstrap-tpls.min.js')"
-    ],
-    fileUploadHTML5Shim: [
-      '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/$angularFileUploadVersion/angular-file-upload-html5-shim.min',
-      "$!services.webjars.url('angular-file-upload', 'angular-file-upload-html5-shim.min.js')"
-    ],
-    fileUpload: [
-      '//cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/$angularFileUploadVersion/angular-file-upload.min',
-      "$!services.webjars.url('angular-file-upload', 'angular-file-upload.min.js')"
-    ],
+    angular: "$!services.webjars.url('angularjs', 'angular.min.js')",
+    'angular-resource': "$!services.webjars.url('angularjs', 'angular-resource.min.js')",
+    'angular-ui-bootstrap': "$!services.webjars.url('angular-ui-bootstrap', 'ui-bootstrap-tpls.min.js')",
+    fileUploadHTML5Shim: "$!services.webjars.url('angular-file-upload', 'angular-file-upload-html5-shim.min.js')",
+    fileUpload: "$!services.webjars.url('angular-file-upload', 'angular-file-upload.min.js')",
     pagination: '$xwiki.getURL("FileManagerCode.Pagination", "jsx", "language=$xcontext.language")',
     liveTable: '$xwiki.getURL("FileManagerCode.LiveTable", "jsx", "language=$xcontext.language")',
     liveTableFilters: '$xwiki.getURL("FileManagerCode.LiveTableFilter", "jsx", "language=$xcontext.language")',

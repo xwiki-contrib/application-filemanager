@@ -63,7 +63,7 @@
     <dependency>
       <groupId>org.webjars</groupId>
       <artifactId>angularjs</artifactId>
-      <version>1.3.8</version>
+      <version>1.3.17</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
@@ -82,7 +82,7 @@
     <dependency>
       <groupId>org.webjars</groupId>
       <artifactId>angular-file-upload</artifactId>
-      <version>1.6.12-1</version>
+      <version>1.6.12</version>
       <scope>runtime</scope>
     </dependency>
     <!-- Wiki syntax macros used in the File Manager sheets -->
