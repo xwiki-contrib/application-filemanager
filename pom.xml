@@ -30,6 +30,10 @@
   <name>File Manager Application Parent POM</name>
   <version>2.2-SNAPSHOT</version>
   <description>Application to manage a hierarchy of folders and files. It embeds viewers for many known file types, such as office and PDF.</description>
+  <properties>
+    <xwiki.release.jira.skip>false</xwiki.release.jira.skip>
+    <xwiki.issueManagement.jira.id>FILEMAN</xwiki.issueManagement.jira.id>
+  </properties>
   <developers>
     <developer>
       <id>tdelafosse</id>
@@ -44,23 +48,12 @@
       <name>Marius Dumitru Florea</name>
     </developer>
   </developers>
-  <issueManagement>
-    <system>jira</system>
-    <url>http://jira.xwiki.org/browse/FILEMAN</url>
-  </issueManagement>
   <scm>
     <connection>scm:git:git://github.com/xwiki-contrib/application-filemanager.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/application-filemanager.git</developerConnection>
     <url>https://github.com/xwiki-contrib/application-filemanager/tree/master</url>
     <tag>HEAD</tag>
   </scm>
-  <distributionManagement>
-    <repository>
-      <id>xwiki-staging</id>
-      <name>XWiki Staging Repository</name>
-      <url>http://nexus.xwiki.org/nexus/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
   <modules>
     <module>api</module>
     <module>ui</module>
