@@ -1,0 +1,78 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.1" locale="da">
+  <web>FileManager</web>
+  <name>FileManagerTranslations</name>
+  <language>da</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>FileManagerClass</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>plain/1.0</syntaxId>
+  <hidden>true</hidden>
+  <content># Class fields
+### Missing: FileManager.FileManagerClass_description=
+
+# Live table generic keys
+### Missing: filemanager.livetable.doc.title=
+### Missing: filemanager.livetable.doc.name=
+### Missing: filemanager.livetable.doc.space=
+### Missing: filemanager.livetable.doc.fullname=
+### Missing: filemanager.livetable.doc.author=
+### Missing: filemanager.livetable.doc.creator=
+### Missing: filemanager.livetable.doc.date=
+### Missing: filemanager.livetable.doc.creationDate=
+### Missing: filemanager.livetable._avatar=
+### Missing: filemanager.livetable._images=
+### Missing: filemanager.livetable._attachments=
+### Missing: filemanager.livetable._actions=
+### Missing: filemanager.livetable._actions.edit=
+### Missing: filemanager.livetable._actions.delete=
+### Missing: filemanager.livetable.emptyvalue=
+
+# Live table specific keys
+### Missing: filemanager.livetable.description=
+### Missing: filemanager.appname=
+
+# Old keys, from the first version of the application.
+### Missing: contrib.FM.description=
+### Missing: contrib.FM.noDescription=
+### Missing: contrib.FM.noAttachment=
+### Missing: contrib.FM.editDescription=
+### Missing: contrib.FM.change.explanations=
+### Missing: rendering.macro.filetagcloud.name=
+### Missing: rendering.macro.filetagcloud.description=
+### Missing: rendering.macro.filemanagerdoc.name=
+### Missing: rendering.macro.filemanagerdoc.description=
+### Missing: rendering.macro.filemanagerdoc.parameter.page.name=
+### Missing: rendering.macro.filemanagerdoc.parameter.page.description=
+### Missing: rendering.macro.filemanagerdoc.parameter.preview.name=
+### Missing: rendering.macro.filemanagerdoc.parameter.preview.description=
+</content>
+</xwikidoc>
