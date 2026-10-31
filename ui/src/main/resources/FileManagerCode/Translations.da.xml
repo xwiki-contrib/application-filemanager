@@ -1,0 +1,121 @@
+<?xml version="1.1" encoding="UTF-8"?>
+
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc version="1.1" locale="da">
+  <web>FileManagerCode</web>
+  <name>Translations</name>
+  <language>da</language>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>1</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <parent>FileManagerCode.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>plain/1.0</syntaxId>
+  <hidden>true</hidden>
+  <content>### Missing: fileManager.tree.allFiles=
+### Missing: fileManager.tree.orphanFiles=
+### Missing: fileManager.tree.orphanFolders=
+### Missing: fileManager.tree.tasks=
+### Missing: fileManager.tree.pagination.more=
+### Missing: fileManager.action.newFolder=
+### Missing: fileManager.action.newFile=
+### Missing: fileManager.action.newFileHint=
+### Missing: fileManager.action.open=
+### Missing: fileManager.action.openInNewTab=
+### Missing: fileManager.action.refresh=
+### Missing: fileManager.action.download=
+### Missing: fileManager.action.download.buildingPackage=
+### Missing: fileManager.action.downloadFilesHint=
+### Missing: fileManager.action.recentDownloads=
+### Missing: fileManager.action.noRecentDownloads=
+### Missing: fileManager.action.cut=
+### Missing: fileManager.action.cutFilesHint=
+### Missing: fileManager.action.copy=
+### Missing: fileManager.action.copyFilesHint=
+### Missing: fileManager.action.paste=
+### Missing: fileManager.action.pasteHint=
+### Missing: fileManager.action.pasteIntoFolder=
+### Missing: fileManager.action.rename=
+### Missing: fileManager.action.renameFileHint=
+### Missing: fileManager.action.delete=
+### Missing: fileManager.action.deleteFilesHint=
+### Missing: fileManager.action.deleteFilesConfirmation=
+### Missing: fileManager.action.deleteFoldersConfirmation=
+### Missing: fileManager.action.back=
+### Missing: fileManager.action.backToFileList=
+### Missing: fileManager.action.backToFileManager=
+### Missing: fileManager.action.clear=
+### Missing: fileManager.action.clearUploadStatus=
+### Missing: fileManager.action.upload.destinationFolder=
+### Missing: fileManager.action.upload.destinationPath=
+### Missing: fileManager.action.upload.enableFolderSelection=
+### Missing: fileManager.action.upload.dropZoneHint=
+### Missing: fileManager.action.upload.pendingUploadsCount=
+### Missing: fileManager.action.upload.cancelHint=
+### Missing: fileManager.action.upload.estimatedRemainingTime=
+### Missing: fileManager.action.upload.bytesSent=
+### Missing: fileManager.liveTable.name=
+### Missing: fileManager.liveTable.size=
+### Missing: fileManager.liveTable.type=
+### Missing: fileManager.liveTable.date=
+### Missing: fileManager.liveTable.author=
+### Missing: fileManager.fileType.text=
+### Missing: fileManager.fileType.image=
+### Missing: fileManager.fileType.audio=
+### Missing: fileManager.fileType.video=
+### Missing: fileManager.fileType.document=
+### Missing: fileManager.fileType.presentation=
+### Missing: fileManager.fileType.spreadsheet=
+### Missing: fileManager.fileType.archive=
+### Missing: fileManager.fileType.font=
+### Missing: fileManager.timeAgo.seconds=
+### Missing: fileManager.timeAgo.minute=
+### Missing: fileManager.timeAgo.minutes=
+### Missing: fileManager.timeAgo.hour=
+### Missing: fileManager.timeAgo.hours=
+### Missing: fileManager.timeAgo.day=
+### Missing: fileManager.timeAgo.days=
+### Missing: fileManager.timeAgo.month=
+### Missing: fileManager.timeAgo.months=
+### Missing: fileManager.timeAgo.year=
+### Missing: fileManager.timeAgo.years=
+
+# Recent Files Macro
+### Missing: fileManager.recentFiles.creator=
+### Missing: fileManager.recentFiles.creationDate=
+### Missing: fileManager.recentFiles.noFiles=
+### Missing: fileManager.recentFiles.addFiles=
+### Missing: fileManager.recentFiles.seeAllFiles=
+
+# Recent Files Panel
+### Missing: fileManager.panel.RecentFiles.header=
+### Missing: rendering.macro.fileManager.recentFiles.name=
+### Missing: rendering.macro.fileManager.recentFiles.description=
+### Missing: rendering.macro.fileManager.recentFiles.parameter.limit.name=
+### Missing: rendering.macro.fileManager.recentFiles.parameter.limit.description=
+</content>
+</xwikidoc>
