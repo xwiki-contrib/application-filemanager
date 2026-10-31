@@ -37,42 +37,42 @@
   <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
   <content># Class fields
-### Missing: FileManager.FileManagerClass_description=
+FileManager.FileManagerClass_description=Beskrivelse
 
 # Live table generic keys
-### Missing: filemanager.livetable.doc.title=
-### Missing: filemanager.livetable.doc.name=
-### Missing: filemanager.livetable.doc.space=
-### Missing: filemanager.livetable.doc.fullname=
-### Missing: filemanager.livetable.doc.author=
-### Missing: filemanager.livetable.doc.creator=
-### Missing: filemanager.livetable.doc.date=
-### Missing: filemanager.livetable.doc.creationDate=
-### Missing: filemanager.livetable._avatar=
-### Missing: filemanager.livetable._images=
-### Missing: filemanager.livetable._attachments=
-### Missing: filemanager.livetable._actions=
-### Missing: filemanager.livetable._actions.edit=
-### Missing: filemanager.livetable._actions.delete=
-### Missing: filemanager.livetable.emptyvalue=
+filemanager.livetable.doc.title=Sidetitel
+filemanager.livetable.doc.name=Sidenavn
+filemanager.livetable.doc.space=Område
+filemanager.livetable.doc.fullname=Sidens fulde navn
+filemanager.livetable.doc.author=Seneste forfatter
+filemanager.livetable.doc.creator=Opretter
+filemanager.livetable.doc.date=Opdateringsdato
+filemanager.livetable.doc.creationDate=Oprettelsesdato
+filemanager.livetable._avatar=Avatar
+filemanager.livetable._images=Billeder
+filemanager.livetable._attachments=Bilag
+filemanager.livetable._actions=Handlinger
+filemanager.livetable._actions.edit=Rediger
+filemanager.livetable._actions.delete=Slet
+filemanager.livetable.emptyvalue=-
 
 # Live table specific keys
-### Missing: filemanager.livetable.description=
-### Missing: filemanager.appname=
+filemanager.livetable.description=Beskrivelse
+filemanager.appname=Filhåndtering
 
 # Old keys, from the first version of the application.
-### Missing: contrib.FM.description=
-### Missing: contrib.FM.noDescription=
-### Missing: contrib.FM.noAttachment=
-### Missing: contrib.FM.editDescription=
-### Missing: contrib.FM.change.explanations=
-### Missing: rendering.macro.filetagcloud.name=
-### Missing: rendering.macro.filetagcloud.description=
-### Missing: rendering.macro.filemanagerdoc.name=
-### Missing: rendering.macro.filemanagerdoc.description=
-### Missing: rendering.macro.filemanagerdoc.parameter.page.name=
-### Missing: rendering.macro.filemanagerdoc.parameter.page.description=
-### Missing: rendering.macro.filemanagerdoc.parameter.preview.name=
-### Missing: rendering.macro.filemanagerdoc.parameter.preview.description=
+contrib.FM.description=Filens beskrivelse
+contrib.FM.noDescription=Der findes ingen beskrivelse af denne fil.
+contrib.FM.noAttachment=Der er ingen fil vedhæftet denne side. Tilføj en ved at klikke på "rediger" eller ved at tilføje den direkte som bilag.
+contrib.FM.editDescription=Gem og vis
+contrib.FM.change.explanations=Du kan administrere de filer, der skal vedhæftes denne side, i afsnittet "Bilag" nedenfor. Du kan også give siden nøgleord med programmet nederst i dette afsnit, så den bliver lettere at finde.
+rendering.macro.filetagcloud.name=Filhåndteringens nøgleordssky
+rendering.macro.filetagcloud.description=Viser skyen af filernes nøgleord i denne wiki eller i det angivne område, hvis der er et.
+rendering.macro.filemanagerdoc.name=Side i filhåndteringen
+rendering.macro.filemanagerdoc.description=Indsætter en side fra filhåndteringen på en side, med eller uden eksempel
+rendering.macro.filemanagerdoc.parameter.page.name=Side
+rendering.macro.filemanagerdoc.parameter.page.description=Navnet på siden i filhåndteringen
+rendering.macro.filemanagerdoc.parameter.preview.name=Eksempel
+rendering.macro.filemanagerdoc.parameter.preview.description=True, hvis der skal medtages et eksempel
 </content>
 </xwikidoc>
